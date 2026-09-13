@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collision Domain vs Broadcast Domain — netlearn</title>
+<meta name="description" content="What a collision domain and a broadcast domain actually are, which devices break which, and why VLANs exist.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netlearn <small>/ on-prem</small>
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--fund);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 01 · Networking Fundamentals</a>
+    <span class="topic-eyebrow">FUND</span>
+    <h1>Collision Domain vs Broadcast Domain</h1>
+    <p class="topic-dek">Two different kinds of "who has to share this segment" — one about electrical contention, one about who hears a broadcast. Confusing them is one of the most common early mistakes.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>Collision domain</h2>
+  <p>A collision domain is a segment of network where two devices transmitting <strong>at the same time</strong> can collide — their signals interfere on the shared medium and both transmissions are corrupted. This only matters on shared, half-duplex media.</p>
+  <ul>
+    <li>A <code>hub</code> repeats every bit it receives out every other port — all connected devices are in <strong>one</strong> collision domain.</li>
+    <li>A <code>switch</code> gives each port its own collision domain. Combined with full-duplex links, collisions are effectively eliminated on modern switched networks.</li>
+    <li>A <code>router</code> also separates collision domains, one per interface.</li>
+  </ul>
+
+  <div class="callout">
+    <span class="callout-label">WHY THIS RARELY COMES UP ANYMORE</span>
+    <p>Hubs are essentially extinct in production networks. Full-duplex switched Ethernet means collision domains are mostly a historical/exam concept today — but it's still the correct mental model for <em>why</em> switches replaced hubs.</p>
+  </div>
+
+  <h2>Broadcast domain</h2>
+  <p>A broadcast domain is the set of devices that receive a Layer 2 broadcast frame (destination MAC <code>FFFF.FFFF.FFFF</code>) sent by any one device in that domain.</p>
+  <ul>
+    <li>A <code>switch</code> does <strong>not</strong> break up a broadcast domain — every port in the same VLAN floods and receives broadcasts together.</li>
+    <li>A <code>router</code> (or a Layer 3 switch doing inter-VLAN routing) <strong>does</strong> break up broadcast domains — each subnet/VLAN is its own broadcast domain.</li>
+    <li><strong>VLANs</strong> exist specifically to create multiple broadcast domains on a single physical switch, without needing separate hardware per segment.</li>
+  </ul>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram comparing collision domain scope on a hub versus broadcast domain scope across switches and a router">
+      <!-- Left: hub, one collision domain -->
+      <text x="20" y="24" font-size="12" fill="#8d9bb3">HUB — ONE COLLISION DOMAIN</text>
+      <rect x="15" y="40" width="260" height="130" rx="6" fill="none" stroke="#f2a93b" stroke-width="1.5" stroke-dasharray="5 5"/>
+      <rect x="120" y="55" width="50" height="24" rx="3" fill="none" stroke="#e7ecf3" stroke-width="1.5"/>
+      <text x="145" y="71" text-anchor="middle" font-size="9" fill="#e7ecf3">HUB</text>
+      <circle cx="60" cy="140" r="12" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <circle cx="145" cy="150" r="12" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <circle cx="230" cy="140" r="12" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <line x1="130" y1="79" x2="63" y2="128" stroke="#3a4a6b" stroke-width="1.5"/>
+      <line x1="145" y1="79" x2="145" y2="138" stroke="#3a4a6b" stroke-width="1.5"/>
+      <line x1="160" y1="79" x2="227" y2="128" stroke="#3a4a6b" stroke-width="1.5"/>
+
+      <!-- Right: switches + router, broadcast domains -->
+      <text x="340" y="24" font-size="12" fill="#4fd1c5">SWITCHES + ROUTER — TWO BROADCAST DOMAINS</text>
+      <rect x="335" y="40" width="140" height="130" rx="6" fill="none" stroke="#4fd1c5" stroke-width="1.5" stroke-dasharray="5 5"/>
+      <rect x="475" y="40" width="140" height="130" rx="6" fill="none" stroke="#4fd1c5" stroke-width="1.5" stroke-dasharray="5 5"/>
+
+      <rect x="555" y="185" width="60" height="26" rx="3" fill="none" stroke="#e7ecf3" stroke-width="1.5"/>
+      <text x="585" y="203" text-anchor="middle" font-size="9" fill="#e7ecf3">R1</text>
+
+      <rect x="380" y="55" width="50" height="24" rx="3" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <text x="405" y="71" text-anchor="middle" font-size="9" fill="#8d9bb3">SW-A</text>
+      <rect x="520" y="55" width="50" height="24" rx="3" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <text x="545" y="71" text-anchor="middle" font-size="9" fill="#8d9bb3">SW-B</text>
+
+      <circle cx="360" cy="140" r="12" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <circle cx="420" cy="140" r="12" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <circle cx="500" cy="140" r="12" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <circle cx="560" cy="140" r="12" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+
+      <line x1="390" y1="79" x2="362" y2="128" stroke="#3a4a6b" stroke-width="1.5"/>
+      <line x1="415" y1="79" x2="418" y2="128" stroke="#3a4a6b" stroke-width="1.5"/>
+      <line x1="530" y1="79" x2="502" y2="128" stroke="#3a4a6b" stroke-width="1.5"/>
+      <line x1="555" y1="79" x2="558" y2="128" stroke="#3a4a6b" stroke-width="1.5"/>
+      <line x1="405" y1="55" x2="560" y2="55" stroke="#3a4a6b" stroke-width="1.5" stroke-dasharray="2 3"/>
+      <line x1="405" y1="79" x2="565" y2="185" stroke="#3a4a6b" stroke-width="1"/>
+    </svg>
+    <figcaption>Left: every device shares one collision domain through the hub. Right: two switches each form their own broadcast domain — a broadcast from HOST behind SW-A never reaches SW-B unless R1 explicitly routes it (which routers don't do for broadcasts).</figcaption>
+  </figure>
+
+  <h2>Side by side</h2>
+  <table class="compare-table">
+    <thead>
+      <tr><th>Device</th><th>Breaks collision domain?</th><th>Breaks broadcast domain?</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Hub</td><td>No</td><td>No</td></tr>
+      <tr><td>Switch</td><td>Yes — per port</td><td>No</td></tr>
+      <tr><td>Router / L3 switch</td><td>Yes</td><td>Yes</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Why it matters in practice</h2>
+  <p>Broadcast domain size is the real design constraint in modern networks. Too large a broadcast domain means ARP requests, DHCP discovers, and other broadcast traffic gets flooded to hundreds of hosts that don't care — wasting bandwidth and CPU. This is the entire justification for VLANs: they let you keep broadcast domains small and purposeful without running separate physical switches for every segment.</p>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <span></span>
+  <span>
+    <span class="nav-label">NEXT — PLANNED</span>
+    OSI Model vs TCP/IP Model
+  </span>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>netlearn — an on-prem networking reference, built topic by topic.</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

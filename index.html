@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Netlearn — On-Prem Networking, from Frames to Firewalls</title>
+<meta name="description" content="A structured, on-prem networking curriculum: Layer 2 switching, Layer 3 routing, TCP/UDP, DNS, and security — built one topic at a time.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netlearn <small>/ on-prem</small>
+    </a>
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="topic-search" placeholder="Search topics…" aria-label="Search topics">
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-copy">
+      <h1>Networking, traced from the wire up.</h1>
+      <p class="lede">A ground-up, on-prem networking curriculum — how frames move, how routes get chosen, how a TLS session gets built, and everything CCNA-adjacent in between. No cloud, no fluff, one topic at a time.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="topics/broadcast-vs-collision-domain.html">Start reading →</a>
+        <a class="btn btn-secondary" href="#modules">Browse the curriculum</a>
+      </div>
+    </div>
+    <svg class="hero-diagram" viewBox="0 0 480 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Simple network topology showing a router connected to two switches, each switch connected to two hosts, with a dashed boundary marking a broadcast domain">
+      <!-- broadcast domain boundary -->
+      <rect x="18" y="140" width="200" height="130" rx="6" fill="none" stroke="#4fd1c5" stroke-width="1.5" stroke-dasharray="5 5" opacity="0.7"/>
+      <text x="24" y="132" class="accent-text" font-size="11">BROADCAST DOMAIN</text>
+
+      <!-- router -->
+      <rect x="205" y="30" width="70" height="36" rx="3" fill="none" stroke="#e7ecf3" stroke-width="1.5"/>
+      <text x="240" y="53" text-anchor="middle" font-size="11" fill="#e7ecf3">R1</text>
+
+      <!-- switch A -->
+      <rect x="60" y="150" width="70" height="30" rx="3" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <text x="95" y="170" text-anchor="middle" font-size="10" fill="#8d9bb3">SW-A</text>
+
+      <!-- switch B -->
+      <rect x="340" y="150" width="70" height="30" rx="3" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <text x="375" y="170" text-anchor="middle" font-size="10" fill="#8d9bb3">SW-B</text>
+
+      <!-- router to switches -->
+      <line x1="225" y1="66" x2="100" y2="150" stroke="#3a4a6b" stroke-width="1.5"/>
+      <line x1="255" y1="66" x2="370" y2="150" stroke="#3a4a6b" stroke-width="1.5"/>
+
+      <!-- hosts under switch A -->
+      <circle cx="70" cy="235" r="14" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <circle cx="120" cy="235" r="14" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <line x1="80" y1="180" x2="70" y2="221" stroke="#3a4a6b" stroke-width="1.5"/>
+      <line x1="110" y1="180" x2="120" y2="221" stroke="#3a4a6b" stroke-width="1.5"/>
+      <text x="70" y="270" text-anchor="middle" font-size="9" fill="#5b6a86">HOST-A1</text>
+      <text x="120" y="270" text-anchor="middle" font-size="9" fill="#5b6a86">HOST-A2</text>
+
+      <!-- hosts under switch B -->
+      <circle cx="350" cy="235" r="14" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <circle cx="400" cy="235" r="14" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <line x1="360" y1="180" x2="350" y2="221" stroke="#3a4a6b" stroke-width="1.5"/>
+      <line x1="390" y1="180" x2="400" y2="221" stroke="#3a4a6b" stroke-width="1.5"/>
+      <text x="350" y="270" text-anchor="middle" font-size="9" fill="#5b6a86">HOST-B1</text>
+      <text x="400" y="270" text-anchor="middle" font-size="9" fill="#5b6a86">HOST-B2</text>
+    </svg>
+  </div>
+</section>
+
+<div class="progress-strip">
+  <div class="wrap">
+    <span id="progress-label">0 of 0 topics published</span>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+</div>
+
+<main class="modules" id="modules">
+  <div class="wrap" id="module-list">
+    <!-- rendered by js/main.js from js/site-data.js -->
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>netlearn — an on-prem networking reference, built topic by topic.</span>
+    <span>cloud networking is a separate module, coming later</span>
+  </div>
+</footer>
+
+<script src="js/site-data.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
