@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Netlearn — On-Prem Networking, from Frames to Firewalls</title>
+<title>netskillup — On-Prem Networking, from Frames to Firewalls</title>
 <meta name="description" content="A structured, on-prem networking curriculum: Layer 2 switching, Layer 3 routing, TCP/UDP, DNS, and security — built one topic at a time.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netlearn <small>/ on-prem</small>
+      netskillup <small>/ on-prem</small>
     </a>
     <div class="search-box">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -31,56 +31,86 @@
       <h1>Networking, traced from the wire up.</h1>
       <p class="lede">A ground-up, on-prem networking curriculum — how frames move, how routes get chosen, how a TLS session gets built, and everything CCNA-adjacent in between. No cloud, no fluff, one topic at a time.</p>
       <div class="hero-cta">
-        <a class="btn btn-primary" href="topics/broadcast-vs-collision-domain.html">Start reading →</a>
+        <a class="btn btn-primary" href="topics/osi-vs-tcpip.html">Start reading →</a>
         <a class="btn btn-secondary" href="#modules">Browse the curriculum</a>
       </div>
     </div>
-    <svg class="hero-diagram" viewBox="0 0 480 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Simple network topology showing a router connected to two switches, each switch connected to two hosts, with a dashed boundary marking a broadcast domain">
-      <!-- broadcast domain boundary -->
-      <rect x="18" y="140" width="200" height="130" rx="6" fill="none" stroke="#177e78" stroke-width="1.5" stroke-dasharray="5 5" opacity="0.7"/>
-      <text x="24" y="132" class="accent-text" font-size="11">BROADCAST DOMAIN</text>
 
-      <!-- router -->
-      <rect x="205" y="30" width="70" height="36" rx="3" fill="none" stroke="#242827" stroke-width="1.5"/>
-      <text x="240" y="53" text-anchor="middle" font-size="11" fill="#242827">R1</text>
+    <svg class="hero-art" viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Abstract animated illustration of data packets flowing along multiple crossing paths">
+      <defs>
+        <filter id="glow" x="-150%" y="-150%" width="400%" height="400%">
+          <feGaussianBlur stdDeviation="2.4" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
 
-      <!-- switch A -->
-      <rect x="60" y="150" width="70" height="30" rx="3" fill="none" stroke="#68706d" stroke-width="1.5"/>
-      <text x="95" y="170" text-anchor="middle" font-size="10" fill="#68706d">SW-A</text>
+        <path id="traceA" d="M -10 268 C 90 190, 160 340, 260 240 C 340 160, 380 40, 480 90 C 560 120, 600 40, 650 70"/>
+        <path id="traceB" d="M -10 60 C 90 140, 150 20, 240 100 C 330 180, 400 260, 500 200 C 570 160, 605 240, 650 258"/>
+        <path id="traceC" d="M -10 176 C 80 90, 180 214, 280 150 C 380 90, 420 244, 520 190 C 580 160, 612 200, 650 162"/>
+        <path id="traceD" d="M -10 318 C 100 280, 140 120, 240 62 C 320 12, 400 122, 480 42 C 540 10, 580 82, 650 24"/>
+        <path id="traceE" d="M -10 12 C 120 62, 100 202, 220 222 C 320 240, 360 122, 460 162 C 540 190, 585 102, 650 132"/>
+      </defs>
 
-      <!-- switch B -->
-      <rect x="340" y="150" width="70" height="30" rx="3" fill="none" stroke="#68706d" stroke-width="1.5"/>
-      <text x="375" y="170" text-anchor="middle" font-size="10" fill="#68706d">SW-B</text>
+      <!-- faint background traces -->
+      <use href="#traceA" fill="none" stroke="#4fd1c5" stroke-width="1.2" opacity="0.22"/>
+      <use href="#traceB" fill="none" stroke="#f2a93b" stroke-width="1.2" opacity="0.2"/>
+      <use href="#traceC" fill="none" stroke="#b18cf0" stroke-width="1.2" opacity="0.2"/>
+      <use href="#traceD" fill="none" stroke="#5b9df9" stroke-width="1.2" opacity="0.18"/>
+      <use href="#traceE" fill="none" stroke="#f1789c" stroke-width="1.2" opacity="0.18"/>
 
-      <!-- router to switches -->
-      <line x1="225" y1="66" x2="100" y2="150" stroke="#b8b7b0" stroke-width="1.5"/>
-      <line x1="255" y1="66" x2="370" y2="150" stroke="#b8b7b0" stroke-width="1.5"/>
+      <!-- ping pulses at a few nodes for extra life -->
+      <circle cx="260" cy="240" r="3" fill="none" stroke="#4fd1c5" stroke-width="1">
+        <animate attributeName="r" values="3;26" dur="3.6s" begin="0s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.55;0" dur="3.6s" begin="0s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="480" cy="42" r="3" fill="none" stroke="#5b9df9" stroke-width="1">
+        <animate attributeName="r" values="3;22" dur="4.2s" begin="-1.4s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0" dur="4.2s" begin="-1.4s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="220" cy="222" r="3" fill="none" stroke="#f1789c" stroke-width="1">
+        <animate attributeName="r" values="3;24" dur="4.8s" begin="-2.6s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0" dur="4.8s" begin="-2.6s" repeatCount="indefinite"/>
+      </circle>
 
-      <!-- hosts under switch A -->
-      <circle cx="70" cy="235" r="14" fill="none" stroke="#68706d" stroke-width="1.5"/>
-      <circle cx="120" cy="235" r="14" fill="none" stroke="#68706d" stroke-width="1.5"/>
-      <line x1="80" y1="180" x2="70" y2="221" stroke="#b8b7b0" stroke-width="1.5"/>
-      <line x1="110" y1="180" x2="120" y2="221" stroke="#b8b7b0" stroke-width="1.5"/>
-      <text x="70" y="270" text-anchor="middle" font-size="9" fill="#929895">HOST-A1</text>
-      <text x="120" y="270" text-anchor="middle" font-size="9" fill="#929895">HOST-A2</text>
+      <!-- moving packets, glowing, staggered so they never feel synced -->
+      <circle r="4" fill="#4fd1c5" filter="url(#glow)">
+        <animateMotion dur="6.5s" repeatCount="indefinite" begin="0s"><mpath href="#traceA"/></animateMotion>
+      </circle>
+      <circle r="3" fill="#4fd1c5" filter="url(#glow)" opacity="0.8">
+        <animateMotion dur="6.5s" repeatCount="indefinite" begin="-3.2s"><mpath href="#traceA"/></animateMotion>
+      </circle>
 
-      <!-- hosts under switch B -->
-      <circle cx="350" cy="235" r="14" fill="none" stroke="#68706d" stroke-width="1.5"/>
-      <circle cx="400" cy="235" r="14" fill="none" stroke="#68706d" stroke-width="1.5"/>
-      <line x1="360" y1="180" x2="350" y2="221" stroke="#b8b7b0" stroke-width="1.5"/>
-      <line x1="390" y1="180" x2="400" y2="221" stroke="#b8b7b0" stroke-width="1.5"/>
-      <text x="350" y="270" text-anchor="middle" font-size="9" fill="#929895">HOST-B1</text>
-      <text x="400" y="270" text-anchor="middle" font-size="9" fill="#929895">HOST-B2</text>
+      <circle r="4" fill="#f2a93b" filter="url(#glow)">
+        <animateMotion dur="7.8s" repeatCount="indefinite" begin="-1.1s"><mpath href="#traceB"/></animateMotion>
+      </circle>
+
+      <circle r="3.5" fill="#b18cf0" filter="url(#glow)">
+        <animateMotion dur="5.6s" repeatCount="indefinite" begin="-2.4s"><mpath href="#traceC"/></animateMotion>
+      </circle>
+      <circle r="3" fill="#b18cf0" filter="url(#glow)" opacity="0.75">
+        <animateMotion dur="5.6s" repeatCount="indefinite" begin="-4.9s"><mpath href="#traceC"/></animateMotion>
+      </circle>
+
+      <circle r="4" fill="#5b9df9" filter="url(#glow)">
+        <animateMotion dur="8.6s" repeatCount="indefinite" begin="-5s"><mpath href="#traceD"/></animateMotion>
+      </circle>
+
+      <circle r="3.5" fill="#f1789c" filter="url(#glow)">
+        <animateMotion dur="7.1s" repeatCount="indefinite" begin="-2s"><mpath href="#traceE"/></animateMotion>
+      </circle>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animateMotion, animate').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
     </svg>
   </div>
 </section>
-
-<div class="progress-strip">
-  <div class="wrap">
-    <span id="progress-label">0 of 0 topics published</span>
-    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-  </div>
-</div>
 
 <main class="modules" id="modules">
   <div class="wrap" id="module-list">
@@ -90,8 +120,8 @@
 
 <footer class="site-footer">
   <div class="wrap">
-    <span>netlearn — an on-prem networking reference, built topic by topic.</span>
-    <span>cloud networking is a separate module, coming later</span>
+    <span>© 2026 netskillup</span>
+    <a href="https://github.com/Prandip23/netskillup">github.com/Prandip23/netskillup</a>
   </div>
 </footer>
 

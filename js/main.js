@@ -1,8 +1,6 @@
 (function () {
   const listEl = document.getElementById("module-list");
   const searchEl = document.getElementById("topic-search");
-  const progressLabel = document.getElementById("progress-label");
-  const progressFill = document.getElementById("progress-fill");
 
   const moduleColorVar = {
     fundamentals: "var(--fund)",
@@ -14,14 +12,9 @@
   };
 
   function render() {
-    let totalTopics = 0;
-    let publishedTopics = 0;
     const frag = document.createDocumentFragment();
 
     SITE_DATA.forEach((mod) => {
-      totalTopics += mod.topics.length;
-      publishedTopics += mod.topics.filter((t) => t.status === "published").length;
-
       const section = document.createElement("section");
       section.className = "module";
       section.dataset.moduleId = mod.id;
@@ -30,8 +23,6 @@
       const head = document.createElement("div");
       head.className = "module-head";
       head.innerHTML = `
-        <span class="module-number">MODULE ${mod.number}</span>
-        <span class="module-tag">${mod.tag}</span>
         <h2>${mod.title}</h2>
         <p>${mod.blurb}</p>
       `;
@@ -63,11 +54,6 @@
     });
 
     listEl.appendChild(frag);
-
-    progressLabel.textContent = `${publishedTopics} of ${totalTopics} topics published`;
-    progressFill.style.width = totalTopics
-      ? `${Math.round((publishedTopics / totalTopics) * 100)}%`
-      : "0%";
   }
 
   function filter(query) {

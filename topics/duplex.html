@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Duplex: Half vs Full — netskillup</title>
+<meta name="description" content="Half-duplex vs full-duplex explained through walkie-talkies and phone calls — and why it made collisions disappear from modern networks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup <small>/ on-prem</small>
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--fund);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 01 · Networking Fundamentals</a>
+    <span class="topic-eyebrow">FUND</span>
+    <h1>Duplex: Half vs Full</h1>
+    <p class="topic-dek">Whether a link can carry traffic in both directions at the same instant — and the single biggest reason collisions basically don't happen anymore.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>Half-duplex — walkie-talkies</h2>
+  <p>On a half-duplex link, only one side can transmit at a time. If both sides try to talk at once, the signals collide and both transmissions are lost. This is exactly how a walkie-talkie works: you press the button, say your piece, say "over," and only then does the other person reply. You physically cannot both talk and clearly hear the other person at the same moment. Old hub-based Ethernet and early wireless links worked this way — and it's the entire reason collision domains and CSMA/CD (the "listen before you talk, and detect if you collided" logic) had to exist in the first place.</p>
+
+  <h2>Full-duplex — a phone call</h2>
+  <p>On a full-duplex link, both sides can transmit and receive at the exact same time, over separate transmit and receive paths (on twisted-pair Ethernet, literally separate wire pairs). This is a phone call: you can talk while the other person is talking, interrupt, and hear them simultaneously — there's no "over." Modern switched Ethernet is full-duplex by default, which is why collisions are essentially a non-issue on any current network: there's no shared medium left to collide on.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram comparing half-duplex, where only one device transmits at a time, to full-duplex, where both devices transmit simultaneously">
+      <defs>
+        <marker id="arrAmber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#f2a93b"/>
+        </marker>
+        <marker id="arrBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#5b9df9"/>
+        </marker>
+        <marker id="arrTeal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#4fd1c5"/>
+        </marker>
+        <marker id="arrViolet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#b18cf0"/>
+        </marker>
+      </defs>
+
+      <!-- HALF DUPLEX -->
+      <g transform="translate(0,0)">
+        <text x="150" y="16" text-anchor="middle" font-size="12" fill="#8d9bb3">HALF-DUPLEX</text>
+
+        <text x="150" y="50" text-anchor="middle" font-size="10.5" fill="#f2a93b">t1 — A → B</text>
+        <circle cx="40" cy="70" r="14" fill="none" stroke="#cbd4e3" stroke-width="1.4"/>
+        <text x="40" y="74" text-anchor="middle" font-size="10" fill="#cbd4e3">A</text>
+        <circle cx="260" cy="70" r="14" fill="none" stroke="#cbd4e3" stroke-width="1.4"/>
+        <text x="260" y="74" text-anchor="middle" font-size="10" fill="#cbd4e3">B</text>
+        <line x1="56" y1="70" x2="242" y2="70" stroke="#f2a93b" stroke-width="1.8" marker-end="url(#arrAmber)"/>
+
+        <text x="150" y="140" text-anchor="middle" font-size="10.5" fill="#5b9df9">t2 — B → A</text>
+        <circle cx="40" cy="160" r="14" fill="none" stroke="#cbd4e3" stroke-width="1.4"/>
+        <text x="40" y="164" text-anchor="middle" font-size="10" fill="#cbd4e3">A</text>
+        <circle cx="260" cy="160" r="14" fill="none" stroke="#cbd4e3" stroke-width="1.4"/>
+        <text x="260" y="164" text-anchor="middle" font-size="10" fill="#cbd4e3">B</text>
+        <line x1="244" y1="160" x2="58" y2="160" stroke="#5b9df9" stroke-width="1.8" marker-end="url(#arrBlue)"/>
+
+        <text x="150" y="204" text-anchor="middle" font-size="11" fill="#5b6a86">Never both at once — like a walkie-talkie</text>
+      </g>
+
+      <!-- FULL DUPLEX -->
+      <g transform="translate(340,0)">
+        <text x="150" y="16" text-anchor="middle" font-size="12" fill="#4fd1c5">FULL-DUPLEX</text>
+
+        <text x="150" y="70" text-anchor="middle" font-size="10.5" fill="#4fd1c5">both directions, same instant</text>
+        <circle cx="40" cy="110" r="16" fill="none" stroke="#cbd4e3" stroke-width="1.4"/>
+        <text x="40" y="114" text-anchor="middle" font-size="10" fill="#cbd4e3">A</text>
+        <circle cx="260" cy="110" r="16" fill="none" stroke="#cbd4e3" stroke-width="1.4"/>
+        <text x="260" y="114" text-anchor="middle" font-size="10" fill="#cbd4e3">B</text>
+        <line x1="58" y1="98" x2="242" y2="98" stroke="#4fd1c5" stroke-width="1.8" marker-end="url(#arrTeal)"/>
+        <line x1="242" y1="122" x2="58" y2="122" stroke="#b18cf0" stroke-width="1.8" marker-end="url(#arrViolet)"/>
+
+        <text x="150" y="204" text-anchor="middle" font-size="11" fill="#5b6a86">Simultaneous — like a phone call</text>
+      </g>
+    </svg>
+    <figcaption>Half-duplex takes turns on one shared path; full-duplex uses separate paths so both sides can talk at once.</figcaption>
+  </figure>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th></th><th>Half-Duplex</th><th>Full-Duplex</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Can both sides transmit at once?</td><td>No</td><td>Yes</td></tr>
+      <tr><td>Collisions possible?</td><td>Yes</td><td>No — nothing to collide with</td></tr>
+      <tr><td>Analogy</td><td>Walkie-talkie</td><td>Phone call</td></tr>
+      <tr><td>Where you'll see it today</td><td>Old hubs, some wireless/satellite links</td><td>Virtually all modern switched Ethernet</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="callout-label">CONNECTING THE DOTS</span>
+    <p>This is why the <a href="broadcast-vs-collision-domain.html">collision domain</a> topic earlier called collisions "mostly historical" — full-duplex links plus switches (one collision domain per port) together removed the conditions a collision needs to happen at all.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="hubs-switches-routers.html">
+    <span class="nav-label">← PREVIOUS</span>
+    Hubs vs Switches vs Routers
+  </a>
+  <span>
+    <span class="nav-label">NEXT — PLANNED</span>
+    Ethernet Frame & MAC Addressing
+  </span>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

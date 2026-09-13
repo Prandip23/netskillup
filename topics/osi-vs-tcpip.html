@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSI Model vs TCP/IP Model — netskillup</title>
+<meta name="description" content="Why networking has two competing layer models, what each layer actually does, and how the 7-layer OSI model maps onto the 4-layer TCP/IP model.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup <small>/ on-prem</small>
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--fund);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 01 · Networking Fundamentals</a>
+    <span class="topic-eyebrow">FUND</span>
+    <h1>OSI Model vs TCP/IP Model</h1>
+    <p class="topic-dek">Two different ways of slicing up "everything involved in getting data from A to B" into layers. You'll hear both used interchangeably in the real world, so you need to be fluent in both.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>Why layer anything at all?</h2>
+  <p>Imagine you had to think about electrical voltage on a cable at the exact same moment you were thinking about what a web page's HTML looks like. That would be unmanageable — so networking is broken into layers, where each layer only has to worry about its own job and trusts the layer below it to have already handled its part.</p>
+  <p>Think about mailing a letter internationally. You write a letter (the content), put it in an envelope with an address (so the postal system can route it), the local post office bags it with other mail heading the same direction, a truck carries the bag to an airport, a plane flies it to the destination country, and a local carrier makes the final delivery to the door. You never think about "how planes fly" while writing the letter — that's a different layer's problem. Networking models exist for the same reason: to separate concerns.</p>
+
+  <h2>The OSI Model — 7 layers</h2>
+  <p>OSI (Open Systems Interconnection) is the theoretical, academic model. It's rarely implemented exactly as written, but its vocabulary is everywhere — "that's a Layer 2 problem," "we're seeing Layer 7 errors" — so you need it even though the real Internet doesn't run on it directly.</p>
+  <ul>
+    <li><strong>Layer 7 — Application:</strong> what the user-facing program actually does (HTTP, DNS, SMTP). This is "writing the letter."</li>
+    <li><strong>Layer 6 — Presentation:</strong> formatting, encryption, compression — making sure both ends understand the data the same way (translating the letter if the recipient speaks a different language).</li>
+    <li><strong>Layer 5 — Session:</strong> establishing, managing, and tearing down a conversation between two programs (agreeing you're having an ongoing exchange of letters, not a one-off).</li>
+    <li><strong>Layer 4 — Transport:</strong> reliable or unreliable delivery, ordering, error recovery (TCP/UDP). This is choosing tracked courier vs. a regular postcard.</li>
+    <li><strong>Layer 3 — Network:</strong> logical addressing and routing between different networks (IP). This is the destination address on the envelope, used by the postal system to route it across cities.</li>
+    <li><strong>Layer 2 — Data Link:</strong> framing and addressing on the local segment (Ethernet, MAC addresses, switches). This is the local mail carrier who knows exactly which house on the street to hand it to.</li>
+    <li><strong>Layer 1 — Physical:</strong> the actual bits on the wire — voltage, light pulses, radio waves, cabling, connectors. This is the paper, the truck, the road itself.</li>
+  </ul>
+
+  <h2>The TCP/IP Model — 4 layers</h2>
+  <p>TCP/IP is the model the real Internet is actually built on. It's more practical and compresses OSI's upper three layers into one, since in practice applications, presentation, and session concerns are usually handled together by the same piece of software.</p>
+  <ul>
+    <li><strong>Application:</strong> combines OSI's Application + Presentation + Session. HTTP, DNS, TLS, SSH all live here.</li>
+    <li><strong>Transport:</strong> same job as OSI Layer 4 — TCP or UDP.</li>
+    <li><strong>Internet:</strong> same job as OSI Layer 3 — IP addressing and routing.</li>
+    <li><strong>Network Access</strong> (also called Link): combines OSI's Data Link + Physical — Ethernet, Wi-Fi, and the actual signaling.</li>
+  </ul>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 410" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram mapping the seven OSI layers on the left to the four TCP/IP layers on the right, with lines showing which OSI layers collapse into which TCP/IP layer">
+      <text x="140" y="20" text-anchor="middle" font-size="12" fill="#8d9bb3">OSI MODEL</text>
+      <text x="500" y="20" text-anchor="middle" font-size="12" fill="#4fd1c5">TCP/IP MODEL</text>
+
+      <!-- OSI boxes -->
+      <g fill="none" stroke="#8d9bb3" stroke-width="1.4">
+        <rect x="40" y="40" width="200" height="48" rx="3"/>
+        <rect x="40" y="92" width="200" height="48" rx="3"/>
+        <rect x="40" y="144" width="200" height="48" rx="3"/>
+        <rect x="40" y="196" width="200" height="48" rx="3"/>
+        <rect x="40" y="248" width="200" height="48" rx="3"/>
+        <rect x="40" y="300" width="200" height="48" rx="3"/>
+        <rect x="40" y="352" width="200" height="48" rx="3"/>
+      </g>
+      <g font-size="11.5" fill="#cbd4e3" text-anchor="middle">
+        <text x="140" y="68">7 · Application</text>
+        <text x="140" y="120">6 · Presentation</text>
+        <text x="140" y="172">5 · Session</text>
+        <text x="140" y="224">4 · Transport</text>
+        <text x="140" y="276">3 · Network</text>
+        <text x="140" y="328">2 · Data Link</text>
+        <text x="140" y="380">1 · Physical</text>
+      </g>
+
+      <!-- TCP/IP boxes -->
+      <g fill="none" stroke="#4fd1c5" stroke-width="1.4">
+        <rect x="400" y="40" width="200" height="152" rx="3"/>
+        <rect x="400" y="196" width="200" height="48" rx="3"/>
+        <rect x="400" y="248" width="200" height="48" rx="3"/>
+        <rect x="400" y="300" width="200" height="100" rx="3"/>
+      </g>
+      <g font-size="12" fill="#e7ecf3" text-anchor="middle">
+        <text x="500" y="120">Application</text>
+        <text x="500" y="224">Transport</text>
+        <text x="500" y="276">Internet</text>
+        <text x="500" y="354">Network Access</text>
+      </g>
+
+      <!-- connectors -->
+      <g stroke="#3a4a6b" stroke-width="1" opacity="0.8">
+        <line x1="240" y1="64" x2="400" y2="116"/>
+        <line x1="240" y1="116" x2="400" y2="116"/>
+        <line x1="240" y1="168" x2="400" y2="116"/>
+        <line x1="240" y1="220" x2="400" y2="220"/>
+        <line x1="240" y1="272" x2="400" y2="272"/>
+        <line x1="240" y1="324" x2="400" y2="350"/>
+        <line x1="240" y1="376" x2="400" y2="350"/>
+      </g>
+    </svg>
+    <figcaption>OSI's Application, Presentation, and Session layers all collapse into one TCP/IP Application layer; Data Link and Physical collapse into Network Access.</figcaption>
+  </figure>
+
+  <h2>Side by side</h2>
+  <table class="compare-table">
+    <thead>
+      <tr><th>OSI Layer</th><th>TCP/IP Layer</th><th>Real-world analogy</th><th>Examples</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>7 Application, 6 Presentation, 5 Session</td><td>Application</td><td>Writing the letter, choosing the language, agreeing to keep writing back and forth</td><td>HTTP, DNS, TLS, SSH</td></tr>
+      <tr><td>4 Transport</td><td>Transport</td><td>Tracked courier vs. a postcard</td><td>TCP, UDP</td></tr>
+      <tr><td>3 Network</td><td>Internet</td><td>The destination address that routes it across cities</td><td>IP, ICMP, routers</td></tr>
+      <tr><td>2 Data Link, 1 Physical</td><td>Network Access</td><td>The local carrier and the actual road/truck</td><td>Ethernet, MAC addresses, Wi-Fi, cabling</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="callout-label">WHY YOU NEED BOTH</span>
+    <p>Engineers talk in OSI terms ("that's a Layer 3 issue," "we're doing Layer 2 troubleshooting") because it's precise and everyone was taught it — but the actual packets on the wire are structured according to TCP/IP. You'll use OSI vocabulary daily and TCP/IP's actual header structures whenever you're reading a packet capture.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <span></span>
+  <a href="network-topologies.html">
+    <span class="nav-label">NEXT →</span>
+    Network Topologies
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

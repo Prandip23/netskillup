@@ -11,11 +11,11 @@ const SITE_DATA = [
     title: "Networking Fundamentals",
     blurb: "The building blocks everything else stacks on top of.",
     topics: [
-      { title: "OSI Model vs TCP/IP Model", slug: "osi-vs-tcpip", status: "planned" },
-      { title: "Network Topologies", slug: "network-topologies", status: "planned" },
+      { title: "OSI Model vs TCP/IP Model", slug: "osi-vs-tcpip", status: "published" },
+      { title: "Network Topologies", slug: "network-topologies", status: "published" },
       { title: "Collision Domain vs Broadcast Domain", slug: "broadcast-vs-collision-domain", status: "published" },
-      { title: "Hubs vs Switches vs Routers", slug: "hubs-switches-routers", status: "planned" },
-      { title: "Duplex: Half vs Full", slug: "duplex", status: "planned" },
+      { title: "Hubs vs Switches vs Routers", slug: "hubs-switches-routers", status: "published" },
+      { title: "Duplex: Half vs Full", slug: "duplex", status: "published" },
     ],
   },
   {

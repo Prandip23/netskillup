@@ -1,4 +1,4 @@
-# netlearn — on-prem networking reference
+# netskillup — on-prem networking reference
 
 A static, GitHub Pages–ready learning site covering on-prem networking:
 Layer 2 switching, Layer 3 routing, TCP/UDP, DNS, and security fundamentals.
