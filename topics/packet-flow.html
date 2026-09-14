@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Packet Flow Across Networks — netskillup</title>
+<title>Packet Flow Across Networks · netskillup</title>
 <meta name="description" content="Every mechanism from this module and the last, walked through in order: what actually happens, step by step, when a device sends a packet to a remote address.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +23,7 @@
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3 — Network</a>
+    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
     <h1>Packet Flow Across Networks</h1>
     <p class="topic-dek">Every mechanism from the last two modules, in the order they actually fire, for one ordinary packet leaving your device and reaching somewhere else entirely.</p>
   </div>
@@ -35,7 +35,7 @@
   <p>This is worth working through slowly, out loud, the first few times. It's the single best way to check that all the pieces from this module and the last one actually fit together instead of sitting in your head as separate facts.</p>
   <ol>
     <li><strong>Is the destination local?</strong> The sending host compares the destination IP (Internet Protocol) address against its own subnet mask. Same subnet, and it can ARP (Address Resolution Protocol) for the destination directly and send straight to it at Layer 2.</li>
-    <li><strong>Not local — ARP for the gateway.</strong> If the destination is on a different network, the host doesn't ARP for the destination at all. It ARPs for its <strong>default gateway's</strong> MAC (Media Access Control) address, since that's who it actually needs to hand the frame to next.</li>
+    <li><strong>Not local: ARP for the gateway.</strong> If the destination is on a different network, the host doesn't ARP for the destination at all. It ARPs for its <strong>default gateway's</strong> MAC (Media Access Control) address, since that's who it actually needs to hand the frame to next.</li>
     <li><strong>The gateway does a routing lookup.</strong> The router receives the frame, strips the Layer 2 header, and looks at the destination IP. It checks its routing table using <strong>longest prefix match</strong> to find the most specific route, decrements the packet's <strong>TTL</strong> (Time to Live) by one, and rewrites the Layer 2 header with the next hop's MAC address.</li>
     <li><strong>Possibly NAT, at the edge.</strong> If this router sits at the boundary of a private network, it may also rewrite the packet's source IP (and port, under PAT, or Port Address Translation) before sending it onward, recording the translation in its NAT (Network Address Translation) table so the reply can find its way back.</li>
     <li><strong>Repeat, hop by hop.</strong> Every router along the path repeats step 3: look up longest prefix match, decrement TTL, rewrite the Layer 2 header, forward. The IP header's source and destination addresses never change in transit. Only the Layer 2 addressing and the TTL do, at every hop.</li>
@@ -96,7 +96,7 @@
 
   <div class="callout">
     <span class="callout-label">A GOOD WAY TO CHECK YOUR OWN UNDERSTANDING</span>
-    <p>Try narrating this same sequence out loud for a device pinging a server on the other side of the world, naming which specific mechanism handles each step — ARP, longest prefix match, TTL, NAT — without looking anything up. Any step that feels shaky is exactly the topic in this module worth re-reading.</p>
+    <p>Try narrating this same sequence out loud for a device pinging a server on the other side of the world, naming which specific mechanism handles each step (ARP, longest prefix match, TTL, NAT) without looking anything up. Any step that feels shaky is exactly the topic in this module worth re-reading.</p>
   </div>
 
 </article>
@@ -107,7 +107,7 @@
     Inter-VLAN Routing
   </a>
   <span>
-    <span class="nav-label">NEXT — PLANNED</span>
+    <span class="nav-label">NEXT · PLANNED</span>
     TCP Header Structure
   </span>
 </nav>

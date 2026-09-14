@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IPv6 Addressing & Header Basics — netskillup</title>
+<title>IPv6 Addressing & Header Basics · netskillup</title>
 <meta name="description" content="Why IPv6 exists, how its 128-bit addresses are written and compressed, and how its simplified header and multicast-based design replace ARP and broadcast entirely.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +23,7 @@
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3 — Network</a>
+    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
     <h1>IPv6 Addressing & Header Basics</h1>
     <p class="topic-dek">IPv4 has roughly 4 billion addresses, and the internet ran out of the easy ones years ago. IPv6 isn't a patch, it's a wholly bigger address space with a cleaner header to match.</p>
   </div>
@@ -42,8 +42,8 @@
   </ul>
   <p>Compressed, that same address becomes <code>2001:db8::ff00:42:8329</code>.</p>
 
-  <h2>No more broadcast — multicast does that job now</h2>
-  <p>IPv6 has no broadcast address at all. Anything that used to rely on a broadcast in IPv4 (including ARP, or Address Resolution Protocol) is handled by <strong>multicast</strong> instead, sent to a specific group of interested listeners rather than flooded to everyone. Address resolution — the IPv6 equivalent of ARP — is a multicast-based protocol called <strong>NDP</strong> (Neighbor Discovery Protocol).</p>
+  <h2>No more broadcast: multicast does that job now</h2>
+  <p>IPv6 has no broadcast address at all. Anything that used to rely on a broadcast in IPv4 (including ARP, or Address Resolution Protocol) is handled by <strong>multicast</strong> instead, sent to a specific group of interested listeners rather than flooded to everyone. Address resolution, the IPv6 equivalent of ARP, is a multicast-based protocol called <strong>NDP</strong> (Neighbor Discovery Protocol).</p>
 
   <table class="compare-table">
     <thead>
@@ -60,11 +60,11 @@
 
   <figure class="diagram-block">
     <svg viewBox="0 0 640 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram comparing the length and notation of an IPv4 address to an IPv6 address at the same scale">
-      <text x="20" y="24" font-size="11" fill="#5b9df9">IPv4 — 32 bits</text>
+      <text x="20" y="24" font-size="11" fill="#5b9df9">IPv4: 32 bits</text>
       <rect x="20" y="34" width="150" height="26" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
       <text x="95" y="52" text-anchor="middle" font-family="monospace" font-size="10" fill="#e7ecf3">192.168.1.1</text>
 
-      <text x="20" y="94" font-size="11" fill="#4fd1c5">IPv6 — 128 bits</text>
+      <text x="20" y="94" font-size="11" fill="#4fd1c5">IPv6: 128 bits</text>
       <rect x="20" y="104" width="600" height="26" fill="none" stroke="#4fd1c5" stroke-width="1.8"/>
       <text x="320" y="122" text-anchor="middle" font-family="monospace" font-size="10" fill="#e7ecf3">2001:0db8:0000:0000:0000:ff00:0042:8329</text>
     </svg>

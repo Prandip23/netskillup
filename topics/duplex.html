@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Duplex: Half vs Full — netskillup</title>
+<title>Duplex: Half vs Full · netskillup</title>
 <meta name="description" content="Half-duplex vs full-duplex explained through walkie-talkies and phone calls, and why it made collisions disappear from modern networks.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,10 +31,10 @@
 
 <article class="topic-body wrap">
 
-  <h2>Half-duplex — walkie-talkies</h2>
+  <h2>Half-duplex: walkie-talkies</h2>
   <p>On a half-duplex link, only one side can transmit at a time. If both sides try to talk at once, the signals collide and both transmissions are lost. This is exactly how a walkie-talkie works: you press the button, say your piece, say "over," and only then does the other person reply. You physically cannot both talk and clearly hear the other person at the same moment. Old hub-based Ethernet and early wireless links worked this way, and it's the entire reason collision domains and CSMA/CD (Carrier Sense Multiple Access with Collision Detection: the "listen before you talk, and detect if you collided" logic) had to exist in the first place.</p>
 
-  <h2>Full-duplex — a phone call</h2>
+  <h2>Full-duplex: a phone call</h2>
   <p>On a full-duplex link, both sides can transmit and receive at the exact same time, over separate transmit and receive paths (on twisted-pair Ethernet, literally separate wire pairs). This is a phone call: you can talk while the other person is talking, interrupt, and hear them simultaneously. There's no "over." Modern switched Ethernet is full-duplex by default, which is why collisions are essentially a non-issue on any current network: there's no shared medium left to collide on.</p>
 
   <figure class="diagram-block">
@@ -58,7 +58,7 @@
       <g transform="translate(0,0)">
         <text x="150" y="16" text-anchor="middle" font-size="12" fill="#8d9bb3">HALF-DUPLEX</text>
 
-        <text x="150" y="50" text-anchor="middle" font-size="10.5" fill="#f2a93b">t1 — A → B</text>
+        <text x="150" y="50" text-anchor="middle" font-size="10.5" fill="#f2a93b">t1: A → B</text>
         <circle cx="40" cy="70" r="14" fill="none" stroke="#cbd4e3" stroke-width="1.4"/>
         <text x="40" y="74" text-anchor="middle" font-size="10" fill="#cbd4e3">A</text>
         <circle cx="260" cy="70" r="14" fill="none" stroke="#cbd4e3" stroke-width="1.4"/>
@@ -67,7 +67,7 @@
           <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.48;0.52;1" dur="3.2s" repeatCount="indefinite"/>
         </line>
 
-        <text x="150" y="140" text-anchor="middle" font-size="10.5" fill="#5b9df9">t2 — B → A</text>
+        <text x="150" y="140" text-anchor="middle" font-size="10.5" fill="#5b9df9">t2: B → A</text>
         <circle cx="40" cy="160" r="14" fill="none" stroke="#cbd4e3" stroke-width="1.4"/>
         <text x="40" y="164" text-anchor="middle" font-size="10" fill="#cbd4e3">A</text>
         <circle cx="260" cy="160" r="14" fill="none" stroke="#cbd4e3" stroke-width="1.4"/>
@@ -76,7 +76,7 @@
           <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.48;0.52;1" dur="3.2s" repeatCount="indefinite"/>
         </line>
 
-        <text x="150" y="204" text-anchor="middle" font-size="11" fill="#5b6a86">Never both at once — like a walkie-talkie</text>
+        <text x="150" y="204" text-anchor="middle" font-size="11" fill="#5b6a86">Never both at once: like a walkie-talkie</text>
       </g>
 
       <!-- FULL DUPLEX -->
@@ -95,7 +95,7 @@
           <animate attributeName="opacity" values="0.55;1;0.55" dur="1.6s" repeatCount="indefinite"/>
         </line>
 
-        <text x="150" y="204" text-anchor="middle" font-size="11" fill="#5b6a86">Simultaneous — like a phone call</text>
+        <text x="150" y="204" text-anchor="middle" font-size="11" fill="#5b6a86">Simultaneous: like a phone call</text>
       </g>
 
       <script type="text/javascript"><![CDATA[

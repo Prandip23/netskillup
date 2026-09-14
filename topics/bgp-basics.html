@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BGP Basics — netskillup</title>
+<title>BGP Basics · netskillup</title>
 <meta name="description" content="The routing protocol that actually holds the internet together: Autonomous Systems, eBGP vs iBGP, and why BGP picks routes on policy, not just shortest path.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +23,7 @@
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3 — Network</a>
+    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
     <h1>BGP Basics</h1>
     <p class="topic-dek">Every protocol so far in this module routes traffic inside one organization's network. BGP is what routes traffic between organizations, which is to say, it's what the actual internet runs on.</p>
   </div>
@@ -67,7 +67,7 @@
   </figure>
 
   <h2>"Best" isn't just "shortest"</h2>
-  <p>Interior protocols like OSPF pick the lowest-cost path, full stop. BGP is different on purpose: it's as much a policy and business tool as a technical one, since real transit and peering relationships involve contracts, cost, and trust, not just distance. Instead of a simple metric, BGP compares a whole ordered list of <strong>path attributes</strong> — including <code>AS-PATH</code> (how many ASes the route passes through), <code>LOCAL_PREF</code> (a locally-configured preference for one path over another), and <code>MED</code> (a hint from a neighboring AS about which of its own entry points it'd prefer you use) — before falling back to anything resembling "shortest."</p>
+  <p>Interior protocols like OSPF pick the lowest-cost path, full stop. BGP is different on purpose: it's as much a policy and business tool as a technical one, since real transit and peering relationships involve contracts, cost, and trust, not just distance. Instead of a simple metric, BGP compares a whole ordered list of <strong>path attributes</strong>, including <code>AS-PATH</code> (how many ASes the route passes through), <code>LOCAL_PREF</code> (a locally-configured preference for one path over another), and <code>MED</code> (a hint from a neighboring AS about which of its own entry points it'd prefer you use), before falling back to anything resembling "shortest."</p>
 
   <div class="callout">
     <span class="callout-label">WHY THIS ISN'T "JUST A BIGGER OSPF"</span>

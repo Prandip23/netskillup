@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EtherChannel / Link Aggregation — netskillup</title>
+<title>EtherChannel / Link Aggregation · netskillup</title>
 <meta name="description" content="How bundling several physical links into one logical link gives you more bandwidth and redundancy without STP blocking any of them, plus PAgP vs LACP.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +23,7 @@
 
 <div class="topic-header" style="--module-color: var(--l2);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 02 · Layer 2 — Data Link</a>
+    <a class="breadcrumb" href="../index.html#modules">← Module 02 · Layer 2: Data Link</a>
     <h1>EtherChannel / Link Aggregation</h1>
     <p class="topic-dek">Instead of one cable and a blocked backup, bundle several cables into one link that spanning tree treats as if it were only ever one.</p>
   </div>
@@ -79,7 +79,7 @@
 
   <div class="callout">
     <span class="callout-label">THE FAILURE MODE TO WATCH FOR</span>
-    <p>Member links need matching speed, duplex, and VLAN (Virtual Local Area Network) / trunk configuration. Mismatch one of them and instead of a clean error, the bundle can silently fail to form or drop into an inconsistent state — some links up, some in a non-bundled err state — which looks like a partial outage rather than an obvious misconfiguration.</p>
+    <p>Member links need matching speed, duplex, and VLAN (Virtual Local Area Network) / trunk configuration. Mismatch one of them and instead of a clean error, the bundle can silently fail to form or drop into an inconsistent state (some links up, some in a non-bundled err state), which looks like a partial outage rather than an obvious misconfiguration.</p>
   </div>
 
 </article>
