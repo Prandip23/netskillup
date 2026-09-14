@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VPN Types · netskillup</title>
+<meta name="description" content="The same core idea, a private encrypted path across a public network, implemented two very different ways: connecting whole sites, and connecting individual people.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--sec);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
+    <h1>VPN Types</h1>
+    <p class="topic-dek">A VPN (Virtual Private Network) is one core idea, a private encrypted path across a public network, built for two very different situations.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>A private tunnel through a public road system</h2>
+  <p>Imagine a permanent private tunnel connecting two office buildings across an otherwise public city, versus a single traveler getting a temporary secure escort in from wherever they happen to be. Both get you the same guarantee, a protected path across territory you don't control, but they're built for completely different situations.</p>
+
+  <h2>Site-to-site VPN</h2>
+  <p>A permanent tunnel between two networks, usually built with <a href="ipsec-fundamentals.html">IPsec in tunnel mode</a>, connecting an entire office to another entire office (or to a cloud network). It's set up once by network administrators, and every device behind either gateway uses it automatically without any configuration of its own. A user at a branch office reaching a file server at headquarters has no idea a tunnel is even involved.</p>
+
+  <h2>Remote-access VPN</h2>
+  <p>An individual device connects in from wherever it happens to be, gets treated as if it were on the private network, and this is the kind most people actually interact with directly. It comes in a few common flavors: IPsec-based (often IKEv2/IPsec), an SSL/TLS VPN that can run through little more than a browser, and newer options like WireGuard, built from the ground up to be simpler to configure and faster than older options.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram comparing a site-to-site VPN, a permanent tunnel between two office gateways, with a remote-access VPN, an individual user tunneling in through the public internet to a VPN gateway">
+      <text x="150" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">SITE-TO-SITE VPN</text>
+      <text x="490" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">REMOTE-ACCESS VPN</text>
+
+      <rect x="15" y="55" width="100" height="60" rx="4" fill="none" stroke="#5b9df9" stroke-width="1.4"/>
+      <text x="65" y="48" text-anchor="middle" font-size="9" fill="#5b9df9">OFFICE A</text>
+      <rect x="195" y="55" width="100" height="60" rx="4" fill="none" stroke="#5b9df9" stroke-width="1.4"/>
+      <text x="245" y="48" text-anchor="middle" font-size="9" fill="#5b9df9">OFFICE B</text>
+
+      <circle cx="115" cy="85" r="14" fill="none" stroke="#f2a93b" stroke-width="1.4"/>
+      <text x="115" y="88" text-anchor="middle" font-size="7" fill="#f2a93b">GW</text>
+      <circle cx="195" cy="85" r="14" fill="none" stroke="#f2a93b" stroke-width="1.4"/>
+      <text x="195" y="88" text-anchor="middle" font-size="7" fill="#f2a93b">GW</text>
+
+      <line x1="129" y1="85" x2="181" y2="85" stroke="#4fd1c5" stroke-width="2" stroke-dasharray="300" stroke-dashoffset="300">
+        <animate attributeName="stroke-dashoffset" from="300" to="0" dur="0.4s" begin="0.3s" fill="freeze"/>
+      </line>
+      <text x="155" y="130" text-anchor="middle" font-size="8" fill="#4fd1c5">ALWAYS-ON TUNNEL</text>
+      <text x="155" y="165" text-anchor="middle" font-size="8.5" fill="#5b6a86">every host behind either gateway uses it</text>
+      <text x="155" y="178" text-anchor="middle" font-size="8.5" fill="#5b6a86">automatically, with no setup of its own</text>
+
+      <circle cx="350" cy="85" r="18" fill="none" stroke="#8d9bb3" stroke-width="1.6"/>
+      <text x="350" y="89" text-anchor="middle" font-size="8" fill="#8d9bb3">YOU</text>
+
+      <rect x="390" y="55" width="130" height="60" rx="4" fill="none" stroke="#3a4a6b" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <text x="455" y="48" text-anchor="middle" font-size="8.5" fill="#5b6a86">PUBLIC INTERNET</text>
+
+      <rect x="545" y="55" width="90" height="60" rx="4" fill="none" stroke="#5b9df9" stroke-width="1.4"/>
+      <text x="590" y="80" text-anchor="middle" font-size="7.5" fill="#5b9df9">VPN</text>
+      <text x="590" y="92" text-anchor="middle" font-size="7.5" fill="#5b9df9">GATEWAY</text>
+
+      <line x1="368" y1="85" x2="545" y2="85" stroke="#4fd1c5" stroke-width="2" stroke-dasharray="500" stroke-dashoffset="500">
+        <animate attributeName="stroke-dashoffset" from="500" to="0" dur="0.5s" begin="0.5s" fill="freeze"/>
+      </line>
+      <text x="490" y="165" text-anchor="middle" font-size="8.5" fill="#5b6a86">one device, tunneling in from anywhere,</text>
+      <text x="490" y="178" text-anchor="middle" font-size="8.5" fill="#5b6a86">treated as if it were on the private network</text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate').forEach(function (a) {
+            a.setAttribute('dur', '0.01s');
+            a.setAttribute('begin', '0s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Same underlying guarantee, encrypted and authenticated, applied to two different scopes: an entire network on the left, one device on the right.</figcaption>
+  </figure>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th>Type</th><th>Connects</th><th>Typical protocol</th><th>Use case</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Site-to-site</td><td>Network to network</td><td>IPsec, tunnel mode</td><td>Branch office to headquarters, always on</td></tr>
+      <tr><td>Remote-access (IPsec)</td><td>Device to network</td><td>IKEv2/IPsec</td><td>Managed corporate laptop VPN client</td></tr>
+      <tr><td>Remote-access (SSL/TLS)</td><td>Device to network</td><td>TLS</td><td>Lightweight or clientless remote access</td></tr>
+      <tr><td>WireGuard</td><td>Either</td><td>Its own modern protocol</td><td>Simpler configuration, strong performance</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="callout-label">SPLIT TUNNELING</span>
+    <p>With a remote-access VPN, an administrator can choose to route only traffic actually destined for the private network through the tunnel, letting everything else, general web browsing, go straight out the user's own internet connection. That's split tunneling: better performance and less load on the VPN gateway, at the cost of losing visibility and protection over that other traffic. The alternative, a full tunnel, routes everything through the VPN, slower but fully visible and protected.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="ikev1-vs-ikev2.html">
+    <span class="nav-label">← PREVIOUS</span>
+    IKEv1 vs IKEv2
+  </a>
+  <a href="firewalls-acls.html">
+    <span class="nav-label">NEXT →</span>
+    Firewalls & ACLs
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

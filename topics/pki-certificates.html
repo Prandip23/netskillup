@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PKI & Digital Certificates · netskillup</title>
+<meta name="description" content="How a stranger's public key gets trusted without ever having met them: certificate authorities, what's inside a certificate, and the chain of trust.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--sec);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
+    <h1>PKI & Digital Certificates</h1>
+    <p class="topic-dek">How a public key belonging to a total stranger gets trusted anyway, without the two of you ever having met.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>A passport, not a personal introduction</h2>
+  <p>A passport doesn't work because a border agent personally knows you. It works because a trusted government verified your identity once and issued a document that's extremely hard to forge, and every other country downstream agrees to trust that government's word for it. PKI (Public Key Infrastructure) works the same way for public keys: a <strong>Certificate Authority (CA)</strong> verifies that a public key genuinely belongs to a specific domain or organization, then issues a digital certificate binding the two together, backed by the CA's own digital signature vouching for it.</p>
+
+  <h2>What's actually inside a certificate</h2>
+  <table class="compare-table">
+    <thead>
+      <tr><th>Field</th><th>What it holds</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Subject</td><td>Who or what the certificate was issued to, e.g. a domain name</td></tr>
+      <tr><td>Issuer</td><td>Which CA issued it</td></tr>
+      <tr><td>Public Key</td><td>The subject's public key</td></tr>
+      <tr><td>Validity Period</td><td>A not-before and not-after date; expired certificates are rejected</td></tr>
+      <tr><td>Serial Number</td><td>A unique identifier, used for revocation lookups</td></tr>
+      <tr><td>Signature</td><td>The issuing CA's digital signature over the whole certificate</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The chain of trust</h2>
+  <p>Browsers and operating systems don't ship with every website's certificate pre-trusted. They ship with a small, curated list of <strong>root CAs</strong> they trust unconditionally, called a trust store. A root CA's certificate is self-signed: nobody vouches for it but itself, and that's fine, since it's the trust anchor everything else is built on. Root CAs rarely sign server certificates directly; instead they sign an <strong>intermediate CA's</strong> certificate, which then signs the actual server certificate. Verifying a certificate means walking that chain, server certificate, up through each intermediate, until it reaches a root already sitting in the trust store.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of a certificate chain of trust: a self-signed root CA, trusted directly by the operating system, signs an intermediate CA certificate, which in turn signs a server certificate for example.com">
+      <rect x="240" y="20" width="160" height="36" rx="4" fill="none" stroke="#f2a93b" stroke-width="1.6"/>
+      <text x="320" y="41" text-anchor="middle" font-size="9.5" fill="#f2a93b">ROOT CA (self-signed)</text>
+      <text x="320" y="14" text-anchor="middle" font-size="8" fill="#5b6a86">TRUSTED DIRECTLY BY YOUR OS/BROWSER</text>
+
+      <rect x="240" y="100" width="160" height="36" rx="4" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="320" y="121" text-anchor="middle" font-size="9.5" fill="#4fd1c5">INTERMEDIATE CA</text>
+
+      <rect x="230" y="180" width="180" height="36" rx="4" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="320" y="201" text-anchor="middle" font-size="9.5" fill="#5b9df9">example.com certificate</text>
+
+      <line x1="320" y1="56" x2="320" y2="100" stroke="#f2a93b" stroke-width="1.4" stroke-dasharray="500" stroke-dashoffset="500">
+        <animate attributeName="stroke-dashoffset" from="500" to="0" dur="0.5s" begin="0.2s" fill="freeze"/>
+      </line>
+      <text x="345" y="82" font-size="8" fill="#5b6a86">signs</text>
+
+      <line x1="320" y1="136" x2="320" y2="180" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="500" stroke-dashoffset="500">
+        <animate attributeName="stroke-dashoffset" from="500" to="0" dur="0.5s" begin="0.5s" fill="freeze"/>
+      </line>
+      <text x="345" y="162" font-size="8" fill="#5b6a86">signs</text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate').forEach(function (a) {
+            a.setAttribute('dur', '0.01s');
+            a.setAttribute('begin', '0s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Verifying example.com's certificate means checking the intermediate's signature, then checking that the intermediate itself was signed by a root already in the trust store, not trusting example.com's certificate in isolation.</figcaption>
+  </figure>
+
+  <h2>Revocation: when a certificate shouldn't be trusted anymore</h2>
+  <p>A certificate can be compromised or issued in error before its expiry date arrives. Two mechanisms exist to catch that: a <strong>CRL (Certificate Revocation List)</strong>, a published list of revoked serial numbers a client can check, and <strong>OCSP (Online Certificate Status Protocol)</strong>, a live query asking a CA "is this specific certificate still good?" instead of downloading an entire list.</p>
+
+  <div class="callout">
+    <span class="callout-label">WHY SELF-SIGNED CERTIFICATES TRIGGER BROWSER WARNINGS</span>
+    <p>A self-signed certificate that isn't a root already in the trust store has nobody vouching for it. The browser has no chain to walk back to anything it already trusts, so it can't tell the difference between a legitimate internal test certificate and an attacker's forged one, and warns either way.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="symmetric-vs-asymmetric.html">
+    <span class="nav-label">← PREVIOUS</span>
+    Symmetric vs Asymmetric Encryption
+  </a>
+  <a href="tls-handshake.html">
+    <span class="nav-label">NEXT →</span>
+    TLS/SSL Handshake (1.2 vs 1.3)
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

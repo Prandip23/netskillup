@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DNS Hierarchy & Record Types · netskillup</title>
+<meta name="description" content="Why DNS is structured as a delegated tree instead of one giant list, and what each record type (A, AAAA, CNAME, MX, NS, TXT, SOA, PTR) actually answers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--app);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 05 · Application Layer & Name Resolution</a>
+    <h1>DNS Hierarchy & Record Types</h1>
+    <p class="topic-dek">DNS (Domain Name System) is organized as a delegated tree, not one giant lookup table, and different record types on the same name answer completely different questions.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>A tree, not a flat list</h2>
+  <p>DNS is structured like a global franchise business, not a single company you could look up in one place. The root level is like a headquarters: it doesn't know where "example.com" actually lives, but it knows exactly which regional office handles everything ending in <code>.com</code>. That regional office, a TLD (Top-Level Domain) server, doesn't know example.com's content either, but it knows which specific store location, the <strong>authoritative server</strong> for example.com, is licensed to answer for it. And that store can run its own departments, subdomains like <code>www.example.com</code> or <code>mail.example.com</code>, all still under the same license.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tree diagram of DNS delegation: the root delegates to TLDs like .com and .org, .com delegates to example.com, and example.com has its own subdomains www.example.com and mail.example.com">
+      <g font-family="monospace" font-size="9.5" fill="#e7ecf3">
+        <rect x="290" y="15" width="60" height="26" rx="4" fill="none" stroke="#8d9bb3" stroke-width="1.4"/>
+        <text x="320" y="33" text-anchor="middle">root</text>
+
+        <rect x="140" y="75" width="80" height="26" rx="4" fill="none" stroke="#f2a93b" stroke-width="1.6"/>
+        <text x="180" y="93" text-anchor="middle" fill="#f2a93b">.com</text>
+        <rect x="420" y="75" width="80" height="26" rx="4" fill="none" stroke="#3a4a6b" stroke-width="1.3"/>
+        <text x="460" y="93" text-anchor="middle" fill="#5b6a86">.org</text>
+
+        <rect x="110" y="135" width="140" height="26" rx="4" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+        <text x="180" y="153" text-anchor="middle" fill="#4fd1c5">example.com</text>
+
+        <rect x="20" y="195" width="160" height="26" rx="4" fill="none" stroke="#5b9df9" stroke-width="1.4"/>
+        <text x="100" y="213" text-anchor="middle" fill="#5b9df9">www.example.com</text>
+        <rect x="200" y="195" width="160" height="26" rx="4" fill="none" stroke="#b18cf0" stroke-width="1.4"/>
+        <text x="280" y="213" text-anchor="middle" fill="#b18cf0">mail.example.com</text>
+      </g>
+
+      <g fill="none" stroke-width="1.4">
+        <line x1="300" y1="41" x2="190" y2="75" stroke="#f2a93b" stroke-dasharray="1000" stroke-dashoffset="1000">
+          <animate attributeName="stroke-dashoffset" from="1000" to="0" dur="0.5s" begin="0s" fill="freeze"/>
+        </line>
+        <line x1="340" y1="41" x2="450" y2="75" stroke="#3a4a6b" stroke-dasharray="1000" stroke-dashoffset="1000">
+          <animate attributeName="stroke-dashoffset" from="1000" to="0" dur="0.5s" begin="0.15s" fill="freeze"/>
+        </line>
+        <line x1="180" y1="101" x2="180" y2="135" stroke="#4fd1c5" stroke-dasharray="1000" stroke-dashoffset="1000">
+          <animate attributeName="stroke-dashoffset" from="1000" to="0" dur="0.5s" begin="0.3s" fill="freeze"/>
+        </line>
+        <line x1="150" y1="161" x2="100" y2="195" stroke="#5b9df9" stroke-dasharray="1000" stroke-dashoffset="1000">
+          <animate attributeName="stroke-dashoffset" from="1000" to="0" dur="0.5s" begin="0.45s" fill="freeze"/>
+        </line>
+        <line x1="210" y1="161" x2="280" y2="195" stroke="#b18cf0" stroke-dasharray="1000" stroke-dashoffset="1000">
+          <animate attributeName="stroke-dashoffset" from="1000" to="0" dur="0.5s" begin="0.6s" fill="freeze"/>
+        </line>
+      </g>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate').forEach(function (a) {
+            a.setAttribute('dur', '0.01s');
+            a.setAttribute('begin', '0s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Each level only has to know how to reach the next level down. The root never needs to know about www.example.com directly; it only needs to know who to delegate <code>.com</code> to.</figcaption>
+  </figure>
+
+  <h2>Record types: different questions, different answers</h2>
+  <p>A single name like <code>example.com</code> can have several different kinds of records, each answering a completely different question.</p>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th>Record</th><th>Full name</th><th>Answers</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>A</td><td>Address</td><td>Which IPv4 address does this name point to?</td></tr>
+      <tr><td>AAAA</td><td>Nicknamed "quad-A": four times the size of an A record</td><td>Which IPv6 address does this name point to?</td></tr>
+      <tr><td>CNAME</td><td>Canonical Name</td><td>What's the "real" name this is just an alias for?</td></tr>
+      <tr><td>MX</td><td>Mail Exchange</td><td>Which server handles email for this domain, and in what priority order?</td></tr>
+      <tr><td>NS</td><td>Name Server</td><td>Which servers are authoritative for this zone?</td></tr>
+      <tr><td>TXT</td><td>Text</td><td>Arbitrary text, commonly used for domain ownership verification, SPF/DKIM email policy</td></tr>
+      <tr><td>SOA</td><td>Start of Authority</td><td>The zone's master record: primary name server, admin contact, and cache refresh timers</td></tr>
+      <tr><td>PTR</td><td>Pointer</td><td>Reverse lookup: which name does this IP address belong to?</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Why delegation matters</h2>
+  <p>Nobody has to ask a single central server for every name on the internet, and nobody needs the root's permission every time a subdomain changes. The owner of example.com can add, change, or remove <code>www.example.com</code> and <code>mail.example.com</code> freely on their own authoritative server, since the root and the <code>.com</code> TLD only delegated authority for the zone, not control over what's inside it. That's what lets DNS scale to billions of names without a single bottleneck.</p>
+
+  <div class="callout">
+    <span class="callout-label">WHY TTL MATTERS ON EVERY RECORD</span>
+    <p>Every record carries its own TTL (Time to Live), how long a resolver is allowed to cache it before asking again. A short TTL means changes propagate fast but generates more lookup traffic; a long TTL means less load but slower failover if something changes. How resolvers actually use that cached answer is the next topic.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="ports-sockets.html">
+    <span class="nav-label">← PREVIOUS</span>
+    Ports & Sockets
+  </a>
+  <a href="dns-resolution-flow.html">
+    <span class="nav-label">NEXT →</span>
+    DNS Resolution Flow
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

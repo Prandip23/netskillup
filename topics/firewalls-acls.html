@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firewalls & ACLs · netskillup</title>
+<meta name="description" content="The difference between checking every packet against a static list every single time, and actually remembering which conversations are already permitted.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--sec);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
+    <h1>Firewalls & ACLs</h1>
+    <p class="topic-dek">A building's security desk can check every visitor against a list every single time, or it can remember who it already let in. Both approaches exist in networking, with very different trade-offs.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>ACLs: stateless, rule by rule, every time</h2>
+  <p>An ACL (Access Control List) is an ordered list of permit and deny rules, matched from top to bottom, first match wins, with an implicit deny at the very end for anything that matched nothing. A standard ACL matches only on source address; an extended ACL can also match destination address, protocol, and port. What an ACL has no memory of is prior traffic: a reply packet has to match its own explicit rule going the other direction, or it gets blocked, even if it's just the response to a request the same device already sent.</p>
+
+  <h2>Stateful firewalls: remembering the conversation</h2>
+  <p>A stateful firewall tracks connection state, TCP's handshake progress, or a simple timeout-based session for UDP (User Datagram Protocol) and ICMP (Internet Control Message Protocol), which don't have a handshake at all. Once an outbound connection is permitted and recorded, its return traffic is automatically allowed without needing a separate explicit rule for the reply direction. That's what makes a simple "allow outbound" policy actually usable in practice.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram contrasting a stateless ACL, which checks every packet in both directions against its rule list separately, with a stateful firewall, which checks the outbound packet once and automatically permits the matching return traffic">
+      <text x="150" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">STATELESS ACL</text>
+      <text x="490" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">STATEFUL FIREWALL</text>
+
+      <circle cx="40" cy="100" r="18" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="40" y="104" text-anchor="middle" font-size="7.5" fill="#5b9df9">CLIENT</text>
+      <rect x="105" y="75" width="100" height="50" rx="4" fill="none" stroke="#f2a93b" stroke-width="1.4"/>
+      <text x="155" y="103" text-anchor="middle" font-size="8" fill="#f2a93b">ACL RULES</text>
+      <circle cx="280" cy="100" r="18" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="280" y="104" text-anchor="middle" font-size="7.5" fill="#4fd1c5">SERVER</text>
+      <line x1="58" y1="100" x2="105" y2="100" stroke="#3a4a6b" stroke-width="1.2"/>
+      <line x1="205" y1="100" x2="262" y2="100" stroke="#3a4a6b" stroke-width="1.2"/>
+
+      <circle r="4.5" fill="#5b9df9">
+        <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.02;0.42;1" path="M58,100 L262,100"/>
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.42;0.44;1" dur="10s" repeatCount="indefinite"/>
+      </circle>
+      <text x="155" y="150" text-anchor="middle" font-size="9" fill="#5b9df9">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.42;0.44;1" dur="10s" repeatCount="indefinite"/>
+        1. Outbound: checked, matches a rule, forwarded
+      </text>
+
+      <circle r="4.5" fill="#f2a93b">
+        <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.54;0.94;1" path="M262,100 L58,100"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.52;0.54;0.94;0.96;1" dur="10s" repeatCount="indefinite"/>
+      </circle>
+      <text x="155" y="150" text-anchor="middle" font-size="9" fill="#f2a93b">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.52;0.54;0.94;0.96;1" dur="10s" repeatCount="indefinite"/>
+        2. Return: checked again, needs its own rule
+      </text>
+
+      <circle cx="380" cy="100" r="18" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="380" y="104" text-anchor="middle" font-size="7.5" fill="#5b9df9">CLIENT</text>
+      <rect x="450" y="75" width="110" height="50" rx="4" fill="none" stroke="#4fd1c5" stroke-width="1.4"/>
+      <text x="505" y="98" text-anchor="middle" font-size="7.5" fill="#4fd1c5">CONNECTION</text>
+      <text x="505" y="110" text-anchor="middle" font-size="7.5" fill="#4fd1c5">TABLE</text>
+      <circle cx="615" cy="100" r="18" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="615" y="104" text-anchor="middle" font-size="7.5" fill="#4fd1c5">SERVER</text>
+      <line x1="398" y1="100" x2="450" y2="100" stroke="#3a4a6b" stroke-width="1.2"/>
+      <line x1="560" y1="100" x2="597" y2="100" stroke="#3a4a6b" stroke-width="1.2"/>
+
+      <circle r="4.5" fill="#5b9df9">
+        <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.02;0.42;1" path="M398,100 L597,100"/>
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.42;0.44;1" dur="10s" repeatCount="indefinite"/>
+      </circle>
+      <text x="490" y="150" text-anchor="middle" font-size="9" fill="#5b9df9">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.42;0.44;1" dur="10s" repeatCount="indefinite"/>
+        1. Outbound: checked once, connection recorded
+      </text>
+
+      <circle r="4.5" fill="#4fd1c5">
+        <animateMotion dur="10s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.54;0.94;1" path="M597,100 L398,100"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.52;0.54;0.94;0.96;1" dur="10s" repeatCount="indefinite"/>
+      </circle>
+      <text x="490" y="150" text-anchor="middle" font-size="9" fill="#4fd1c5">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.52;0.54;0.94;0.96;1" dur="10s" repeatCount="indefinite"/>
+        2. Return: auto-permitted, no rule check needed
+      </text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate, animateMotion').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Same round trip, two different amounts of rule-checking. The stateful firewall does the checking once, up front, and trusts its own memory of the connection for the reply.</figcaption>
+  </figure>
+
+  <h2>Next-generation firewalls (NGFW)</h2>
+  <p>Modern firewalls typically go further than tracking connection state alone. An NGFW adds application awareness (recognizing that traffic on port 443 is actually a specific application, not just "some HTTPS"), intrusion prevention, and deep packet inspection, filtering decisions based on more than IP addresses and ports.</p>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th></th><th>Stateless ACL</th><th>Stateful firewall</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Tracks connections</td><td>No</td><td>Yes</td></tr>
+      <tr><td>Return traffic</td><td>Needs its own explicit rule</td><td>Automatically permitted for established connections</td></tr>
+      <tr><td>Performance overhead</td><td>Lower</td><td>Slightly higher, tracks session state</td></tr>
+      <tr><td>Typical device</td><td>Router ACL</td><td>Dedicated firewall, or a Layer 3 switch with firewall features</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="callout-label">WHY "PERMIT ESTABLISHED" EXISTS AS ITS OWN KEYWORD</span>
+    <p>Extended ACLs sometimes offer an <code>established</code> keyword, permitting a packet if its ACK bit is set. It's a limited, cruder approximation of statefulness, just checking one bit rather than tracking real connection state, and it exists specifically because plain ACLs have no memory of their own to rely on otherwise.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="vpn-types.html">
+    <span class="nav-label">← PREVIOUS</span>
+    VPN Types
+  </a>
+  <a href="common-attacks.html">
+    <span class="nav-label">NEXT →</span>
+    Common Attacks: ARP Spoofing, MITM, DDoS
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

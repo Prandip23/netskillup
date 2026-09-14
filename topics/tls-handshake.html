@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TLS/SSL Handshake (1.2 vs 1.3) · netskillup</title>
+<meta name="description" content="How a client and server that have never spoken before agree on a shared secret in the open, and why TLS 1.3 does it in half the round trips TLS 1.2 needed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--sec);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
+    <h1>TLS/SSL Handshake (1.2 vs 1.3)</h1>
+    <p class="topic-dek">How a client and server that have never spoken before agree on a shared secret entirely in the open, before a single byte of actual data is encrypted.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>What the handshake has to accomplish</h2>
+  <p>Meeting a new business contact for the first time means checking their credentials, agreeing on which shared rules you'll both follow, and settling on a private code only the two of you know before discussing anything sensitive. TLS (Transport Layer Security) does exactly that, in three jobs: agree on a protocol version and cipher suite, authenticate the server using the certificate chain from <a href="pki-certificates.html">PKI & Digital Certificates</a>, and establish shared symmetric session keys. That last part is <a href="symmetric-vs-asymmetric.html">hybrid encryption</a> in action: asymmetric crypto is used only to set the session keys up, then fast symmetric encryption handles the actual data for the rest of the connection.</p>
+
+  <h2>TLS 1.2: two round trips</h2>
+  <p>A full TLS 1.2 handshake needs two full round trips between client and server before any application data can be sent: one to agree on parameters and receive the server's certificate, a second to actually exchange the key material and confirm both sides derived the same session keys.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 175" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of the TLS 1.2 handshake: ClientHello, ServerHello with certificate and key exchange, ClientKeyExchange with Finished, and ServerFinished, two full round trips before encrypted data flows">
+      <text x="320" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">TLS 1.2: TWO ROUND TRIPS</text>
+
+      <circle cx="70" cy="100" r="24" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="70" y="104" text-anchor="middle" font-size="9.5" fill="#5b9df9">CLIENT</text>
+      <circle cx="570" cy="100" r="24" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="570" y="104" text-anchor="middle" font-size="9.5" fill="#4fd1c5">SERVER</text>
+      <line x1="96" y1="100" x2="544" y2="100" stroke="#3a4a6b" stroke-width="1.2"/>
+
+      <circle r="5" fill="#5b9df9">
+        <animateMotion dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.015;0.16;1" path="M96,100 L544,100"/>
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.015;0.16;0.18;1" dur="12s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="58" text-anchor="middle" font-size="10" fill="#5b9df9">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.015;0.16;0.18;1" dur="12s" repeatCount="indefinite"/>
+        ClientHello
+      </text>
+      <text x="320" y="72" text-anchor="middle" font-size="8.5" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.015;0.16;0.18;1" dur="12s" repeatCount="indefinite"/>
+        supported TLS versions and cipher suites
+      </text>
+
+      <circle r="5" fill="#4fd1c5">
+        <animateMotion dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.27;0.41;1" path="M544,100 L96,100"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.25;0.27;0.41;0.43;1" dur="12s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="130" text-anchor="middle" font-size="10" fill="#4fd1c5">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.25;0.27;0.41;0.43;1" dur="12s" repeatCount="indefinite"/>
+        ServerHello, Certificate, KeyExchange
+      </text>
+      <text x="320" y="144" text-anchor="middle" font-size="8.5" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.25;0.27;0.41;0.43;1" dur="12s" repeatCount="indefinite"/>
+        chosen cipher suite, the server's certificate, key material
+      </text>
+
+      <circle r="5" fill="#5b9df9">
+        <animateMotion dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.52;0.66;1" path="M96,100 L544,100"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.50;0.52;0.66;0.68;1" dur="12s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="58" text-anchor="middle" font-size="10" fill="#5b9df9">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.50;0.52;0.66;0.68;1" dur="12s" repeatCount="indefinite"/>
+        ClientKeyExchange, Finished
+      </text>
+      <text x="320" y="72" text-anchor="middle" font-size="8.5" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.50;0.52;0.66;0.68;1" dur="12s" repeatCount="indefinite"/>
+        client's half of the key material, switches to encrypted
+      </text>
+
+      <circle r="5" fill="#4fd1c5">
+        <animateMotion dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.77;0.91;1" path="M544,100 L96,100"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.75;0.77;0.91;0.93;1" dur="12s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="130" text-anchor="middle" font-size="10" fill="#4fd1c5">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.75;0.77;0.91;0.93;1" dur="12s" repeatCount="indefinite"/>
+        Finished
+      </text>
+      <text x="320" y="144" text-anchor="middle" font-size="8.5" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.75;0.77;0.91;0.93;1" dur="12s" repeatCount="indefinite"/>
+        both sides confirmed, encrypted data can now flow
+      </text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate, animateMotion').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Two round trips of pure negotiation before a single byte of the actual page loads.</figcaption>
+  </figure>
+
+  <h2>TLS 1.3: one round trip, sometimes zero</h2>
+  <p>TLS 1.3 cuts this down by having the client guess which key exchange method the server will accept and send its key share immediately in the ClientHello, instead of waiting to be told. If the guess is right, the whole handshake collapses into a single round trip.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 175" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of the TLS 1.3 handshake: ClientHello with a key share guess, ServerHello with certificate and Finished combined, and ClientFinished, a single round trip before encrypted data flows">
+      <text x="320" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">TLS 1.3: ONE ROUND TRIP</text>
+
+      <circle cx="70" cy="100" r="24" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="70" y="104" text-anchor="middle" font-size="9.5" fill="#5b9df9">CLIENT</text>
+      <circle cx="570" cy="100" r="24" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="570" y="104" text-anchor="middle" font-size="9.5" fill="#4fd1c5">SERVER</text>
+      <line x1="96" y1="100" x2="544" y2="100" stroke="#3a4a6b" stroke-width="1.2"/>
+
+      <circle r="5" fill="#5b9df9">
+        <animateMotion dur="9s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.02;0.21;1" path="M96,100 L544,100"/>
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.21;0.23;1" dur="9s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="58" text-anchor="middle" font-size="10" fill="#5b9df9">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.21;0.23;1" dur="9s" repeatCount="indefinite"/>
+        ClientHello + a guessed key share
+      </text>
+      <text x="320" y="72" text-anchor="middle" font-size="8.5" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.21;0.23;1" dur="9s" repeatCount="indefinite"/>
+        no more waiting to be told which method to use
+      </text>
+
+      <circle r="5" fill="#4fd1c5">
+        <animateMotion dur="9s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.35;0.54;1" path="M544,100 L96,100"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.33;0.35;0.54;0.56;1" dur="9s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="130" text-anchor="middle" font-size="10" fill="#4fd1c5">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.33;0.35;0.54;0.56;1" dur="9s" repeatCount="indefinite"/>
+        ServerHello, Certificate, Finished
+      </text>
+      <text x="320" y="144" text-anchor="middle" font-size="8.5" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.33;0.35;0.54;0.56;1" dur="9s" repeatCount="indefinite"/>
+        key share, certificate, and confirmation combined
+      </text>
+
+      <circle r="5" fill="#5b9df9">
+        <animateMotion dur="9s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.68;0.87;1" path="M96,100 L544,100"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.66;0.68;0.87;0.89;1" dur="9s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="58" text-anchor="middle" font-size="10" fill="#5b9df9">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.66;0.68;0.87;0.89;1" dur="9s" repeatCount="indefinite"/>
+        Finished
+      </text>
+      <text x="320" y="72" text-anchor="middle" font-size="8.5" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.66;0.68;0.87;0.89;1" dur="9s" repeatCount="indefinite"/>
+        one round trip total, encrypted data can now flow
+      </text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate, animateMotion').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Half the round trips of TLS 1.2. Reconnecting to a server visited recently can drop to zero extra round trips (0-RTT) using a resumed session, though 0-RTT data carries its own replay-attack caveats.</figcaption>
+  </figure>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th></th><th>TLS 1.2</th><th>TLS 1.3</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Round trips before data</td><td>Two</td><td>One (zero with session resumption)</td></tr>
+      <tr><td>Weak/legacy ciphers</td><td>Still permitted</td><td>Removed entirely</td></tr>
+      <tr><td>Forward secrecy</td><td>Optional, depends on cipher suite</td><td>Mandatory for every connection</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="callout-label">WHY THIS SITS ON TOP OF TCP, NOT INSTEAD OF IT</span>
+    <p>TLS still assumes a reliable, ordered byte stream underneath it, which is exactly what TCP provides. That's true for TLS 1.2 and 1.3 alike. QUIC, the transport HTTP/3 uses (see <a href="http-https-versions.html">HTTP/HTTPS: 1.1 vs 2 vs 3</a>), handles this differently by folding TLS 1.3 directly into its own transport instead of layering it on top of TCP.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="pki-certificates.html">
+    <span class="nav-label">← PREVIOUS</span>
+    PKI & Digital Certificates
+  </a>
+  <a href="ipsec-fundamentals.html">
+    <span class="nav-label">NEXT →</span>
+    IPsec Fundamentals (AH vs ESP)
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

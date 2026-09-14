@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Symmetric vs Asymmetric Encryption · netskillup</title>
+<meta name="description" content="Two fundamentally different ways to keep data secret: one identical shared key, or a public/private key pair, and why real systems almost always use both together.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--sec);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
+    <h1>Symmetric vs Asymmetric Encryption</h1>
+    <p class="topic-dek">Two fundamentally different ways to keep data secret, and why almost every real system, including the one securing this page, ends up using both together.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>Two kinds of drop-box</h2>
+  <p>Imagine two different kinds of secure drop-box. The first kind has one identical key that both locks and unlocks it: whoever holds a copy of that exact key can put something in or take something out. That's <strong>symmetric encryption</strong>. The same key both encrypts and decrypts, so both sides need an identical copy of it, and getting that copy to the other side safely in the first place is the entire hard problem.</p>
+  <p>The second kind works differently. Anyone can walk up and snap the box's lock shut using a key that's published publicly, but only the one person holding the matching private key can ever open it again. That's <strong>asymmetric encryption</strong>: two mathematically related keys, a public one anyone can use to lock, and a private one only the owner holds to unlock.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram comparing symmetric encryption, where Alice and Bob share an identical key that both locks and unlocks a message, with asymmetric encryption, where Alice locks a message with Bob's public key and only Bob's private key can unlock it">
+      <text x="150" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">SYMMETRIC</text>
+      <text x="480" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">ASYMMETRIC</text>
+
+      <circle cx="60" cy="100" r="20" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="60" y="104" text-anchor="middle" font-size="8.5" fill="#5b9df9">ALICE</text>
+      <circle cx="260" cy="100" r="20" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="260" y="104" text-anchor="middle" font-size="8.5" fill="#5b9df9">BOB</text>
+      <line x1="82" y1="100" x2="238" y2="100" stroke="#3a4a6b" stroke-width="1.2"/>
+
+      <rect x="35" y="135" width="50" height="16" rx="3" fill="none" stroke="#4fd1c5" stroke-width="1.3"/>
+      <text x="60" y="146" text-anchor="middle" font-size="7.5" fill="#4fd1c5">KEY</text>
+      <rect x="235" y="135" width="50" height="16" rx="3" fill="none" stroke="#4fd1c5" stroke-width="1.3"/>
+      <text x="260" y="146" text-anchor="middle" font-size="7.5" fill="#4fd1c5">KEY</text>
+
+      <rect x="0" y="0" width="12" height="9" rx="2" fill="#4fd1c5">
+        <animateMotion dur="5s" repeatCount="indefinite" path="M82,100 L238,100"/>
+      </rect>
+      <text x="150" y="178" text-anchor="middle" font-size="9" fill="#5b6a86">locked and unlocked with the identical key</text>
+
+      <circle cx="390" cy="100" r="20" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="390" y="104" text-anchor="middle" font-size="8.5" fill="#5b9df9">ALICE</text>
+      <circle cx="590" cy="100" r="20" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="590" y="104" text-anchor="middle" font-size="8.5" fill="#5b9df9">BOB</text>
+      <line x1="412" y1="100" x2="568" y2="100" stroke="#3a4a6b" stroke-width="1.2"/>
+
+      <rect x="330" y="135" width="120" height="16" rx="3" fill="none" stroke="#4fd1c5" stroke-width="1.3"/>
+      <text x="390" y="146" text-anchor="middle" font-size="7.5" fill="#4fd1c5">BOB'S PUBLIC KEY</text>
+      <rect x="530" y="135" width="120" height="16" rx="3" fill="none" stroke="#b18cf0" stroke-width="1.3"/>
+      <text x="590" y="146" text-anchor="middle" font-size="7.5" fill="#b18cf0">BOB'S PRIVATE KEY</text>
+
+      <rect x="0" y="0" width="12" height="9" rx="2" fill="#4fd1c5">
+        <animateMotion dur="5s" repeatCount="indefinite" path="M412,100 L562,100"/>
+        <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.85;0.9;1" dur="5s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="562" y="95" width="12" height="9" rx="2" fill="#b18cf0">
+        <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.85;0.9;1" dur="5s" repeatCount="indefinite"/>
+      </rect>
+      <text x="480" y="178" text-anchor="middle" font-size="9" fill="#5b6a86">locked with one key, only opens with the other</text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate, animateMotion').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Left: the same key travels both directions. Right: the key that locks the message (Bob's public key) is never the key that unlocks it (Bob's private key), and Bob never has to share that private key with anyone.</figcaption>
+  </figure>
+
+  <h2>Symmetric encryption</h2>
+  <p>Algorithms like AES (Advanced Encryption Standard), commonly used with a 128-bit or 256-bit key, are fast enough to encrypt large amounts of data with almost no performance cost. The problem it doesn't solve is getting that one shared key to the other party in the first place: send it over the same insecure channel you're trying to protect, and anyone watching that channel gets the key too.</p>
+
+  <h2>Asymmetric encryption</h2>
+  <p>Algorithms like RSA and ECC (Elliptic Curve Cryptography) solve exactly that problem: a public key can be handed out completely openly, since it's only useful for locking, not unlocking. Nobody needs a shared secret arranged in advance. The trade-off is speed: the math involved is far more computationally expensive than symmetric encryption, which makes it impractical for encrypting large amounts of data directly.</p>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th></th><th>Symmetric</th><th>Asymmetric</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Keys used</td><td>One shared key</td><td>A public/private key pair</td></tr>
+      <tr><td>Speed</td><td>Fast</td><td>Much slower</td></tr>
+      <tr><td>Main problem</td><td>Needs a secure way to share the key first</td><td>Solved: the public key needs no secrecy at all</td></tr>
+      <tr><td>Common algorithms</td><td>AES, ChaCha20</td><td>RSA, ECC, DSA</td></tr>
+      <tr><td>Typical use</td><td>Bulk data encryption</td><td>Key exchange, digital signatures, certificates</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="callout-label">WHY REAL SYSTEMS USE BOTH TOGETHER</span>
+    <p>Almost nothing uses one or the other alone. The common pattern, called hybrid encryption, uses slow asymmetric encryption only to securely exchange a fast symmetric session key, then switches to that symmetric key for the actual bulk data. This is exactly what the <a href="tls-handshake.html">TLS/SSL Handshake</a>, covered next, does for every HTTPS connection on the internet.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="url-to-page-capstone.html">
+    <span class="nav-label">← PREVIOUS</span>
+    Capstone: What Happens When You Type a URL
+  </a>
+  <a href="pki-certificates.html">
+    <span class="nav-label">NEXT →</span>
+    PKI & Digital Certificates
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

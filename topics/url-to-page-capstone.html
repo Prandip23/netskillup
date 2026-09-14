@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capstone: What Happens When You Type a URL · netskillup</title>
+<meta name="description" content="Every mechanism from this module and the ones before it, walked through in order: what actually happens, step by step, when a browser loads a page.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--app);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 05 · Application Layer & Name Resolution</a>
+    <h1>Capstone: What Happens When You Type a URL</h1>
+    <p class="topic-dek">Every mechanism from this module, and several from the ones before it, in the order they actually fire, for one ordinary page load.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>The walk-through</h2>
+  <p>This is worth working through slowly, out loud, the first few times. It's the single best way to check that every mechanism this site has covered actually fits together, instead of sitting in your head as separate, disconnected facts.</p>
+  <ol>
+    <li><strong>Parse the URL.</strong> Split it into a scheme (<code>https://</code>), a host (<code>example.com</code>), and a path (<code>/page</code>).</li>
+    <li><strong>Check caches first.</strong> The browser checks its own cache, then the OS's (Operating System's) DNS cache, before asking anyone else anything.</li>
+    <li><strong>DNS resolution.</strong> If the name isn't cached, a recursive resolver walks the DNS hierarchy, root, then TLD (Top-Level Domain), then authoritative, to turn <code>example.com</code> into an IP (Internet Protocol) address. See <a href="dns-resolution-flow.html">DNS Resolution Flow</a>.</li>
+    <li><strong>TCP three-way handshake.</strong> The browser opens a TCP (Transmission Control Protocol) connection to that IP address on the target port, SYN, SYN-ACK, ACK. See <a href="tcp-handshake-termination.html">TCP 3-Way Handshake & Termination</a>.</li>
+    <li><strong>TLS handshake, if it's HTTPS.</strong> Client and server agree on a cipher suite, the server proves its identity with a certificate, and both sides establish shared session keys before any HTTP data is sent. Covered in full in the next module's <a href="tls-handshake.html">TLS/SSL Handshake</a>.</li>
+    <li><strong>HTTP request and response.</strong> The browser sends its request over that now-secured connection and the server replies with a status code, headers, and a body. See <a href="http-https-versions.html">HTTP/HTTPS: 1.1 vs 2 vs 3</a>.</li>
+    <li><strong>Parse and fetch everything else.</strong> The browser parses the returned HTML and discovers more resources it needs, CSS, JavaScript, images, fonts, each one repeating steps 2 through 6 on its own, often in parallel.</li>
+    <li><strong>Render the page.</strong> Once enough of that has arrived, the browser builds the page and the user actually sees something.</li>
+  </ol>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated end-to-end diagram of a browser resolving a domain name, completing a TCP handshake, completing a TLS handshake, exchanging an HTTP request and response, and rendering the page">
+      <circle cx="40" cy="120" r="18" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="40" y="124" text-anchor="middle" font-size="8" fill="#5b9df9">BROWSER</text>
+
+      <circle cx="580" cy="120" r="18" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="580" y="124" text-anchor="middle" font-size="8" fill="#4fd1c5">SERVER</text>
+
+      <line x1="58" y1="120" x2="562" y2="120" stroke="#3a4a6b" stroke-width="1.3"/>
+
+      <circle r="4.5" fill="#f2a93b">
+        <animateMotion dur="20s" repeatCount="indefinite" path="M40,120 L580,120"/>
+      </circle>
+
+      <text x="320" y="150" text-anchor="middle" font-size="10.5" fill="#f2a93b">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.15;0.17;1" dur="20s" repeatCount="indefinite"/>
+        1. DNS resolution
+      </text>
+      <text x="320" y="165" text-anchor="middle" font-size="9" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.15;0.17;1" dur="20s" repeatCount="indefinite"/>
+        the hostname becomes an IP address
+      </text>
+
+      <text x="320" y="150" text-anchor="middle" font-size="10.5" fill="#5b9df9">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.22;0.35;0.37;1" dur="20s" repeatCount="indefinite"/>
+        2. TCP three-way handshake
+      </text>
+      <text x="320" y="165" text-anchor="middle" font-size="9" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.22;0.35;0.37;1" dur="20s" repeatCount="indefinite"/>
+        SYN, SYN-ACK, ACK: a connection is open
+      </text>
+
+      <text x="320" y="150" text-anchor="middle" font-size="10.5" fill="#b18cf0">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.42;0.55;0.57;1" dur="20s" repeatCount="indefinite"/>
+        3. TLS handshake
+      </text>
+      <text x="320" y="165" text-anchor="middle" font-size="9" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.42;0.55;0.57;1" dur="20s" repeatCount="indefinite"/>
+        certificate checked, session keys agreed on
+      </text>
+
+      <text x="320" y="150" text-anchor="middle" font-size="10.5" fill="#4fd1c5">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.62;0.75;0.77;1" dur="20s" repeatCount="indefinite"/>
+        4. HTTP request and response
+      </text>
+      <text x="320" y="165" text-anchor="middle" font-size="9" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.62;0.75;0.77;1" dur="20s" repeatCount="indefinite"/>
+        encrypted, over the now-open connection
+      </text>
+
+      <text x="320" y="150" text-anchor="middle" font-size="10.5" fill="#e7ecf3">
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.82;0.97;1" dur="20s" repeatCount="indefinite"/>
+        5. Parse, fetch, render
+      </text>
+      <text x="320" y="165" text-anchor="middle" font-size="9" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.82;0.97;1" dur="20s" repeatCount="indefinite"/>
+        the page you actually see finally appears
+      </text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate, animateMotion').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Five phases, five different topics on this site, all happening for a single page load, and most real pages repeat the DNS-to-render sequence dozens of times over for every additional resource they load.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <span class="callout-label">A GOOD WAY TO CHECK YOUR OWN UNDERSTANDING</span>
+    <p>Try narrating this whole sequence out loud for a real HTTPS page load, naming which specific mechanism handles each step, DNS, TCP, TLS, HTTP, without looking anything up. Any step that feels shaky is exactly the topic worth re-reading. The TLS handshake step is covered in full in the next module; it's worth coming back to this page once you've read it.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="http-https-versions.html">
+    <span class="nav-label">← PREVIOUS</span>
+    HTTP/HTTPS: 1.1 vs 2 vs 3
+  </a>
+  <a href="symmetric-vs-asymmetric.html">
+    <span class="nav-label">NEXT →</span>
+    Symmetric vs Asymmetric Encryption
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

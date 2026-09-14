@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IKEv1 vs IKEv2 · netskillup</title>
+<meta name="description" content="How two IPsec peers actually agree on and exchange keys before any protected traffic can flow, and what IKEv2 simplified compared to IKEv1.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--sec);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
+    <h1>IKEv1 vs IKEv2</h1>
+    <p class="topic-dek">IKE (Internet Key Exchange) is how two IPsec peers actually agree on and exchange keys before AH or ESP can protect a single packet, and IKEv2 does it in noticeably fewer messages.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>Two phases, in both versions</h2>
+  <p><a href="ipsec-fundamentals.html">AH and ESP</a> both need shared keys to work with, and IKE is the negotiation that produces them, in two phases:</p>
+  <ul>
+    <li><strong>Phase 1:</strong> establish a protected channel between the two peers, called the IKE SA (Security Association), that the rest of the negotiation can safely happen over.</li>
+    <li><strong>Phase 2:</strong> use that protected channel to negotiate the actual keys AH/ESP will use to protect real traffic.</li>
+  </ul>
+
+  <h2>IKEv1: main mode or aggressive mode</h2>
+  <p>IKEv1's Phase 1 comes in two variants. <strong>Main mode</strong> takes six messages and never exposes either peer's identity in cleartext along the way. <strong>Aggressive mode</strong> collapses that down to three messages, faster, but at the cost of exposing identity information openly, making it the less secure option.</p>
+
+  <h2>IKEv2: simplified, and more capable</h2>
+  <p>IKEv2 replaced that split entirely with one fixed exchange: four messages total for the initial setup, no separate main/aggressive choice to make. It also added several things IKEv1 never had: built-in NAT traversal detection, built-in reliability with sequence numbers and retransmission (IKEv1 had no such mechanism of its own), and MOBIKE, which lets a VPN session survive a device switching networks, like moving from WiFi to cellular, without tearing the tunnel down.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram comparing IKEv1 main mode, which takes six alternating messages between initiator and responder, with IKEv2, which accomplishes the same initial negotiation in four">
+      <text x="150" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">IKEV1 MAIN MODE: 6 MESSAGES</text>
+      <text x="490" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">IKEV2: 4 MESSAGES</text>
+
+      <circle cx="60" cy="100" r="20" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="60" y="104" text-anchor="middle" font-size="8" fill="#5b9df9">INIT</text>
+      <circle cx="260" cy="100" r="20" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="260" y="104" text-anchor="middle" font-size="8" fill="#4fd1c5">RESP</text>
+
+      <g font-size="9.5" font-family="monospace">
+        <line x1="85" y1="40" x2="235" y2="40" stroke="#5b9df9" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0s" fill="freeze"/></line>
+        <text x="70" y="37" fill="#5b9df9"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0s" fill="freeze"/>1 →</text>
+        <line x1="235" y1="60" x2="85" y2="60" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.2s" fill="freeze"/></line>
+        <text x="70" y="57" fill="#4fd1c5"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.2s" fill="freeze"/>2 ←</text>
+        <line x1="85" y1="80" x2="235" y2="80" stroke="#5b9df9" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.4s" fill="freeze"/></line>
+        <text x="70" y="77" fill="#5b9df9"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.4s" fill="freeze"/>3 →</text>
+        <line x1="235" y1="100" x2="85" y2="100" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.6s" fill="freeze"/></line>
+        <text x="70" y="97" fill="#4fd1c5"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.6s" fill="freeze"/>4 ←</text>
+        <line x1="85" y1="120" x2="235" y2="120" stroke="#5b9df9" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.8s" fill="freeze"/></line>
+        <text x="70" y="117" fill="#5b9df9"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.8s" fill="freeze"/>5 →</text>
+        <line x1="235" y1="140" x2="85" y2="140" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="1s" fill="freeze"/></line>
+        <text x="70" y="137" fill="#4fd1c5"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="1s" fill="freeze"/>6 ←</text>
+      </g>
+      <text x="150" y="165" text-anchor="middle" font-size="9" fill="#5b6a86">3 round trips before real key material is ready</text>
+
+      <circle cx="390" cy="100" r="20" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="390" y="104" text-anchor="middle" font-size="8" fill="#5b9df9">INIT</text>
+      <circle cx="590" cy="100" r="20" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="590" y="104" text-anchor="middle" font-size="8" fill="#4fd1c5">RESP</text>
+
+      <g font-size="9.5" font-family="monospace">
+        <line x1="415" y1="60" x2="565" y2="60" stroke="#5b9df9" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0s" fill="freeze"/></line>
+        <text x="400" y="57" fill="#5b9df9"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0s" fill="freeze"/>1 →</text>
+        <line x1="565" y1="80" x2="415" y2="80" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.2s" fill="freeze"/></line>
+        <text x="400" y="77" fill="#4fd1c5"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.2s" fill="freeze"/>2 ←</text>
+        <line x1="415" y1="100" x2="565" y2="100" stroke="#5b9df9" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.4s" fill="freeze"/></line>
+        <text x="400" y="97" fill="#5b9df9"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.4s" fill="freeze"/>3 →</text>
+        <line x1="565" y1="120" x2="415" y2="120" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.6s" fill="freeze"/></line>
+        <text x="400" y="117" fill="#4fd1c5"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.6s" fill="freeze"/>4 ←</text>
+      </g>
+      <text x="490" y="165" text-anchor="middle" font-size="9" fill="#5b6a86">2 round trips, one fixed exchange, no mode to choose</text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate').forEach(function (a) {
+            a.setAttribute('dur', '0.01s');
+            a.setAttribute('begin', '0s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Both are negotiating the same thing. IKEv2 just does it in two fewer messages, with no separate faster-but-less-secure mode to accidentally pick.</figcaption>
+  </figure>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th></th><th>IKEv1</th><th>IKEv2</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Initial exchange</td><td>6 messages (main) or 3 (aggressive)</td><td>4 messages, always</td></tr>
+      <tr><td>NAT traversal</td><td>Added later, inconsistently</td><td>Built in</td></tr>
+      <tr><td>Reliability (retransmission)</td><td>Not built in</td><td>Built in</td></tr>
+      <tr><td>Mobility (MOBIKE)</td><td>No</td><td>Yes</td></tr>
+      <tr><td>Standard variations</td><td>Many optional, vendor-specific extensions</td><td>Simpler, more consistent across vendors</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="callout-label">WHY MOST NEW DEPLOYMENTS DEFAULT TO IKEV2</span>
+    <p>Fewer messages, no risky aggressive-mode shortcut, built-in NAT traversal, and mobility support add up to a simpler, more reliable protocol with fewer ways to misconfigure it. IKEv1 still shows up in older or legacy equipment, but IKEv2 is the default choice for anything new.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="ipsec-fundamentals.html">
+    <span class="nav-label">← PREVIOUS</span>
+    IPsec Fundamentals (AH vs ESP)
+  </a>
+  <a href="vpn-types.html">
+    <span class="nav-label">NEXT →</span>
+    VPN Types
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

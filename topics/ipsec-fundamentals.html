@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPsec Fundamentals (AH vs ESP) · netskillup</title>
+<meta name="description" content="How IPsec authenticates and encrypts traffic at the IP layer itself: the difference between AH and ESP, and transport mode versus tunnel mode.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--sec);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
+    <h1>IPsec Fundamentals (AH vs ESP)</h1>
+    <p class="topic-dek">IPsec (IP Security) protects traffic at the network layer itself, transparent to everything running above it, using two very differently capable protocols.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>Two protocols, two different jobs</h2>
+  <p>Think of a shipping container. A tamper-evident seal on the outside proves nobody opened it in transit and confirms who sent it, but anyone can still see straight through the container's mesh sides at what's inside if they look. A fully sealed, opaque, locked container does both: nobody can see the contents without the key, and it can carry that same tamper-proof seal too. IPsec's two protocols map directly onto that difference.</p>
+  <ul>
+    <li><strong>AH (Authentication Header):</strong> authenticates the packet and checks its integrity, including parts of the IP header itself, but doesn't encrypt anything. The contents stay fully visible to anyone watching.</li>
+    <li><strong>ESP (Encapsulating Security Payload):</strong> encrypts the payload, and typically authenticates it too. Contents are hidden, not just verified.</li>
+  </ul>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th></th><th>AH</th><th>ESP</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Confidentiality (encryption)</td><td>No</td><td>Yes</td></tr>
+      <tr><td>Integrity / authentication</td><td>Yes</td><td>Yes, typically</td></tr>
+      <tr><td>Protects the outer IP header</td><td>Yes, its immutable fields</td><td>No</td></tr>
+      <tr><td>Works through NAT</td><td>No, without extra help</td><td>Yes, with NAT-T (NAT Traversal)</td></tr>
+      <tr><td>IP protocol number</td><td>51</td><td>50</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Transport mode vs tunnel mode</h2>
+  <p><strong>Transport mode</strong> protects just the original payload, leaving the original IP header alone; it's a host-to-host arrangement. <strong>Tunnel mode</strong> wraps the <em>entire</em> original packet, header and all, inside a brand new outer IP header, which is what makes site-to-site VPNs possible: the two gateways' IP addresses are all that's visible from the outside, and every internal host behind either gateway is completely unaware the tunnel even exists.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of an ESP packet in tunnel mode: a new outer IP header, an ESP header, the entire original IP header and payload now encrypted inside, an ESP trailer, and an optional ESP authentication field">
+      <g font-family="monospace" font-size="9.5" fill="#e7ecf3">
+        <rect x="20" y="20" width="600" height="30" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+        <text x="320" y="40" text-anchor="middle" fill="#4fd1c5">New IP Header (tunnel endpoints)</text>
+
+        <rect x="20" y="54" width="600" height="30" fill="none" stroke="#f2a93b" stroke-width="1.6"/>
+        <text x="320" y="74" text-anchor="middle" fill="#f2a93b">ESP Header</text>
+
+        <rect x="20" y="88" width="600" height="30" fill="none" stroke="#8d9bb3" stroke-width="1.3" stroke-dasharray="5 4"/>
+        <text x="320" y="108" text-anchor="middle">Original IP Header</text>
+
+        <rect x="20" y="122" width="600" height="50" fill="none" stroke="#b18cf0" stroke-width="1.6" stroke-dasharray="5 4"/>
+        <text x="320" y="151" text-anchor="middle" fill="#b18cf0">Original Payload</text>
+
+        <rect x="20" y="176" width="600" height="30" fill="none" stroke="#f2a93b" stroke-width="1.6"/>
+        <text x="320" y="196" text-anchor="middle" fill="#f2a93b">ESP Trailer</text>
+
+        <rect x="20" y="210" width="600" height="30" fill="none" stroke="#8d9bb3" stroke-width="1.3" stroke-dasharray="5 4"/>
+        <text x="320" y="230" text-anchor="middle">ESP Authentication (optional)</text>
+      </g>
+    </svg>
+    <figcaption>Everything from the original IP header through the ESP trailer is encrypted; only the new outer IP header stays in plaintext, since routers along the path still need to read it to forward the packet.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <span class="callout-label">WHY ESP DOMINATES IN PRACTICE</span>
+    <p>AH authenticates fields in the IP header that NAT (Network Address Translation) rewrites in transit, which breaks AH's integrity check the moment a NAT device touches the packet. Combined with offering no confidentiality at all, that's why almost every real-world IPsec deployment today uses ESP, either alone or with its own authentication enabled, and AH is mostly a historical footnote.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="tls-handshake.html">
+    <span class="nav-label">← PREVIOUS</span>
+    TLS/SSL Handshake (1.2 vs 1.3)
+  </a>
+  <a href="ikev1-vs-ikev2.html">
+    <span class="nav-label">NEXT →</span>
+    IKEv1 vs IKEv2
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>
