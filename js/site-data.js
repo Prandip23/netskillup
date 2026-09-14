@@ -45,6 +45,7 @@ const SITE_DATA = [
       { title: "IPv4 Addressing, CIDR & VLSM", slug: "ipv4-subnetting-cidr-vlsm", status: "published" },
       { title: "IPv4 Header Structure", slug: "ipv4-header", status: "published" },
       { title: "IPv6 Addressing & Header Basics", slug: "ipv6-basics", status: "published" },
+      { title: "IPv4 Fragmentation", slug: "ipv4-fragmentation", status: "published" },
       { title: "ICMP — Ping & Traceroute Mechanics", slug: "icmp", status: "published" },
       { title: "Routing Tables & Longest Prefix Match", slug: "routing-tables-lpm", status: "published" },
       { title: "Administrative Distance & Metrics", slug: "admin-distance-metrics", status: "published" },
