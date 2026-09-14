@@ -68,7 +68,7 @@
   <h2>Where it falls apart</h2>
   <p>Static routes don't adapt. If the configured next-hop goes down, the route stays in the table (unless the router also loses reachability to the next-hop itself) and traffic keeps getting sent into a dead end until a human notices and fixes it. And every network has to be entered by hand, on every router that needs to reach it. A topology with dozens of routers becomes an enormous, error-prone amount of manual configuration. That's exactly the problem the dynamic routing protocols later in this module exist to solve.</p>
 
-  <h2>A worked example: a floating static route as a backup ISP link</h2>
+  <h2>Working example: a floating static route as a backup ISP link</h2>
   <p>The floating static route from the previous topic, worked through concretely. R1 has two paths out to the internet: a primary link through ISP-A, and a backup link through ISP-B that should only ever carry traffic if the primary is actually down.</p>
   <p>Two static default routes point at the same destination, <code>0.0.0.0/0</code>, but with different administrative distances:</p>
   <ul>
