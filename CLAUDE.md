@@ -106,8 +106,8 @@ handling in the HTML parser. The pattern is valid and already shipping in
 
 - **Module 01: Fundamentals** (5/5 topics): published and upgraded to the
   current voice/component/diagram standard above.
-- **Module 02: Layer 2 (Data Link)** and **Module 03: Layer 3 (Network)**:
-  written to the same standard (see `js/site-data.js` for the current
-  per-topic `status`).
-- **Module 04 (Transport), 05 (App/Naming), 06 (Security)**: still
-  `"planned"`, not started. When picking these up, follow this same guide.
+- **Module 02: Layer 2 (Data Link)**, **Module 03: Layer 3 (Network)**, and
+  **Module 04: Layer 4 (Transport)**: written to the same standard (see
+  `js/site-data.js` for the current per-topic `status`).
+- **Module 05 (App/Naming), 06 (Security)**: still `"planned"`, not started.
+  When picking these up, follow this same guide.
