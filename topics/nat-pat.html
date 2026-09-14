@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NAT & PAT — netskillup</title>
+<meta name="description" content="How Network Address Translation lets a whole private network share one public IP, and how PAT uses port numbers to keep every device's traffic straight.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup <small>/ on-prem</small>
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--l3);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3 — Network</a>
+    <h1>NAT & PAT</h1>
+    <p class="topic-dek">Hundreds of private devices, one public IP address, and somehow the replies still find their way back to the right device. This is how.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>The problem: too many devices, too few public addresses</h2>
+  <p>Private IPv4 ranges (like <code>192.168.0.0/16</code> or <code>10.0.0.0/8</code>) can be reused by literally every home and office network on earth, because they're never routed on the public internet. But a device using one of those addresses can't be reached from the internet directly — something has to translate between the private address inside the network and a real, routable public address at the edge. That something is <strong>NAT</strong> (Network Address Translation).</p>
+  <p>It's exactly like an office building with one public street address, where every employee has their own internal extension. Mail addressed to the building's street address still needs a mailroom to figure out which specific desk it's actually for.</p>
+
+  <h2>Static NAT, dynamic NAT, and PAT</h2>
+  <ul>
+    <li><strong>Static NAT:</strong> one private address always maps to the same one public address — a fixed, permanent mapping, typically for a server that needs to be reachable at a consistent public IP.</li>
+    <li><strong>Dynamic NAT:</strong> private addresses are mapped to public addresses from a shared pool, on a first-come basis — still one-to-one at any given moment, but not a fixed pairing.</li>
+    <li><strong>PAT</strong> (Port Address Translation, also called NAT overload): many private addresses share a <em>single</em> public address, distinguished from each other by port number. This is what almost every home and small-office router actually does.</li>
+  </ul>
+
+  <h2>How PAT keeps replies straight</h2>
+  <p>Every outbound connection gets a unique combination of (public IP, public port) assigned to it, and the router keeps a translation table mapping that pair back to the original (private IP, private port) it came from. When a reply comes back addressed to that public IP and port, the router looks up the table and rewrites it back to the correct private device, exactly like a receptionist routing an incoming call to the right desk extension based on which line it came in on.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of two private hosts sharing one public IP through PAT, with a translation table mapping each private address and port to a unique public port">
+      <circle cx="60" cy="50" r="18" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="60" y="54" text-anchor="middle" font-size="9" fill="#5b9df9">A</text>
+      <text x="60" y="80" text-anchor="middle" font-size="9" fill="#5b6a86">192.168.1.10:5001</text>
+
+      <circle cx="60" cy="170" r="18" fill="none" stroke="#b18cf0" stroke-width="1.6"/>
+      <text x="60" y="174" text-anchor="middle" font-size="9" fill="#b18cf0">B</text>
+      <text x="60" y="200" text-anchor="middle" font-size="9" fill="#5b6a86">192.168.1.11:5001</text>
+
+      <rect x="230" y="70" width="180" height="80" rx="4" fill="none" stroke="#f2a93b" stroke-width="1.8"/>
+      <text x="320" y="55" text-anchor="middle" font-size="10.5" fill="#f2a93b">NAT / PAT table</text>
+      <text x="320" y="98" text-anchor="middle" font-size="9" font-family="monospace" fill="#e7ecf3">192.168.1.10:5001 → :40001</text>
+      <text x="320" y="118" text-anchor="middle" font-size="9" font-family="monospace" fill="#e7ecf3">192.168.1.11:5001 → :40002</text>
+
+      <circle cx="580" cy="110" r="20" fill="none" stroke="#4fd1c5" stroke-width="1.8"/>
+      <text x="580" y="114" text-anchor="middle" font-size="9" fill="#4fd1c5">203.0.113.9</text>
+
+      <line x1="78" y1="52" x2="228" y2="90" stroke="#5b9df9" stroke-width="1.6">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="2.6s" repeatCount="indefinite"/>
+      </line>
+      <line x1="78" y1="168" x2="228" y2="128" stroke="#b18cf0" stroke-width="1.6">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="2.6s" repeatCount="indefinite" begin="-1.3s"/>
+      </line>
+      <line x1="410" y1="110" x2="558" y2="110" stroke="#f2a93b" stroke-width="1.8">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="2.6s" repeatCount="indefinite" begin="-0.6s"/>
+      </line>
+      <text x="480" y="140" text-anchor="middle" font-size="9" fill="#5b6a86">one public IP, two distinct source ports</text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Both A and B use source port 5001 internally. PAT rewrites each to a different public port so replies for each come back to the right device.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <span class="callout-label">THE TRADE-OFF NAT MAKES</span>
+    <p>NAT solved the IPv4 address shortage well enough to buy the internet another two decades, but it breaks true end-to-end connectivity: an outside device can't initiate a connection to a device that's only reachable through PAT, and some protocols need extra workarounds (like STUN/TURN for real-time voice/video) specifically because of it. IPv6's address space is large enough that most devices don't need NAT at all — every device just gets its own real, globally routable address.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="bgp-basics.html">
+    <span class="nav-label">← PREVIOUS</span>
+    BGP Basics
+  </a>
+  <a href="inter-vlan-routing.html">
+    <span class="nav-label">NEXT →</span>
+    Inter-VLAN Routing
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

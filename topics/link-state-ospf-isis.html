@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Link-State Routing (OSPF, IS-IS) — netskillup</title>
+<meta name="description" content="How link-state protocols give every router the full topology map and let each one compute its own shortest paths, and how OSPF and IS-IS split that map into areas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup <small>/ on-prem</small>
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--l3);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3 — Network</a>
+    <h1>Link-State Routing (OSPF, IS-IS)</h1>
+    <p class="topic-dek">Instead of trusting a neighbor's secondhand distance, every router gets the same full map and draws its own route across it.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>Everyone gets the same map</h2>
+  <p>The previous topic's distance-vector routers only know direction and distance, secondhand, from their neighbors. A <strong>link-state</strong> router does something fundamentally different: it floods a small description of its own directly-connected links (an LSA, Link-State Advertisement) to the entire routing domain, and receives everyone else's in return. Every router ends up holding an identical, complete map of the topology, and independently runs <strong>Dijkstra's shortest path algorithm</strong> on that map to compute its own best route to everywhere.</p>
+  <p>Nobody is trusting a rumor anymore — every router has the actual map and draws its own path, the way two people using the same detailed city map might still choose different routes depending on where they're each starting from.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of link-state advertisements flooding from one router to all others, so every router ends up with the same complete topology map">
+      <circle cx="320" cy="90" r="20" fill="none" stroke="#4fd1c5" stroke-width="1.8"/>
+      <text x="320" y="94" text-anchor="middle" font-size="9" fill="#4fd1c5">R1</text>
+
+      <circle cx="120" cy="30" r="18" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <text x="120" y="34" text-anchor="middle" font-size="9" fill="#8d9bb3">R2</text>
+      <circle cx="520" cy="30" r="18" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <text x="520" y="34" text-anchor="middle" font-size="9" fill="#8d9bb3">R3</text>
+      <circle cx="120" cy="150" r="18" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <text x="120" y="154" text-anchor="middle" font-size="9" fill="#8d9bb3">R4</text>
+      <circle cx="520" cy="150" r="18" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <text x="520" y="154" text-anchor="middle" font-size="9" fill="#8d9bb3">R5</text>
+
+      <g stroke="#f2a93b" stroke-width="1.6">
+        <line x1="304" y1="76" x2="136" y2="42"><animate attributeName="opacity" values="0.2;1;0.2" dur="2.2s" repeatCount="indefinite"/></line>
+        <line x1="338" y1="76" x2="504" y2="42"><animate attributeName="opacity" values="0.2;1;0.2" dur="2.2s" repeatCount="indefinite" begin="-0.5s"/></line>
+        <line x1="304" y1="104" x2="136" y2="138"><animate attributeName="opacity" values="0.2;1;0.2" dur="2.2s" repeatCount="indefinite" begin="-1s"/></line>
+        <line x1="338" y1="104" x2="504" y2="138"><animate attributeName="opacity" values="0.2;1;0.2" dur="2.2s" repeatCount="indefinite" begin="-1.5s"/></line>
+      </g>
+      <text x="320" y="180" text-anchor="middle" font-size="10.5" fill="#5b6a86">R1's LSA reaches every other router — and every router floods its own the same way</text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Link-state flooding: everyone eventually holds the same map of the whole topology, not just their own neighbors' opinions.</figcaption>
+  </figure>
+
+  <h2>OSPF and areas</h2>
+  <p>Flooding the entire topology to every router works fine on a small network, but scales badly for the same reason a single giant broadcast domain does: too much update traffic, too much CPU spent recomputing paths every time anything, anywhere, changes. OSPF's fix is <strong>areas</strong> — the topology gets split into Area 0 (the mandatory "backbone") plus additional numbered areas connected to it. Full LSA flooding only happens <em>within</em> an area; between areas, routers exchange summarized reachability information instead of the raw topology.</p>
+  <p>OSPF's cost metric is based on interface bandwidth (lower cost for faster links), and on shared broadcast segments a <strong>DR/BDR</strong> (Designated Router / Backup Designated Router) election reduces how many routers need to exchange LSAs directly with each other.</p>
+
+  <h2>IS-IS: the same idea, a different lineage</h2>
+  <p>IS-IS (Intermediate System to Intermediate System) is conceptually very close to OSPF, link-state, Dijkstra, the works, but comes from the OSI protocol suite rather than the IP world, and organizes its hierarchy into <strong>Level 1</strong> and <strong>Level 2</strong> routers instead of numbered areas. It's less common in enterprise networks than OSPF, but it's the backbone protocol of choice inside many large service-provider networks.</p>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th></th><th>OSPF</th><th>IS-IS</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Hierarchy</td><td>Areas (Area 0 backbone)</td><td>Levels (L1 / L2)</td></tr>
+      <tr><td>Runs over</td><td>Directly over IP</td><td>Directly over the data link layer, not IP</td></tr>
+      <tr><td>Most common in</td><td>Enterprise networks</td><td>Large service-provider backbones</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="callout-label">A FAMILIAR REASON FOR THE HIERARCHY</span>
+    <p>OSPF splitting the topology into areas is the same underlying instinct as VLANs splitting a switch into smaller broadcast domains: contain how far a piece of "everyone needs to know this" information has to spread, so the network keeps scaling instead of drowning in its own updates.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="distance-vector-rip-eigrp.html">
+    <span class="nav-label">← PREVIOUS</span>
+    Distance-Vector Routing (RIP, EIGRP)
+  </a>
+  <a href="bgp-basics.html">
+    <span class="nav-label">NEXT →</span>
+    BGP Basics
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

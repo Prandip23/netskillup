@@ -24,7 +24,6 @@
 <div class="topic-header" style="--module-color: var(--fund);">
   <div class="wrap">
     <a class="breadcrumb" href="../index.html#modules">← Module 01 · Networking Fundamentals</a>
-    <span class="topic-eyebrow">FUND</span>
     <h1>Collision Domain vs Broadcast Domain</h1>
     <p class="topic-dek">Two different kinds of "who has to share this segment" — one about electrical contention, one about who hears a broadcast. Confusing them is one of the most common early mistakes.</p>
   </div>
@@ -63,9 +62,17 @@
       <circle cx="60" cy="140" r="12" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
       <circle cx="145" cy="150" r="12" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
       <circle cx="230" cy="140" r="12" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
-      <line x1="130" y1="79" x2="63" y2="128" stroke="#3a4a6b" stroke-width="1.5"/>
-      <line x1="145" y1="79" x2="145" y2="138" stroke="#3a4a6b" stroke-width="1.5"/>
-      <line x1="160" y1="79" x2="227" y2="128" stroke="#3a4a6b" stroke-width="1.5"/>
+      <g stroke="#f2a93b" stroke-width="1.6">
+        <line x1="130" y1="79" x2="63" y2="128">
+          <animate attributeName="opacity" values="0.25;1;0.25" dur="1.8s" repeatCount="indefinite"/>
+        </line>
+        <line x1="145" y1="79" x2="145" y2="138">
+          <animate attributeName="opacity" values="0.25;1;0.25" dur="1.8s" repeatCount="indefinite"/>
+        </line>
+        <line x1="160" y1="79" x2="227" y2="128">
+          <animate attributeName="opacity" values="0.25;1;0.25" dur="1.8s" repeatCount="indefinite"/>
+        </line>
+      </g>
 
       <!-- Right: switches + router, broadcast domains -->
       <text x="340" y="24" font-size="12" fill="#4fd1c5">SWITCHES + ROUTER — TWO BROADCAST DOMAINS</text>
@@ -91,6 +98,21 @@
       <line x1="555" y1="79" x2="558" y2="128" stroke="#3a4a6b" stroke-width="1.5"/>
       <line x1="405" y1="55" x2="560" y2="55" stroke="#3a4a6b" stroke-width="1.5" stroke-dasharray="2 3"/>
       <line x1="405" y1="79" x2="565" y2="185" stroke="#3a4a6b" stroke-width="1"/>
+
+      <!-- a broadcast starting at the left host floods within SW-A's domain only, and never reaches SW-B or crosses R1 -->
+      <path id="floodPath" d="M360,140 L390,79 L405,66 L420,79 L420,140" fill="none" stroke="none"/>
+      <circle r="4" fill="#4fd1c5">
+        <animateMotion dur="2.4s" repeatCount="indefinite" begin="0s"><mpath href="#floodPath"/></animateMotion>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.85;1" dur="2.4s" repeatCount="indefinite"/>
+      </circle>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate, animateMotion').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
     </svg>
     <figcaption>Left: every device shares one collision domain through the hub. Right: two switches each form their own broadcast domain — a broadcast from HOST behind SW-A never reaches SW-B unless R1 explicitly routes it (which routers don't do for broadcasts).</figcaption>
   </figure>

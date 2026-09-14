@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Routing Tables & Longest Prefix Match — netskillup</title>
+<meta name="description" content="What's actually stored in a routing table, and the rule a router always follows when more than one entry could match a destination: the most specific one wins.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup <small>/ on-prem</small>
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--l3);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3 — Network</a>
+    <h1>Routing Tables & Longest Prefix Match</h1>
+    <p class="topic-dek">A router's whole job comes down to one lookup, repeated for every packet: given this destination address, which entry in my table actually applies?</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>What's in a routing table entry</h2>
+  <p>Every entry describes: a destination network (as an address and prefix, like <code>10.0.2.0/24</code>), the <strong>next-hop</strong> address to forward toward, the outgoing interface, and a metric/administrative distance (covered in the next topic) used to break ties between competing sources of routes.</p>
+
+  <h2>When more than one entry matches</h2>
+  <p>Routing tables are built with prefixes of different lengths, and a single destination IP can legitimately match several entries at once — a broad <code>10.0.0.0/16</code> entry and a more specific <code>10.0.2.0/24</code> entry could both technically cover the same address. The router always picks the entry with the <strong>longest matching prefix</strong>, meaning the most specific one, regardless of which entry appears first in the table or which one has a "better" metric.</p>
+  <p>This is exactly how postal sorting works: a rule for "Springfield, Illinois" is more specific than a rule for "the state of Illinois," and a sorter routes mail using whichever rule matches most precisely, not whichever rule was written first.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of three overlapping routing table entries for the same destination address, with the most specific one highlighted as the winner">
+      <text x="20" y="24" font-size="11" fill="#8d9bb3">Destination to reach: 10.0.2.55</text>
+
+      <g font-family="monospace" font-size="10.5">
+        <rect x="20" y="40" width="280" height="34" fill="none" stroke="#3a4a6b" stroke-width="1.2" opacity="0.55"/>
+        <text x="35" y="62" fill="#5b6a86">0.0.0.0/0 → default route</text>
+
+        <rect x="20" y="82" width="280" height="34" fill="none" stroke="#3a4a6b" stroke-width="1.2" opacity="0.55"/>
+        <text x="35" y="104" fill="#5b6a86">10.0.0.0/16 → also matches, less specific</text>
+
+        <rect x="20" y="124" width="330" height="34" fill="none" stroke="#4fd1c5" stroke-width="2"/>
+        <text x="35" y="146" fill="#4fd1c5">10.0.2.0/24 → longest prefix match, wins</text>
+      </g>
+
+      <line x1="500" y1="141" x2="360" y2="141" stroke="#4fd1c5" stroke-width="1.8" marker-end="url(#arrLpm)"/>
+      <defs>
+        <marker id="arrLpm" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#4fd1c5"/>
+        </marker>
+      </defs>
+      <text x="565" y="146" text-anchor="middle" font-size="10" fill="#4fd1c5">used</text>
+
+      <text x="320" y="190" text-anchor="middle" font-size="10" fill="#5b6a86">/24 beats /16, and /16 beats the /0 default — the most specific match always wins, no exceptions.</text>
+    </svg>
+    <figcaption>Three entries all technically cover 10.0.2.55. Only the most specific one is ever actually used.</figcaption>
+  </figure>
+
+  <h2>The default route</h2>
+  <p>A <code>0.0.0.0/0</code> entry, the <strong>default route</strong> (sometimes called the "route of last resort"), matches literally every address with the least specificity possible — a prefix length of zero. It only gets used when nothing more specific matches anything at all, which is exactly what makes it the right entry for "everywhere else on the internet I don't have an explicit route for."</p>
+
+  <div class="callout">
+    <span class="callout-label">METRIC AND AD ONLY MATTER AFTER THIS</span>
+    <p>Longest prefix match is evaluated first, before administrative distance or metric ever come into play. Those only break ties between multiple routes to the <em>exact same</em> prefix — they never override a more specific match. That distinction is the whole subject of the next topic.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="icmp.html">
+    <span class="nav-label">← PREVIOUS</span>
+    ICMP — Ping & Traceroute Mechanics
+  </a>
+  <a href="admin-distance-metrics.html">
+    <span class="nav-label">NEXT →</span>
+    Administrative Distance & Metrics
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

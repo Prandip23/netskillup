@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPv6 Addressing & Header Basics — netskillup</title>
+<meta name="description" content="Why IPv6 exists, how its 128-bit addresses are written and compressed, and how its simplified header and multicast-based design replace ARP and broadcast entirely.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup <small>/ on-prem</small>
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--l3);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3 — Network</a>
+    <h1>IPv6 Addressing & Header Basics</h1>
+    <p class="topic-dek">IPv4 has roughly 4 billion addresses, and the internet ran out of the easy ones years ago. IPv6 isn't a patch, it's a wholly bigger address space with a cleaner header to match.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>Why 128 bits instead of 32</h2>
+  <p>IPv4's 32 bits cap out at about 4.3 billion possible addresses, and between phones, laptops, IoT devices, and servers, that ran out long ago (NAT, the topic later in this module, is largely the industry's workaround for that shortage). IPv6 uses 128 bits: roughly 340 undecillion addresses, enough that every device anyone will ever build can have its own globally unique address with room to spare.</p>
+
+  <h2>How an IPv6 address is written</h2>
+  <p>An address is written as eight groups of four hex digits separated by colons, like <code>2001:0db8:0000:0000:0000:ff00:0042:8329</code>. Two shorthand rules make that readable:</p>
+  <ul>
+    <li>Leading zeros in each group can be dropped: <code>0db8</code> becomes <code>db8</code>.</li>
+    <li>One consecutive run of all-zero groups can be compressed to <code>::</code>, but only once per address (otherwise it would be ambiguous how many groups it stands for).</li>
+  </ul>
+  <p>Compressed, that same address becomes <code>2001:db8::ff00:42:8329</code>.</p>
+
+  <h2>No more broadcast — multicast does that job now</h2>
+  <p>IPv6 has no broadcast address at all. Anything that used to rely on a broadcast in IPv4 (including ARP) is handled by <strong>multicast</strong> instead, sent to a specific group of interested listeners rather than flooded to everyone. Address resolution — the IPv6 equivalent of ARP — is a multicast-based protocol called <strong>NDP</strong> (Neighbor Discovery Protocol).</p>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th></th><th>IPv4</th><th>IPv6</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Address length</td><td>32 bits</td><td>128 bits</td></tr>
+      <tr><td>Notation</td><td>Dotted decimal (192.168.1.1)</td><td>Hex, colon-separated, compressible (2001:db8::1)</td></tr>
+      <tr><td>Broadcast</td><td>Yes</td><td>None — replaced by multicast</td></tr>
+      <tr><td>Address resolution</td><td>ARP (broadcast)</td><td>NDP (multicast)</td></tr>
+      <tr><td>Header</td><td>Variable length, header checksum, supports fragmentation fields</td><td>Fixed 40 bytes, no checksum, simpler and faster to process per hop</td></tr>
+    </tbody>
+  </table>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram comparing the length and notation of an IPv4 address to an IPv6 address at the same scale">
+      <text x="20" y="24" font-size="11" fill="#5b9df9">IPv4 — 32 bits</text>
+      <rect x="20" y="34" width="150" height="26" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="95" y="52" text-anchor="middle" font-family="monospace" font-size="10" fill="#e7ecf3">192.168.1.1</text>
+
+      <text x="20" y="94" font-size="11" fill="#4fd1c5">IPv6 — 128 bits</text>
+      <rect x="20" y="104" width="600" height="26" fill="none" stroke="#4fd1c5" stroke-width="1.8"/>
+      <text x="320" y="122" text-anchor="middle" font-family="monospace" font-size="10" fill="#e7ecf3">2001:0db8:0000:0000:0000:ff00:0042:8329</text>
+    </svg>
+    <figcaption>Same visual scale, four times the bit width — that's the entire reason IPv6's address space is astronomically larger.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <span class="callout-label">ONE ADDRESS TYPE YOU'LL SEE ON EVERY DEVICE</span>
+    <p>Every IPv6-enabled interface automatically gets a <strong>link-local</strong> address starting with <code>fe80::</code>, whether or not it has any other address configured. It's only valid for communicating with devices on the same physical link, but protocols like NDP depend on it existing — you'll see it even on a device with no internet connectivity at all.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="ipv4-header.html">
+    <span class="nav-label">← PREVIOUS</span>
+    IPv4 Header Structure
+  </a>
+  <a href="icmp.html">
+    <span class="nav-label">NEXT →</span>
+    ICMP — Ping & Traceroute Mechanics
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

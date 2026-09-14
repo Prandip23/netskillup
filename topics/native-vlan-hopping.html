@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Native VLAN & VLAN Hopping — netskillup</title>
+<meta name="description" content="What the native VLAN is, why it travels untagged across a trunk, and how double-tagging abuses that to hop from one VLAN into another it was never allowed on.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup <small>/ on-prem</small>
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--l2);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 02 · Layer 2 — Data Link</a>
+    <h1>Native VLAN & VLAN Hopping</h1>
+    <p class="topic-dek">One VLAN on every trunk gets to skip its tag entirely. That convenience is also the exact crack an attacker can wedge a frame into.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>The native VLAN</h2>
+  <p>A trunk port tags every frame with its VLAN ID, with one exception: the <strong>native VLAN</strong>. Frames belonging to it cross the trunk completely untagged, the same way they would on a plain access port. This exists mostly for backward compatibility with older equipment that never understood 802.1Q tags at all.</p>
+  <p>By default, the native VLAN is VLAN 1 on every port, on every switch, out of the box — which means if nobody changes it, every trunk in a network is quietly agreeing to treat the same VLAN as the "untagged, trust it" one.</p>
+
+  <h2>Double tagging: how VLAN hopping actually works</h2>
+  <p>An attacker on an access port can't normally reach a different VLAN — their switch strips any tag they try to add and treats the frame as belonging to their own access VLAN. Double tagging abuses the native VLAN's blind spot instead of fighting that rule directly.</p>
+  <p>The attacker crafts a frame with <em>two</em> stacked 802.1Q tags: the outer tag set to the native VLAN, the inner tag set to the VLAN they actually want to reach.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of a double-tagged frame: the first switch strips the outer native VLAN tag and forwards the frame still carrying the inner tag, which the next switch treats as legitimate">
+      <text x="120" y="20" text-anchor="middle" font-size="11" fill="#8d9bb3">ATTACKER'S FRAME</text>
+      <g font-family="monospace" font-size="9.5">
+        <rect x="20" y="35" width="70" height="40" fill="none" stroke="#8d9bb3" stroke-width="1.2"/>
+        <text x="55" y="59" text-anchor="middle" fill="#cbd4e3">MACs</text>
+        <rect x="90" y="35" width="70" height="40" fill="none" stroke="#f2a93b" stroke-width="1.8"/>
+        <text x="125" y="53" text-anchor="middle" fill="#f2a93b">Outer tag</text>
+        <text x="125" y="65" text-anchor="middle" fill="#f2a93b">VLAN 1 (native)</text>
+        <rect x="160" y="35" width="70" height="40" fill="none" stroke="#b18cf0" stroke-width="1.8"/>
+        <text x="195" y="53" text-anchor="middle" fill="#b18cf0">Inner tag</text>
+        <text x="195" y="65" text-anchor="middle" fill="#b18cf0">VLAN 20 (target)</text>
+        <rect x="230" y="35" width="60" height="40" fill="none" stroke="#8d9bb3" stroke-width="1.2"/>
+        <text x="260" y="59" text-anchor="middle" fill="#cbd4e3">Payload</text>
+      </g>
+
+      <text x="180" y="105" text-anchor="middle" font-size="10.5" fill="#5b6a86">SW1 sees "native VLAN" on the outer tag → strips it, no re-tag needed → forwards</text>
+
+      <text x="450" y="20" text-anchor="middle" font-size="11" fill="#4fd1c5">WHAT SW2 RECEIVES</text>
+      <g font-family="monospace" font-size="9.5">
+        <rect x="380" y="35" width="70" height="40" fill="none" stroke="#8d9bb3" stroke-width="1.2"/>
+        <text x="415" y="59" text-anchor="middle" fill="#cbd4e3">MACs</text>
+        <rect x="450" y="35" width="70" height="40" fill="none" stroke="#b18cf0" stroke-width="1.8"/>
+        <text x="485" y="53" text-anchor="middle" fill="#b18cf0">Tag</text>
+        <text x="485" y="65" text-anchor="middle" fill="#b18cf0">VLAN 20</text>
+        <rect x="520" y="35" width="60" height="40" fill="none" stroke="#8d9bb3" stroke-width="1.2"/>
+        <text x="550" y="59" text-anchor="middle" fill="#cbd4e3">Payload</text>
+      </g>
+      <text x="450" y="105" text-anchor="middle" font-size="10.5" fill="#5b6a86">SW2 sees a normal, single-tagged VLAN 20 frame and delivers it as if it belonged there all along</text>
+
+      <line x1="290" y1="55" x2="370" y2="55" stroke="#3a4a6b" stroke-width="1.6" marker-end="url(#arrHop)"/>
+      <defs>
+        <marker id="arrHop" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#3a4a6b"/>
+        </marker>
+      </defs>
+
+      <text x="320" y="150" text-anchor="middle" font-size="12" fill="#f2a93b">One tag was stripped, one was trusted — the frame just hopped from VLAN 1 into VLAN 20.</text>
+      <text x="320" y="180" text-anchor="middle" font-size="10.5" fill="#5b6a86">This only works one direction, and only if the attacker's access VLAN happens to match the trunk's native VLAN.</text>
+    </svg>
+    <figcaption>Double tagging: the outer tag gets consumed by the first switch's native-VLAN handling, leaving the inner tag to be trusted by the next one.</figcaption>
+  </figure>
+
+  <p>The first switch, seeing the outer tag matches its native VLAN, strips it and forwards the frame as if it were a plain untagged native-VLAN frame — carrying the inner tag along for the ride. The next switch down the line unwraps that inner tag and treats it as a completely legitimate frame for the target VLAN. The attacker's traffic just crossed a VLAN boundary it was never granted access to.</p>
+
+  <div class="callout">
+    <span class="callout-label">HOW THIS IS ACTUALLY PREVENTED</span>
+    <p>Three habits close this off: set every trunk's native VLAN to something unused (never the default VLAN 1), explicitly tag native VLAN traffic instead of leaving it untagged, and disable auto-trunk negotiation (DTP) on ports that shouldn't become trunks in the first place. Any one of these breaks the attack; doing all three is standard hardening.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="vlans-trunking.html">
+    <span class="nav-label">← PREVIOUS</span>
+    VLANs & 802.1Q Trunking
+  </a>
+  <a href="stp-8021d.html">
+    <span class="nav-label">NEXT →</span>
+    Spanning Tree Protocol (802.1D)
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

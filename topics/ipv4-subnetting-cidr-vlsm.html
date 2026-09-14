@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPv4 Addressing, CIDR & VLSM — netskillup</title>
+<meta name="description" content="What a subnet mask actually does, how CIDR notation replaced rigid address classes, and how VLSM lets you size each subnet to what it actually needs instead of wasting addresses.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup <small>/ on-prem</small>
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--l3);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3 — Network</a>
+    <h1>IPv4 Addressing, CIDR & VLSM</h1>
+    <p class="topic-dek">An IP address is only half the story. The other half is the mask that decides where the network ends and the host begins.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>Network bits and host bits</h2>
+  <p>An IPv4 address is 32 bits, written as four decimal bytes like <code>192.168.10.37</code>. On its own, that number doesn't tell you anything about which network the device is on — you need a second number, the <strong>subnet mask</strong>, to split those 32 bits into a network portion and a host portion.</p>
+  <p>Think of a whole office building's street address as the network part, and each individual unit number as the host part. <code>192.168.10.0/24</code> means the first 24 bits are the "building," and the remaining 8 bits are free for up to 254 "units" inside it.</p>
+
+  <h2>CIDR replaced fixed classes</h2>
+  <p>IPv4 originally split addresses into fixed-size classes (A, B, C), each with a mask baked into the address range itself — inflexible, and wasteful for anyone who needed a network with, say, 40 hosts, but not 254. <strong>CIDR</strong> (Classless Inter-Domain Routing) replaced that with the <code>/prefix</code> notation you actually use today: the number after the slash is just how many bits are network bits, period, independent of any class.</p>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th>CIDR prefix</th><th>Subnet mask</th><th>Usable hosts</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>/24</td><td>255.255.255.0</td><td>254</td></tr>
+      <tr><td>/25</td><td>255.255.255.128</td><td>126</td></tr>
+      <tr><td>/27</td><td>255.255.255.224</td><td>30</td></tr>
+      <tr><td>/28</td><td>255.255.255.240</td><td>14</td></tr>
+      <tr><td>/30</td><td>255.255.255.252</td><td>2 (point-to-point link)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>VLSM: sizing each subnet to what it actually needs</h2>
+  <p><strong>VLSM</strong> (Variable Length Subnet Masking) is simply subnetting a subnet, allowing different-sized masks across the same address block instead of forcing every subnet to be identical. Handing a 200-person office and a 2-device point-to-point router link the same fixed /26 block wastes dozens of addresses on the router link. VLSM lets the office keep a large block while the router link gets carved down to a /30.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of a /24 network split via VLSM into a /26 for a large office, a /27 for a smaller office, and a /30 for a point-to-point router link">
+      <rect x="20" y="20" width="600" height="40" rx="4" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <text x="320" y="45" text-anchor="middle" font-size="11" fill="#cbd4e3">10.0.1.0 / 24 — 254 addresses to divide up</text>
+
+      <line x1="120" y1="60" x2="120" y2="90" stroke="#3a4a6b" stroke-width="1.2"/>
+      <line x1="320" y1="60" x2="320" y2="90" stroke="#3a4a6b" stroke-width="1.2"/>
+      <line x1="500" y1="60" x2="500" y2="90" stroke="#3a4a6b" stroke-width="1.2"/>
+
+      <rect x="20" y="90" width="200" height="50" rx="4" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="120" y="112" text-anchor="middle" font-size="10.5" fill="#4fd1c5">10.0.1.0/26</text>
+      <text x="120" y="128" text-anchor="middle" font-size="9.5" fill="#5b6a86">62 hosts — main office</text>
+
+      <rect x="230" y="90" width="180" height="50" rx="4" fill="none" stroke="#f2a93b" stroke-width="1.6"/>
+      <text x="320" y="112" text-anchor="middle" font-size="10.5" fill="#f2a93b">10.0.1.64/27</text>
+      <text x="320" y="128" text-anchor="middle" font-size="9.5" fill="#5b6a86">30 hosts — branch office</text>
+
+      <rect x="420" y="90" width="120" height="50" rx="4" fill="none" stroke="#b18cf0" stroke-width="1.6"/>
+      <text x="480" y="112" text-anchor="middle" font-size="10.5" fill="#b18cf0">10.0.1.96/30</text>
+      <text x="480" y="128" text-anchor="middle" font-size="9.5" fill="#5b6a86">2 hosts — WAN link</text>
+
+      <text x="320" y="180" text-anchor="middle" font-size="10" fill="#5b6a86">The rest of the /24 (10.0.1.100 onward) stays free for the next subnet that needs carving out</text>
+    </svg>
+    <figcaption>Same original block, three differently sized subnets — each one no bigger than it needs to be.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <span class="callout-label">THE RULE THAT TRIPS PEOPLE UP</span>
+    <p>Every subnet loses two usable addresses: the first (the network address itself) and the last (the broadcast address). A /30 has 4 total addresses but only 2 usable — which is exactly why point-to-point router links use /30 (or an even tighter /31, a special case designed for exactly this) instead of anything bigger.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="port-security.html">
+    <span class="nav-label">← PREVIOUS</span>
+    Switch Port Security
+  </a>
+  <a href="ipv4-header.html">
+    <span class="nav-label">NEXT →</span>
+    IPv4 Header Structure
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

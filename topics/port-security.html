@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Switch Port Security — netskillup</title>
+<meta name="description" content="How limiting the number of MAC addresses allowed on a switchport stops rogue devices and MAC flooding attacks, and what protect, restrict, and shutdown actually do.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup <small>/ on-prem</small>
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--l2);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 02 · Layer 2 — Data Link</a>
+    <h1>Switch Port Security</h1>
+    <p class="topic-dek">A switchport will happily learn as many MAC addresses as devices plug into it. Port security is what puts a limit on that.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>What it actually restricts</h2>
+  <p>Recall from <a href="ethernet-frame-mac.html">Ethernet Frame & MAC Addressing</a> that a switch learns a MAC address for whatever port it sees that address arrive on. Nothing stops someone from plugging an unauthorized laptop into an open conference-room jack, or worse, plugging in a cheap unmanaged hub to fan one jack out to several devices. Port security caps how many MAC addresses a single port is allowed to learn, like a keycard reader that locks the door the moment a sixth unrecognized badge tries to swipe through, when only five badges were ever supposed to exist for that door.</p>
+
+  <h2>How addresses get allowed onto a port</h2>
+  <ul>
+    <li><strong>Static:</strong> the administrator manually types in the exact MAC address(es) permitted on the port.</li>
+    <li><strong>Dynamic:</strong> the switch learns whatever MAC address(es) show up first, up to the configured maximum — but forgets them on reboot.</li>
+    <li><strong>Sticky:</strong> the switch learns them dynamically, the same as above, but then saves them into the running configuration so they survive a reboot without retyping anything.</li>
+  </ul>
+
+  <h2>What happens on a violation</h2>
+  <p>If a port is already at its MAC limit and a new, unrecognized address shows up, one of three violation modes decides what happens next:</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of a switch port at its MAC address limit, with a second device triggering a violation">
+      <rect x="230" y="70" width="80" height="50" rx="4" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
+      <text x="270" y="99" text-anchor="middle" font-size="10" fill="#8d9bb3">Port, max: 1</text>
+
+      <circle cx="80" cy="95" r="18" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="80" y="99" text-anchor="middle" font-size="9" fill="#4fd1c5">OK</text>
+      <line x1="98" y1="95" x2="228" y2="95" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="80" y="130" text-anchor="middle" font-size="9.5" fill="#5b6a86">learned MAC</text>
+
+      <circle cx="560" cy="95" r="18" fill="none" stroke="#e05a5a" stroke-width="1.6"/>
+      <text x="560" y="99" text-anchor="middle" font-size="9">
+        <animate attributeName="opacity" values="0.4;1;0.4" dur="1.4s" repeatCount="indefinite"/>
+      </text>
+      <text x="560" y="99" text-anchor="middle" font-size="9" fill="#e05a5a">NEW</text>
+      <line x1="542" y1="95" x2="312" y2="95" stroke="#e05a5a" stroke-width="1.8" stroke-dasharray="4 4">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="1.4s" repeatCount="indefinite"/>
+      </line>
+      <text x="560" y="130" text-anchor="middle" font-size="9.5" fill="#e05a5a">unrecognized MAC — violation</text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>The port already learned one MAC at its limit of 1. A second device shows up on the same port and trips a violation.</figcaption>
+  </figure>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th>Mode</th><th>What happens</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Protect</td><td>Silently drops traffic from the offending MAC. No log, no counter.</td></tr>
+      <tr><td>Restrict</td><td>Drops the traffic, but also logs it and increments a violation counter.</td></tr>
+      <tr><td>Shutdown (default)</td><td>Puts the entire port into <code>err-disabled</code> state — it stops passing any traffic at all until an administrator manually re-enables it.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="callout-label">WHY THIS MATTERS BEYOND ONE ROGUE LAPTOP</span>
+    <p>Port security is also the first line of defense against MAC flooding: an attacker deliberately sending frames from thousands of fake source MACs to overflow a switch's MAC table, forcing it to fail open and flood everything like a hub. Capping learned addresses per port stops that flood at the one port it's coming from.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="etherchannel.html">
+    <span class="nav-label">← PREVIOUS</span>
+    EtherChannel / Link Aggregation
+  </a>
+  <a href="ipv4-subnetting-cidr-vlsm.html">
+    <span class="nav-label">NEXT →</span>
+    IPv4 Addressing, CIDR & VLSM
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

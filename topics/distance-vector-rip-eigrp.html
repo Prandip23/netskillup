@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Distance-Vector Routing (RIP, EIGRP) — netskillup</title>
+<meta name="description" content="How distance-vector routing works by trusting your neighbor's word for it, and how RIP's simple hop count compares to EIGRP's faster, more selective approach.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup <small>/ on-prem</small>
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--l3);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3 — Network</a>
+    <h1>Distance-Vector Routing (RIP, EIGRP)</h1>
+    <p class="topic-dek">A router running a distance-vector protocol never sees the whole map. It just trusts what its immediate neighbors report, and passes that along.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>"Routing by rumor"</h2>
+  <p>A distance-vector router doesn't know the network's actual topology. It only knows two things about each destination: which direction (which neighbor) to send toward, and how far away it is by that neighbor's own count. It's exactly like asking a coworker for directions and just trusting their word for how far it is, then repeating that secondhand distance to the next person who asks you — nobody involved is looking at an actual map.</p>
+
+  <h2>RIP: the simplest version</h2>
+  <p>RIP (Routing Information Protocol) measures distance in pure <strong>hop count</strong> — the number of routers between here and the destination — with no regard for link speed at all. A single congested 1 Gbps hop looks identical to it as three empty fast ones. Every 30 seconds, a RIP router broadcasts its <em>entire</em> routing table to its neighbors, whether anything changed or not, and caps out at 15 hops, treating anything farther as unreachable.</p>
+  <p>To avoid loops, RIP uses <strong>split horizon</strong> (never advertise a route back out the same interface you learned it on) and <strong>route poisoning</strong> (explicitly advertise a failed route as a hop count of 16, "infinity," rather than just letting it quietly time out).</p>
+
+  <h2>EIGRP: distance-vector, sped up</h2>
+  <p>EIGRP (Enhanced Interior Gateway Routing Protocol) is still fundamentally distance-vector, but fixes RIP's two biggest weaknesses. Instead of hop count, it uses a composite metric built from bandwidth and delay (and optionally reliability and load), so it actually reflects real path quality. Instead of broadcasting the whole table every 30 seconds, it forms proper neighbor relationships (via periodic Hello packets) and sends only <strong>incremental</strong> updates when something actually changes.</p>
+  <p>It also runs the <strong>DUAL</strong> algorithm (Diffusing Update Algorithm), which lets a router pre-compute a loop-free backup path — a <em>feasible successor</em> — for its important routes ahead of time, so it can fail over almost instantly instead of recalculating from scratch after a failure.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram contrasting RIP's periodic full routing table broadcast every 30 seconds with EIGRP's incremental updates sent only when something changes">
+      <text x="160" y="20" text-anchor="middle" font-size="11" fill="#f2a93b">RIP — every 30 seconds, regardless</text>
+      <g stroke="#f2a93b" stroke-width="1.6">
+        <line x1="60" y1="70" x2="260" y2="70">
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.4;0.5" dur="4s" repeatCount="indefinite"/>
+        </line>
+      </g>
+      <text x="160" y="55" text-anchor="middle" font-size="9.5" fill="#f2a93b">
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.4;0.5" dur="4s" repeatCount="indefinite"/>
+        entire table, every time
+      </text>
+      <circle cx="60" cy="70" r="16" fill="none" stroke="#8d9bb3" stroke-width="1.4"/>
+      <circle cx="260" cy="70" r="16" fill="none" stroke="#8d9bb3" stroke-width="1.4"/>
+
+      <text x="480" y="20" text-anchor="middle" font-size="11" fill="#4fd1c5">EIGRP — Hellos always, updates only on change</text>
+      <g stroke="#4fd1c5" stroke-width="1.2" opacity="0.5">
+        <line x1="380" y1="70" x2="580" y2="70">
+          <animate attributeName="opacity" values="0.5;1;0.5" dur="1.6s" repeatCount="indefinite"/>
+        </line>
+      </g>
+      <text x="480" y="95" text-anchor="middle" font-size="9" fill="#5b6a86">small Hello packets, constantly</text>
+      <circle cx="380" cy="70" r="16" fill="none" stroke="#8d9bb3" stroke-width="1.4"/>
+      <circle cx="580" cy="70" r="16" fill="none" stroke="#8d9bb3" stroke-width="1.4"/>
+      <line x1="390" y1="60" x2="570" y2="60" stroke="#4fd1c5" stroke-width="1.8">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.3;0.35;0.5;0.55;1" dur="4s" repeatCount="indefinite"/>
+      </line>
+      <text x="480" y="130" text-anchor="middle" font-size="9.5" fill="#4fd1c5">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.3;0.35;0.5;0.55;1" dur="4s" repeatCount="indefinite"/>
+        an actual topology change — only then, a real update
+      </text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>RIP re-sends everything on a timer. EIGRP only sends real updates when the topology actually changes.</figcaption>
+  </figure>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th></th><th>RIP</th><th>EIGRP</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Metric</td><td>Hop count (max 15)</td><td>Composite: bandwidth + delay</td></tr>
+      <tr><td>Update style</td><td>Full table, every 30s</td><td>Incremental, only on change</td></tr>
+      <tr><td>Convergence</td><td>Slow</td><td>Fast — pre-computed backup paths via DUAL</td></tr>
+      <tr><td>Where you'll see it</td><td>Mostly retired, still used to teach the concept</td><td>Common in Cisco-heavy enterprise networks</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="callout-label">WHY LEARN RIP IF IT'S RETIRED</span>
+    <p>RIP is the cleanest possible illustration of distance-vector logic precisely because it has nothing else going on. Understanding it first makes EIGRP read as "the same idea, with three specific improvements" instead of a wall of new concepts at once.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="static-routing.html">
+    <span class="nav-label">← PREVIOUS</span>
+    Static Routing
+  </a>
+  <a href="link-state-ospf-isis.html">
+    <span class="nav-label">NEXT →</span>
+    Link-State Routing (OSPF, IS-IS)
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

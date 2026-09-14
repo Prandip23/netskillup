@@ -24,7 +24,6 @@
 <div class="topic-header" style="--module-color: var(--fund);">
   <div class="wrap">
     <a class="breadcrumb" href="../index.html#modules">← Module 01 · Networking Fundamentals</a>
-    <span class="topic-eyebrow">FUND</span>
     <h1>OSI Model vs TCP/IP Model</h1>
     <p class="topic-dek">Two different ways of slicing up "everything involved in getting data from A to B" into layers. You'll hear both used interchangeably in the real world, so you need to be fluent in both.</p>
   </div>
@@ -33,32 +32,32 @@
 <article class="topic-body wrap">
 
   <h2>Why layer anything at all?</h2>
-  <p>Imagine you had to think about electrical voltage on a cable at the exact same moment you were thinking about what a web page's HTML looks like. That would be unmanageable — so networking is broken into layers, where each layer only has to worry about its own job and trusts the layer below it to have already handled its part.</p>
-  <p>Think about mailing a letter internationally. You write a letter (the content), put it in an envelope with an address (so the postal system can route it), the local post office bags it with other mail heading the same direction, a truck carries the bag to an airport, a plane flies it to the destination country, and a local carrier makes the final delivery to the door. You never think about "how planes fly" while writing the letter — that's a different layer's problem. Networking models exist for the same reason: to separate concerns.</p>
+  <p>A single web request touches dozens of separate concerns: what the user asked for, how the data is encoded, whether the connection is encrypted, how it's split into packets, which path those packets take across the internet, and how electrical signals move across a physical cable. No single piece of software could sanely handle all of that at once. So networking splits the problem into layers, each one solving exactly one concern and trusting that the layer below it already solved its own.</p>
+  <p>A food delivery app works the same way. The app itself only cares about what you ordered. It doesn't think about how your payment gets encrypted, which delivery zone your address falls into, or which street the rider takes to get there — those are separate systems, each doing one job. OSI and TCP/IP are just two different ways of drawing the lines between those jobs for a network connection. We'll use this same delivery app the whole way down, one layer at a time, so the mapping actually sticks.</p>
 
   <h2>The OSI Model — 7 layers</h2>
-  <p>OSI (Open Systems Interconnection) is the theoretical, academic model. It's rarely implemented exactly as written, but its vocabulary is everywhere — "that's a Layer 2 problem," "we're seeing Layer 7 errors" — so you need it even though the real Internet doesn't run on it directly.</p>
+  <p>OSI (Open Systems Interconnection) is the academic, 7-layer version. Almost nothing implements it exactly as written, but its vocabulary is what engineers actually say out loud: "that's a Layer 2 problem," "we're seeing Layer 7 errors." You need the terms even though the real internet doesn't run on this model directly.</p>
   <ul>
-    <li><strong>Layer 7 — Application:</strong> what the user-facing program actually does (HTTP, DNS, SMTP). This is "writing the letter."</li>
-    <li><strong>Layer 6 — Presentation:</strong> formatting, encryption, compression — making sure both ends understand the data the same way (translating the letter if the recipient speaks a different language).</li>
-    <li><strong>Layer 5 — Session:</strong> establishing, managing, and tearing down a conversation between two programs (agreeing you're having an ongoing exchange of letters, not a one-off).</li>
-    <li><strong>Layer 4 — Transport:</strong> reliable or unreliable delivery, ordering, error recovery (TCP/UDP). This is choosing tracked courier vs. a regular postcard.</li>
-    <li><strong>Layer 3 — Network:</strong> logical addressing and routing between different networks (IP). This is the destination address on the envelope, used by the postal system to route it across cities.</li>
-    <li><strong>Layer 2 — Data Link:</strong> framing and addressing on the local segment (Ethernet, MAC addresses, switches). This is the local mail carrier who knows exactly which house on the street to hand it to.</li>
-    <li><strong>Layer 1 — Physical:</strong> the actual bits on the wire — voltage, light pulses, radio waves, cabling, connectors. This is the paper, the truck, the road itself.</li>
+    <li><strong>Layer 7 — Application:</strong> the request itself, the thing the user actually wants. In the app, this is tapping "order" on one large pepperoni pizza. On a network, this is <strong>HTTP</strong>, <strong>DNS</strong>, and <strong>SMTP</strong> doing the actual asking.</li>
+    <li><strong>Layer 6 — Presentation:</strong> putting that request into a format both ends agree on, and locking it up if it's sensitive. The app encrypts your card number and formats the order into whatever structure the restaurant's point-of-sale system expects. On the wire, this is <strong>TLS/SSL</strong> encryption and formats like <strong>JPEG</strong> or <strong>ASCII/Unicode</strong> text encoding.</li>
+    <li><strong>Layer 5 — Session:</strong> keeping one continuous conversation open instead of treating every exchange as a one-off. The app keeps a live order thread running from "placed" to "out for delivery" to "delivered," not five unrelated pings. This is what protocols like <strong>NetBIOS</strong> and <strong>RPC</strong> manage on real systems.</li>
+    <li><strong>Layer 4 — Transport:</strong> deciding how reliable delivery needs to be. Some apps track your order with confirmations at every step; others just fire off a notification and move on. That's the difference between <strong>TCP</strong> (reliable, ordered, acknowledged) and <strong>UDP</strong> (fast, no guarantees).</li>
+    <li><strong>Layer 3 — Network:</strong> figuring out which route gets the order across the city to your address. This is the app's dispatch system doing city-to-city routing, and on a real network it's <strong>IP</strong> addressing and the routers that forward packets between different networks.</li>
+    <li><strong>Layer 2 — Data Link:</strong> the last, very local handoff: the rider pulling up to your actual building and finding your specific door. On the wire this is <strong>Ethernet</strong> framing and <strong>MAC addresses</strong>, handled by switches on the local segment.</li>
+    <li><strong>Layer 1 — Physical:</strong> the scooter, the road, the fuel. The physical stuff nothing else could happen without. On a network this is voltage on copper, light pulses in <strong>fiber</strong>, and radio waves for <strong>Wi-Fi</strong> — the actual signal on the medium.</li>
   </ul>
 
   <h2>The TCP/IP Model — 4 layers</h2>
-  <p>TCP/IP is the model the real Internet is actually built on. It's more practical and compresses OSI's upper three layers into one, since in practice applications, presentation, and session concerns are usually handled together by the same piece of software.</p>
+  <p>TCP/IP is the model the real internet is actually built on. It's more practical than OSI because it merges layers that, in practice, get handled by the same piece of software anyway.</p>
   <ul>
-    <li><strong>Application:</strong> combines OSI's Application + Presentation + Session. HTTP, DNS, TLS, SSH all live here.</li>
-    <li><strong>Transport:</strong> same job as OSI Layer 4 — TCP or UDP.</li>
-    <li><strong>Internet:</strong> same job as OSI Layer 3 — IP addressing and routing.</li>
-    <li><strong>Network Access</strong> (also called Link): combines OSI's Data Link + Physical — Ethernet, Wi-Fi, and the actual signaling.</li>
+    <li><strong>Application:</strong> merges OSI's Application, Presentation, and Session. <strong>HTTP</strong>, <strong>DNS</strong>, <strong>TLS</strong>, and <strong>SSH</strong> all live here — the request, its formatting/encryption, and its session tracking, together.</li>
+    <li><strong>Transport:</strong> the same job as OSI Layer 4: <strong>TCP</strong> or <strong>UDP</strong> deciding how reliable the delivery needs to be.</li>
+    <li><strong>Internet:</strong> the same job as OSI Layer 3: <strong>IP</strong> addressing and the routing decisions that get a packet to the right network.</li>
+    <li><strong>Network Access</strong> (also called Link): merges OSI's Data Link and Physical. <strong>Ethernet</strong>, <strong>Wi-Fi</strong>, and the actual signaling on the medium.</li>
   </ul>
 
   <figure class="diagram-block">
-    <svg viewBox="0 0 640 410" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram mapping the seven OSI layers on the left to the four TCP/IP layers on the right, with lines showing which OSI layers collapse into which TCP/IP layer">
+    <svg viewBox="0 0 640 410" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram mapping the seven OSI layers on the left to the four TCP/IP layers on the right, with lines drawing in to show which OSI layers collapse into which TCP/IP layer">
       <text x="140" y="20" text-anchor="middle" font-size="12" fill="#8d9bb3">OSI MODEL</text>
       <text x="500" y="20" text-anchor="middle" font-size="12" fill="#4fd1c5">TCP/IP MODEL</text>
 
@@ -96,16 +95,39 @@
         <text x="500" y="354">Network Access</text>
       </g>
 
-      <!-- connectors -->
-      <g stroke="#3a4a6b" stroke-width="1" opacity="0.8">
-        <line x1="240" y1="64" x2="400" y2="116"/>
-        <line x1="240" y1="116" x2="400" y2="116"/>
-        <line x1="240" y1="168" x2="400" y2="116"/>
-        <line x1="240" y1="220" x2="400" y2="220"/>
-        <line x1="240" y1="272" x2="400" y2="272"/>
-        <line x1="240" y1="324" x2="400" y2="350"/>
-        <line x1="240" y1="376" x2="400" y2="350"/>
+      <!-- connectors: each line draws itself in once on load, staggered -->
+      <g fill="none" stroke="#3a4a6b" stroke-width="1.2" opacity="0.85">
+        <line x1="240" y1="64" x2="400" y2="116" stroke-dasharray="168" stroke-dashoffset="168">
+          <animate attributeName="stroke-dashoffset" from="168" to="0" dur="0.6s" begin="0.05s" fill="freeze"/>
+        </line>
+        <line x1="240" y1="116" x2="400" y2="116" stroke-dasharray="160" stroke-dashoffset="160">
+          <animate attributeName="stroke-dashoffset" from="160" to="0" dur="0.6s" begin="0.2s" fill="freeze"/>
+        </line>
+        <line x1="240" y1="168" x2="400" y2="116" stroke-dasharray="168" stroke-dashoffset="168">
+          <animate attributeName="stroke-dashoffset" from="168" to="0" dur="0.6s" begin="0.35s" fill="freeze"/>
+        </line>
+        <line x1="240" y1="220" x2="400" y2="220" stroke-dasharray="160" stroke-dashoffset="160">
+          <animate attributeName="stroke-dashoffset" from="160" to="0" dur="0.6s" begin="0.5s" fill="freeze"/>
+        </line>
+        <line x1="240" y1="272" x2="400" y2="272" stroke-dasharray="160" stroke-dashoffset="160">
+          <animate attributeName="stroke-dashoffset" from="160" to="0" dur="0.6s" begin="0.65s" fill="freeze"/>
+        </line>
+        <line x1="240" y1="324" x2="400" y2="350" stroke-dasharray="162" stroke-dashoffset="162">
+          <animate attributeName="stroke-dashoffset" from="162" to="0" dur="0.6s" begin="0.8s" fill="freeze"/>
+        </line>
+        <line x1="240" y1="376" x2="400" y2="350" stroke-dasharray="162" stroke-dashoffset="162">
+          <animate attributeName="stroke-dashoffset" from="162" to="0" dur="0.6s" begin="0.95s" fill="freeze"/>
+        </line>
       </g>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate').forEach(function (a) {
+            a.setAttribute('begin', '0s');
+            a.setAttribute('dur', '0.01s');
+          });
+        }
+      ]]></script>
     </svg>
     <figcaption>OSI's Application, Presentation, and Session layers all collapse into one TCP/IP Application layer; Data Link and Physical collapse into Network Access.</figcaption>
   </figure>
@@ -113,19 +135,19 @@
   <h2>Side by side</h2>
   <table class="compare-table">
     <thead>
-      <tr><th>OSI Layer</th><th>TCP/IP Layer</th><th>Real-world analogy</th><th>Examples</th></tr>
+      <tr><th>OSI Layer</th><th>TCP/IP Layer</th><th>Delivery-app equivalent</th><th>Examples</th></tr>
     </thead>
     <tbody>
-      <tr><td>7 Application, 6 Presentation, 5 Session</td><td>Application</td><td>Writing the letter, choosing the language, agreeing to keep writing back and forth</td><td>HTTP, DNS, TLS, SSH</td></tr>
-      <tr><td>4 Transport</td><td>Transport</td><td>Tracked courier vs. a postcard</td><td>TCP, UDP</td></tr>
-      <tr><td>3 Network</td><td>Internet</td><td>The destination address that routes it across cities</td><td>IP, ICMP, routers</td></tr>
-      <tr><td>2 Data Link, 1 Physical</td><td>Network Access</td><td>The local carrier and the actual road/truck</td><td>Ethernet, MAC addresses, Wi-Fi, cabling</td></tr>
+      <tr><td>7 Application, 6 Presentation, 5 Session</td><td>Application</td><td>Placing the order, encrypting payment, keeping the order thread open</td><td>HTTP, DNS, TLS, SSH, RPC</td></tr>
+      <tr><td>4 Transport</td><td>Transport</td><td>Tracked order updates vs. a fire-and-forget notification</td><td>TCP, UDP</td></tr>
+      <tr><td>3 Network</td><td>Internet</td><td>Dispatch routing the order across the city</td><td>IP, ICMP, routers</td></tr>
+      <tr><td>2 Data Link, 1 Physical</td><td>Network Access</td><td>The rider finding your door, and the road they rode in on</td><td>Ethernet, MAC addresses, Wi-Fi, fiber, copper</td></tr>
     </tbody>
   </table>
 
   <div class="callout">
     <span class="callout-label">WHY YOU NEED BOTH</span>
-    <p>Engineers talk in OSI terms ("that's a Layer 3 issue," "we're doing Layer 2 troubleshooting") because it's precise and everyone was taught it — but the actual packets on the wire are structured according to TCP/IP. You'll use OSI vocabulary daily and TCP/IP's actual header structures whenever you're reading a packet capture.</p>
+    <p>Engineers talk in OSI terms because it's precise and it's what everyone was taught: "that's a Layer 3 issue," "we're doing Layer 2 troubleshooting." But the packets actually on the wire are structured according to TCP/IP's four layers. Expect to use OSI vocabulary in conversation and TCP/IP's real header structures when you're reading a packet capture.</p>
   </div>
 
 </article>

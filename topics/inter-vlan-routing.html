@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inter-VLAN Routing — netskillup</title>
+<meta name="description" content="VLANs isolate broadcast domains on purpose. Inter-VLAN routing is how you deliberately let them talk again, via router-on-a-stick or a Layer 3 switch's SVIs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup <small>/ on-prem</small>
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--l3);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3 — Network</a>
+    <h1>Inter-VLAN Routing</h1>
+    <p class="topic-dek">A switch will never forward traffic between two VLANs, on purpose — that's the whole point of a VLAN. Something at Layer 3 has to do it deliberately.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>Recall why this is even necessary</h2>
+  <p>Back in <a href="broadcast-vs-collision-domain.html">Collision Domain vs Broadcast Domain</a>: a router (or something doing Layer 3 work) is what breaks up broadcast domains, and VLANs exist specifically to create multiple broadcast domains on one switch. So naturally, getting traffic <em>between</em> two VLANs requires exactly the kind of device that breaks broadcast domains apart in the first place — a switch alone will never do it.</p>
+
+  <h2>Option 1: Router-on-a-stick</h2>
+  <p>A single physical link runs from the switch to a router as an 802.1Q trunk, and the router carries a separate <strong>subinterface</strong> for each VLAN, each one acting as that VLAN's gateway. One physical interface, logically sliced into as many virtual ones as there are VLANs.</p>
+
+  <h2>Option 2: Layer 3 switch with SVIs</h2>
+  <p>A Layer 3 switch can do the routing itself, with no separate router at all. Each VLAN gets a <strong>Switched Virtual Interface (SVI)</strong>, a virtual interface configured directly on the switch that acts as that VLAN's gateway. Since the switch is already routing in hardware at wire speed, this scales far better than funneling all inter-VLAN traffic through one router link.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram comparing router-on-a-stick, where a single trunk carries all VLANs to a router with per-VLAN subinterfaces, to a Layer 3 switch using per-VLAN switched virtual interfaces">
+      <text x="150" y="20" text-anchor="middle" font-size="11" fill="#8d9bb3">ROUTER-ON-A-STICK</text>
+      <rect x="60" y="40" width="90" height="130" rx="4" fill="none" stroke="#8d9bb3" stroke-width="1.4"/>
+      <text x="105" y="110" text-anchor="middle" font-size="9" fill="#8d9bb3">Switch</text>
+      <text x="105" y="126" text-anchor="middle" font-size="8" fill="#5b6a86">VLAN 10 / 20</text>
+
+      <rect x="200" y="70" width="70" height="70" rx="4" fill="none" stroke="#f2a93b" stroke-width="1.6"/>
+      <text x="235" y="109" text-anchor="middle" font-size="9" fill="#f2a93b">Router</text>
+      <text x="235" y="122" text-anchor="middle" font-size="7.5" fill="#f2a93b">.10 / .20 sub-if</text>
+
+      <line x1="150" y1="105" x2="200" y2="105" stroke="#4fd1c5" stroke-width="2"/>
+      <text x="175" y="90" text-anchor="middle" font-size="7.5" fill="#4fd1c5">one trunk</text>
+
+      <text x="480" y="20" text-anchor="middle" font-size="11" fill="#4fd1c5">L3 SWITCH WITH SVIs</text>
+      <rect x="400" y="40" width="200" height="130" rx="4" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="500" y="90" text-anchor="middle" font-size="9" fill="#4fd1c5">Layer 3 Switch</text>
+      <text x="500" y="108" text-anchor="middle" font-size="8" fill="#5b6a86">SVI VLAN 10 (gateway)</text>
+      <text x="500" y="124" text-anchor="middle" font-size="8" fill="#5b6a86">SVI VLAN 20 (gateway)</text>
+      <text x="500" y="145" text-anchor="middle" font-size="8" fill="#5b6a86">routes between them internally</text>
+    </svg>
+    <figcaption>Router-on-a-stick funnels every inter-VLAN packet through one link and one router. An L3 switch routes internally, at hardware speed.</figcaption>
+  </figure>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th></th><th>Router-on-a-stick</th><th>L3 switch with SVIs</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Extra hardware needed</td><td>A router, plus a trunk link</td><td>None — the switch does it natively</td></tr>
+      <tr><td>Throughput</td><td>Limited by the one trunk link</td><td>Wire-speed, routed in hardware</td></tr>
+      <tr><td>Common in</td><td>Small networks, labs, legacy setups</td><td>Most modern production networks</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="callout-label">WHY MOST PRODUCTION NETWORKS SKIP THE ROUTER ENTIRELY</span>
+    <p>Router-on-a-stick is genuinely useful for learning the concept with minimal hardware, but every inter-VLAN packet has to leave the switch, cross the trunk, get routed, and come back — a real bottleneck under load. An L3 switch's SVIs remove that round trip entirely, which is why they're the default choice once a network outgrows a lab setup.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="nat-pat.html">
+    <span class="nav-label">← PREVIOUS</span>
+    NAT & PAT
+  </a>
+  <a href="packet-flow.html">
+    <span class="nav-label">NEXT →</span>
+    Packet Flow Across Networks
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>
