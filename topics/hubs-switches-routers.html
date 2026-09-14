@@ -31,13 +31,13 @@
 
 <article class="topic-body wrap">
 
-  <h2>Hub: the loudspeaker</h2>
+  <h2>Hub: The loudspeaker</h2>
   <p>A hub has no idea who's connected to which port and doesn't try to find out. Whatever comes in one port gets repeated out <em>every other port</em>, blindly. It's like a party host who repeats every single announcement to the entire room over a megaphone, even a private message meant for one guest. Everyone hears everything, and it's up to your own device to ignore what isn't addressed to it. This wastes bandwidth and only allows one conversation on the whole hub at a time. Hubs are effectively obsolete.</p>
 
-  <h2>Switch: the receptionist who knows everyone's desk</h2>
+  <h2>Switch: The receptionist who knows everyone's desk</h2>
   <p>A switch learns which device is on which port by watching source MAC (Media Access Control) addresses go by, and builds a <strong>MAC address table</strong> from that. Once it knows where a device lives, it forwards traffic <em>only</em> to that specific port instead of flooding everywhere. It's like an office receptionist who's memorized exactly which desk everyone sits at: a call for "Priya" gets transferred straight to Priya's desk phone, not announced over the building intercom. Each port also gets its own collision domain, so multiple conversations can happen at once at full speed. This is what almost every physical network port connects to today.</p>
 
-  <h2>Router: the sorting office between cities</h2>
+  <h2>Router: The sorting office between cities</h2>
   <p>A switch only knows about devices on its own local network. A router's job starts where the switch's knowledge ends: it connects two or more <em>different</em> networks and decides which one a packet needs to go out on next, based on the destination IP (Internet Protocol) address and its routing table. This is a postal sorting office: a letter addressed to a different city doesn't get delivered by the local carrier. It gets handed off to the truck or plane heading toward that city's own sorting office, which then hands it to a local carrier there.</p>
 
   <figure class="diagram-block">

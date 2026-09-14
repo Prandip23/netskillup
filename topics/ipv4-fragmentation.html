@@ -102,7 +102,7 @@
     <li><strong>Bit 2, MF (More Fragments):</strong> set to 1 on every fragment except the last one. The last fragment of a split packet clears it to 0. An ordinary, unfragmented packet also has MF=0, since as far as it's concerned there was never anything to split.</li>
   </ul>
 
-  <h2>Fragment Offset: telling first, middle, and last apart</h2>
+  <h2>Fragment Offset: Telling first, middle, and last apart</h2>
   <p>The 13-bit <strong>Fragment Offset</strong> field says where in the <em>original</em> payload this particular fragment's data starts, measured in 8-byte units (so a fragment starting at byte 1480 of the original payload carries an offset value of <code>1480 / 8 = 185</code>). That's what lets fragments be reassembled correctly even if they arrive out of order, since every fragment knows exactly where it belongs regardless of when it shows up.</p>
   <p>Combine Offset with MF and every fragment's position becomes unambiguous:</p>
 

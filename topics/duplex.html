@@ -31,10 +31,10 @@
 
 <article class="topic-body wrap">
 
-  <h2>Half-duplex: walkie-talkies</h2>
+  <h2>Half-duplex: Walkie-talkies</h2>
   <p>On a half-duplex link, only one side can transmit at a time. If both sides try to talk at once, the signals collide and both transmissions are lost. This is exactly how a walkie-talkie works: you press the button, say your piece, say "over," and only then does the other person reply. You physically cannot both talk and clearly hear the other person at the same moment. Old hub-based Ethernet and early wireless links worked this way, and it's the entire reason collision domains and CSMA/CD (Carrier Sense Multiple Access with Collision Detection: the "listen before you talk, and detect if you collided" logic) had to exist in the first place.</p>
 
-  <h2>Full-duplex: a phone call</h2>
+  <h2>Full-duplex: A phone call</h2>
   <p>On a full-duplex link, both sides can transmit and receive at the exact same time, over separate transmit and receive paths (on twisted-pair Ethernet, literally separate wire pairs). This is a phone call: you can talk while the other person is talking, interrupt, and hear them simultaneously. There's no "over." Modern switched Ethernet is full-duplex by default, which is why collisions are essentially a non-issue on any current network: there's no shared medium left to collide on.</p>
 
   <figure class="diagram-block">

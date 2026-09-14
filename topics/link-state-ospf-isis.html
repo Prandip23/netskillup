@@ -186,7 +186,7 @@
     <p>Because an inter-area route only ever carries a summarized cost, not the real path, a router outside Area 1 can't tell whether that cost went up because of an actual link failure inside Area 1 or just a naturally longer internal detour. All it sees is the number ABR1 advertised. This is also exactly why OSPF's SPF recalculation stays contained: a link flapping inside Area 1 only triggers a fresh Dijkstra run for routers inside Area 1, not the whole network.</p>
   </div>
 
-  <h2>IS-IS: the same idea, a different lineage</h2>
+  <h2>IS-IS: The same idea, a different lineage</h2>
   <p>IS-IS (Intermediate System to Intermediate System) is conceptually very close to OSPF, link-state, Dijkstra, the works, but comes from the OSI (Open Systems Interconnection) protocol suite rather than the IP (Internet Protocol) world, and organizes its hierarchy into <strong>Level 1</strong> and <strong>Level 2</strong> routers instead of numbered areas. It's less common in enterprise networks than OSPF, but it's the backbone protocol of choice inside many large service-provider networks.</p>
 
   <table class="compare-table">

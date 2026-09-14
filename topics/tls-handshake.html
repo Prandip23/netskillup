@@ -34,7 +34,7 @@
   <h2>What the handshake has to accomplish</h2>
   <p>Meeting a new business contact for the first time means checking their credentials, agreeing on which shared rules you'll both follow, and settling on a private code only the two of you know before discussing anything sensitive. TLS (Transport Layer Security) does exactly that, in three jobs: agree on a protocol version and cipher suite, authenticate the server using the certificate chain from <a href="pki-certificates.html">PKI & Digital Certificates</a>, and establish shared symmetric session keys. That last part is <a href="symmetric-vs-asymmetric.html">hybrid encryption</a> in action: asymmetric crypto is used only to set the session keys up, then fast symmetric encryption handles the actual data for the rest of the connection.</p>
 
-  <h2>TLS 1.2: two round trips</h2>
+  <h2>TLS 1.2: Two round trips</h2>
   <p>A full TLS 1.2 handshake needs two full round trips between client and server before any application data can be sent: one to agree on parameters and receive the server's certificate, a second to actually exchange the key material and confirm both sides derived the same session keys.</p>
 
   <figure class="diagram-block">
@@ -110,7 +110,7 @@
     <figcaption>Two round trips of pure negotiation before a single byte of the actual page loads.</figcaption>
   </figure>
 
-  <h2>TLS 1.3: one round trip, sometimes zero</h2>
+  <h2>TLS 1.3: One round trip, sometimes zero</h2>
   <p>TLS 1.3 cuts this down by having the client guess which key exchange method the server will accept and send its key share immediately in the ClientHello, instead of waiting to be told. If the guess is right, the whole handshake collapses into a single round trip.</p>
 
   <figure class="diagram-block">

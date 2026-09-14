@@ -31,10 +31,10 @@
 
 <article class="topic-body wrap">
 
-  <h2>ACLs: stateless, rule by rule, every time</h2>
+  <h2>ACLs: Stateless, rule by rule, every time</h2>
   <p>An ACL (Access Control List) is an ordered list of permit and deny rules, matched from top to bottom, first match wins, with an implicit deny at the very end for anything that matched nothing. A standard ACL matches only on source address; an extended ACL can also match destination address, protocol, and port. What an ACL has no memory of is prior traffic: a reply packet has to match its own explicit rule going the other direction, or it gets blocked, even if it's just the response to a request the same device already sent.</p>
 
-  <h2>Stateful firewalls: remembering the conversation</h2>
+  <h2>Stateful firewalls: Remembering the conversation</h2>
   <p>A stateful firewall tracks connection state, TCP's handshake progress, or a simple timeout-based session for UDP (User Datagram Protocol) and ICMP (Internet Control Message Protocol), which don't have a handshake at all. Once an outbound connection is permitted and recorded, its return traffic is automatically allowed without needing a separate explicit rule for the reply direction. That's what makes a simple "allow outbound" policy actually usable in practice.</p>
 
   <figure class="diagram-block">

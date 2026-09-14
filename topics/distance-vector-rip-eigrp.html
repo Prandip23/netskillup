@@ -39,11 +39,11 @@
   </ol>
   <p>It's exactly like asking a coworker for directions and just trusting their word for how far it is, then repeating that secondhand distance to the next person who asks you. Nobody involved is looking at an actual map.</p>
 
-  <h2>RIP: the simplest version</h2>
+  <h2>RIP: The simplest version</h2>
   <p>RIP (Routing Information Protocol) measures distance in pure <strong>hop count</strong> (the number of routers between here and the destination), with no regard for link speed at all. A single congested 1 Gbps hop looks identical to it as three empty fast ones. Every 30 seconds, a RIP router broadcasts its <em>entire</em> routing table to its neighbors, whether anything changed or not, and caps out at 15 hops, treating anything farther as unreachable.</p>
   <p>To avoid loops, RIP uses <strong>split horizon</strong> (never advertise a route back out the same interface you learned it on) and <strong>route poisoning</strong> (explicitly advertise a failed route as a hop count of 16, "infinity," rather than just letting it quietly time out).</p>
 
-  <h2>EIGRP: distance-vector, sped up</h2>
+  <h2>EIGRP: Distance-vector, sped up</h2>
   <p>EIGRP (Enhanced Interior Gateway Routing Protocol) is still fundamentally distance-vector, but fixes RIP's two biggest weaknesses. Instead of hop count, it uses a composite metric built from bandwidth and delay (and optionally reliability and load), so it actually reflects real path quality. Instead of broadcasting the whole table every 30 seconds, it forms proper neighbor relationships (via periodic Hello packets) and sends only <strong>incremental</strong> updates when something actually changes.</p>
   <p>It also runs the <strong>DUAL</strong> algorithm (Diffusing Update Algorithm), which lets a router pre-compute a loop-free backup path (a <em>feasible successor</em>) for its important routes ahead of time, so it can fail over almost instantly instead of recalculating from scratch after a failure.</p>
 

@@ -31,17 +31,17 @@
 
 <article class="topic-body wrap">
 
-  <h2>The part that never changes: request and response</h2>
+  <h2>The part that never changes: Request and response</h2>
   <p>Every version below still speaks the same basic language: a client sends a request (a method like <code>GET</code> or <code>POST</code>, a path, and headers), and a server sends back a response (a status code like <code>200</code> or <code>404</code>, headers, and a body). What's changed release to release isn't that model. It's the machinery underneath it, aimed entirely at one problem: a real page needs dozens of requests (HTML, CSS, JavaScript, images), and waiting for them one at a time is slow.</p>
   <p>Picture a kitchen sending dishes out to a table. HTTP/1.1 sends one dish out, waits for the table to be done with it, then sends the next; restaurants worked around that by opening several parallel delivery routes at once. HTTP/2 sends multiple dishes out interleaved on a single route, no more waiting between them, but if that one route gets physically blocked, everything behind the blockage still waits. HTTP/3 gives every dish its own independent route entirely, so a holdup on one never touches the others.</p>
 
-  <h2>HTTP/1.1: parallel connections as a workaround</h2>
+  <h2>HTTP/1.1: Parallel connections as a workaround</h2>
   <p>Within a single TCP (Transmission Control Protocol) connection, HTTP/1.1 responses have to come back in the order they were requested; a slow response blocks everything queued behind it on that same connection. Browsers worked around this by opening several TCP connections to the same server at once, commonly six, so requests could run in parallel across them. It works, but every one of those connections pays its own TCP handshake cost and, over HTTPS, its own TLS (Transport Layer Security) handshake cost too.</p>
 
-  <h2>HTTP/2: multiplexing many requests over one connection</h2>
+  <h2>HTTP/2: Multiplexing many requests over one connection</h2>
   <p>HTTP/2 fixes the workaround at the application layer: many requests and responses are broken into frames and interleaved over a <strong>single</strong> TCP connection, so nothing has to wait its turn behind an unrelated response anymore, and headers are compressed (HPACK) instead of repeated in full on every request. But the connection underneath is still one ordinary TCP stream, and TCP still guarantees strictly in-order delivery. If a single packet belonging to any one stream is lost, TCP holds up <strong>every</strong> stream's data behind it until that packet is retransmitted, even though the other streams' data has nothing to do with the loss.</p>
 
-  <h2>HTTP/3: fixing the transport itself</h2>
+  <h2>HTTP/3: Fixing the transport itself</h2>
   <p>HTTP/3 runs over QUIC, a transport protocol built on UDP (User Datagram Protocol) instead of TCP. QUIC still multiplexes streams the way HTTP/2 does, but each stream's reliability and ordering is now tracked independently. A lost packet only stalls the one stream it belonged to; every other stream keeps moving. QUIC also folds in TLS 1.3 encryption by default (there's no unencrypted HTTP/3) and can resume a previous connection in as little as zero extra round trips.</p>
 
   <figure class="diagram-block">

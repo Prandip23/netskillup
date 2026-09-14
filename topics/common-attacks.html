@@ -31,7 +31,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>ARP spoofing: a fake directory desk</h2>
+  <h2>ARP spoofing: A fake directory desk</h2>
   <p>Picture someone setting up a fake "building directory" sign, so people asking "which office is this?" get sent to the wrong place entirely. <a href="arp.html">ARP</a> (Address Resolution Protocol) has no authentication built in: any device on a segment can send an unsolicited ARP reply, and other devices will simply believe it. An attacker exploits this by sending forged replies claiming to own the gateway's IP address, poisoning the victim's ARP cache so traffic meant for the real gateway gets sent to the attacker's MAC (Media Access Control) address instead.</p>
 
   <figure class="diagram-block">
@@ -76,7 +76,7 @@
     <figcaption>The real gateway is never even contacted. Its ARP cache entry has simply been overwritten with a lie.</figcaption>
   </figure>
 
-  <h2>Man-in-the-middle (MITM): a secret relay</h2>
+  <h2>Man-in-the-middle (MITM): A secret relay</h2>
   <p>Once an attacker can redirect traffic, whether through ARP spoofing, a rogue WiFi access point, or another method entirely, they can sit silently in the middle of a conversation, relaying everything between two parties who both believe they're talking directly to each other. The attacker can read the traffic, and if it isn't encrypted, modify it in transit too.</p>
 
   <figure class="diagram-block">
@@ -120,7 +120,7 @@
     <figcaption>The traffic actually takes the solid path through the attacker, never the dashed one either side believes it's taking. TLS (see <a href="tls-handshake.html">TLS/SSL Handshake</a>) defeats this by encrypting the payload and tying the certificate to a specific domain, so a relayed connection either fails validation or shows content the attacker still can't read.</figcaption>
   </figure>
 
-  <h2>DDoS: flooding the doorway</h2>
+  <h2>DDoS: Flooding the doorway</h2>
   <p>A DoS (Denial of Service) attack overwhelms a target with more traffic or requests than it can handle, from a single source. A <strong>D</strong>DoS does the same thing from many sources at once, often a botnet of compromised devices, which makes it far harder to stop by simply blocking one IP address. Either way the goal is the same: legitimate users can't get through, because the doorway is jammed with far more visitors than it can process.</p>
 
   <figure class="diagram-block">

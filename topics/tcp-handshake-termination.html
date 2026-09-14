@@ -31,7 +31,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>Opening a connection: the three-way handshake</h2>
+  <h2>Opening a connection: The three-way handshake</h2>
   <p>It's exactly like the ritual that opens a phone call. "Hello, can you hear me?" "Yes, and can you hear me?" "Yes." Three exchanges, not two, because the call needs to be confirmed working in <strong>both</strong> directions before either side starts talking business. TCP needs the same thing: it's full-duplex, so each side has to pick its own starting sequence number and have the other side confirm it received that number.</p>
 
   <figure class="diagram-block">
@@ -112,7 +112,7 @@
     <p>Two segments aren't enough: if the client only sent SYN and the server replied SYN ACK, the client would know the server's number, but the server would have no confirmation the client actually received it. A fourth segment isn't needed either, since the third segment's ACK can piggyback directly on top of it without adding a separate step. Three is the minimum that confirms both directions.</p>
   </div>
 
-  <h2>Closing a connection: four-way termination</h2>
+  <h2>Closing a connection: Four-way termination</h2>
   <p>Because TCP is full-duplex, either side can still have data left to send even after the other side is done. Closing a connection means each direction has to be shut down on its own, which is normally four segments instead of two. The side that closes first sends FIN and enters <strong>FIN_WAIT</strong>; the other side, now in <strong>CLOSE_WAIT</strong>, can keep sending data on its still-open half of the connection until it's ready to send its own FIN.</p>
 
   <figure class="diagram-block">

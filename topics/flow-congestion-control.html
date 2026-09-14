@@ -35,7 +35,7 @@
   <p>It's easy to lump these together since both end up controlling "how much can I send right now," but they're solving completely different problems, and one of them is told directly while the other has to be guessed.</p>
   <p>Picture dictating a letter to someone writing it by hand, over a shared phone line other calls are also using. <strong>Flow control</strong> is your listener saying "stop, wait, my hand's cramping" whenever they need to. You don't send more words until they say go again: a direct, explicit signal. <strong>Congestion control</strong> is different. Nobody tells you the phone line itself is getting crowded. You just notice the line crackling or words cutting out and, on your own, decide to slow down until it clears: an inferred signal, based on what you observe, not what anyone reports.</p>
 
-  <h2>Flow control: the receive window</h2>
+  <h2>Flow control: The receive window</h2>
   <p>Every TCP segment carries a Window Size field (see the <a href="tcp-header.html">TCP header</a>): how many more bytes the sender of that segment can currently accept, based on how much space is actually free in its receive buffer. If a fast sender is about to overrun a slow receiver's buffer, the receiver just advertises a smaller window, and the sender is required to respect it. A window of <code>0</code> means "stop sending entirely," and the sender has to periodically probe with a small segment until the receiver advertises room again.</p>
 
   <figure class="diagram-block">
@@ -96,7 +96,7 @@
     <figcaption>The receiver, not the network, sets this limit. It's purely about protecting the receiving application's buffer from being overrun.</figcaption>
   </figure>
 
-  <h2>Congestion control: what the sender infers on its own</h2>
+  <h2>Congestion control: What the sender infers on its own</h2>
   <p>The receive window says nothing about the network path in between, which might be far more congested than the receiver's buffer ever is. For that, the sender keeps its own internal value, the <strong>congestion window (cwnd)</strong>, that never appears in any header field and is never advertised to anyone. It starts small and grows based on what the sender infers from how segments are being acknowledged, and shrinks fast the moment it infers loss.</p>
   <ul>
     <li><strong>Slow start:</strong> cwnd starts at a small number of segments (historically as low as 1, larger in modern stacks) and roughly doubles every round-trip, growing exponentially, until it hits a threshold called <strong>ssthresh</strong>.</li>

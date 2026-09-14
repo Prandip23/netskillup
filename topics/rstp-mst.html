@@ -31,7 +31,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>RSTP (802.1w): the same tree, a faster handshake</h2>
+  <h2>RSTP (802.1w): The same tree, a faster handshake</h2>
   <p>802.1D blocks a port and then just <em>waits</em>, stepping through timers because it has no way to know for certain the topology is actually safe yet. RSTP (Rapid Spanning Tree Protocol) replaces that waiting with an active conversation between neighboring switches: a <strong>proposal/agreement</strong> handshake, where a switch proposes "I'll be your designated port," the neighbor checks that its own ports are safe to synchronize, and agrees. That back-and-forth typically finishes in well under a second, instead of 30–50.</p>
 
   <figure class="diagram-block">
@@ -138,7 +138,7 @@
     </tbody>
   </table>
 
-  <h2>MST (802.1s): one tree isn't always the goal</h2>
+  <h2>MST (802.1s): One tree isn't always the goal</h2>
   <p>Running a single spanning tree across every VLAN (Virtual Local Area Network) means every VLAN blocks the exact same link, which wastes the bandwidth of every other physical link for every VLAN that isn't using it. Cisco's PVST+ (Per-VLAN Spanning Tree Plus) solves that by running one full spanning tree instance <em>per VLAN</em>, so different VLANs can block different links and actually load-balance. But that means hundreds of VLANs can mean hundreds of spanning tree instances, all consuming CPU (Central Processing Unit) cycles and BPDUs (Bridge Protocol Data Units).</p>
   <p><strong>Multiple Spanning Tree (MST)</strong> is the middle ground: VLANs are grouped into a small number of instances, and each instance runs its own independent tree. You get the load-balancing benefit of per-VLAN trees, the CPU and BPDU overhead of only a handful of instances instead of hundreds.</p>
 

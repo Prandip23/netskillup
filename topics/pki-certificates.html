@@ -86,7 +86,7 @@
     <figcaption>Verifying example.com's certificate means checking the intermediate's signature, then checking that the intermediate itself was signed by a root already in the trust store, not trusting example.com's certificate in isolation.</figcaption>
   </figure>
 
-  <h2>Revocation: when a certificate shouldn't be trusted anymore</h2>
+  <h2>Revocation: When a certificate shouldn't be trusted anymore</h2>
   <p>A certificate can be compromised or issued in error before its expiry date arrives. Two mechanisms exist to catch that: a <strong>CRL (Certificate Revocation List)</strong>, a published list of revoked serial numbers a client can check, and <strong>OCSP (Online Certificate Status Protocol)</strong>, a live query asking a CA "is this specific certificate still good?" instead of downloading an entire list.</p>
 
   <div class="callout">

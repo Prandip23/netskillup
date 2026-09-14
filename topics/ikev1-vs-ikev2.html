@@ -38,10 +38,10 @@
     <li><strong>Phase 2:</strong> use that protected channel to negotiate the actual keys AH/ESP will use to protect real traffic.</li>
   </ul>
 
-  <h2>IKEv1: main mode or aggressive mode</h2>
+  <h2>IKEv1: Main mode or aggressive mode</h2>
   <p>IKEv1's Phase 1 comes in two variants. <strong>Main mode</strong> takes six messages and never exposes either peer's identity in cleartext along the way. <strong>Aggressive mode</strong> collapses that down to three messages, faster, but at the cost of exposing identity information openly, making it the less secure option.</p>
 
-  <h2>IKEv2: simplified, and more capable</h2>
+  <h2>IKEv2: Simplified, and more capable</h2>
   <p>IKEv2 replaced that split entirely with one fixed exchange: four messages total for the initial setup, no separate main/aggressive choice to make. It also added several things IKEv1 never had: built-in NAT traversal detection, built-in reliability with sequence numbers and retransmission (IKEv1 had no such mechanism of its own), and MOBIKE, which lets a VPN session survive a device switching networks, like moving from WiFi to cellular, without tearing the tunnel down.</p>
 
   <figure class="diagram-block">
