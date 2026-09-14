@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flow Control & Congestion Control · netskillup</title>
+<meta name="description" content="Two different problems TCP solves by adjusting how much data is in flight: an overwhelmed receiver (flow control), and a congested network path (congestion control).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--l4);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 04 · Layer 4: Transport</a>
+    <h1>Flow Control & Congestion Control</h1>
+    <p class="topic-dek">Two different problems, both solved by TCP (Transmission Control Protocol) dynamically shrinking or growing how much data is allowed to be in flight at once.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>Two different problems, two different mechanisms</h2>
+  <p>It's easy to lump these together since both end up controlling "how much can I send right now," but they're solving completely different problems, and one of them is told directly while the other has to be guessed.</p>
+  <p>Picture dictating a letter to someone writing it by hand, over a shared phone line other calls are also using. <strong>Flow control</strong> is your listener saying "stop, wait, my hand's cramping" whenever they need to. You don't send more words until they say go again: a direct, explicit signal. <strong>Congestion control</strong> is different. Nobody tells you the phone line itself is getting crowded. You just notice the line crackling or words cutting out and, on your own, decide to slow down until it clears: an inferred signal, based on what you observe, not what anyone reports.</p>
+
+  <h2>Flow control: the receive window</h2>
+  <p>Every TCP segment carries a Window Size field (see the <a href="tcp-header.html">TCP header</a>): how many more bytes the sender of that segment can currently accept, based on how much space is actually free in its receive buffer. If a fast sender is about to overrun a slow receiver's buffer, the receiver just advertises a smaller window, and the sender is required to respect it. A window of <code>0</code> means "stop sending entirely," and the sender has to periodically probe with a small segment until the receiver advertises room again.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of a sender transmitting data while the receiver's advertised window shrinks, pausing once the window reaches zero, then resuming after a window update reopens it">
+      <text x="515" y="50" text-anchor="middle" font-size="8.5" fill="#5b6a86">RECEIVE WINDOW</text>
+      <rect x="460" y="58" width="110" height="18" fill="none" stroke="#4fd1c5" stroke-width="1.4"/>
+      <rect x="460" y="58" height="18" fill="#4fd1c5" fill-opacity="0.35">
+        <animate attributeName="width" values="110;0;0;110;110" keyTimes="0;0.38;0.55;0.68;1" dur="14s" repeatCount="indefinite"/>
+      </rect>
+
+      <circle cx="70" cy="115" r="22" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="70" y="119" text-anchor="middle" font-size="8.5" fill="#5b9df9">SENDER</text>
+
+      <circle cx="570" cy="115" r="22" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="570" y="119" text-anchor="middle" font-size="8" fill="#4fd1c5">RECEIVER</text>
+
+      <line x1="94" y1="115" x2="546" y2="115" stroke="#3a4a6b" stroke-width="1.2"/>
+
+      <circle r="4.5" fill="#5b9df9">
+        <animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.02;0.11;1" path="M94,115 L546,115"/>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.02;0.11;0.13" dur="14s" repeatCount="indefinite"/>
+      </circle>
+      <circle r="4.5" fill="#5b9df9">
+        <animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.14;0.23;1" path="M94,115 L546,115"/>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.14;0.23;0.25" dur="14s" repeatCount="indefinite"/>
+      </circle>
+      <circle r="4.5" fill="#5b9df9">
+        <animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.26;0.35;1" path="M94,115 L546,115"/>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.26;0.35;0.37" dur="14s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="150" text-anchor="middle" font-size="9" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.34;0.37" dur="14s" repeatCount="indefinite"/>
+        sender keeps transmitting while the window allows
+      </text>
+
+      <text x="320" y="150" text-anchor="middle" font-size="9.5" fill="#e05a5a">
+        <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.40;0.44;0.53;0.56" dur="14s" repeatCount="indefinite"/>
+        window = 0: sender must pause and probe periodically
+      </text>
+
+      <circle r="4.5" fill="#4fd1c5">
+        <animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.60;0.66;1" path="M546,115 L94,115"/>
+        <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.58;0.60;0.66;0.68" dur="14s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="150" text-anchor="middle" font-size="9.5" fill="#4fd1c5">
+        <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.58;0.61;0.72;0.75" dur="14s" repeatCount="indefinite"/>
+        window update: receiver reopens the window, sending resumes
+      </text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate, animateMotion').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>The receiver, not the network, sets this limit. It's purely about protecting the receiving application's buffer from being overrun.</figcaption>
+  </figure>
+
+  <h2>Congestion control: what the sender infers on its own</h2>
+  <p>The receive window says nothing about the network path in between, which might be far more congested than the receiver's buffer ever is. For that, the sender keeps its own internal value, the <strong>congestion window (cwnd)</strong>, that never appears in any header field and is never advertised to anyone. It starts small and grows based on what the sender infers from how segments are being acknowledged, and shrinks fast the moment it infers loss.</p>
+  <ul>
+    <li><strong>Slow start:</strong> cwnd starts at a small number of segments (historically as low as 1, larger in modern stacks) and roughly doubles every round-trip, growing exponentially, until it hits a threshold called <strong>ssthresh</strong>.</li>
+    <li><strong>Congestion avoidance:</strong> past ssthresh, growth switches to roughly linear, one segment's worth of extra room per round-trip, a much more cautious climb.</li>
+    <li><strong>Loss response:</strong> three duplicate ACKs in a row usually mean a single segment was dropped, not a serious jam. TCP does <strong>fast retransmit</strong>, sends that segment again immediately, and cuts cwnd roughly in half rather than starting over from scratch.</li>
+    <li><strong>Timeout response:</strong> no ACK at all for a segment is treated as a much worse sign. cwnd drops all the way back down and slow start restarts from the beginning.</li>
+  </ul>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Line graph of the congestion window over time: exponential growth during slow start up to a threshold, linear growth during congestion avoidance, a sharp drop when loss is detected, then the pattern repeating">
+      <text x="60" y="28" font-size="10" fill="#8d9bb3">CONGESTION WINDOW (cwnd)</text>
+      <text x="600" y="248" text-anchor="end" font-size="9" fill="#5b6a86">TIME</text>
+
+      <line x1="60" y1="40" x2="60" y2="220" stroke="#3a4a6b" stroke-width="1.2"/>
+      <line x1="60" y1="220" x2="600" y2="220" stroke="#3a4a6b" stroke-width="1.2"/>
+      <line x1="60" y1="110" x2="600" y2="110" stroke="#8d9bb3" stroke-width="1" stroke-dasharray="4 3"/>
+      <text x="65" y="105" font-size="8.5" fill="#8d9bb3">ssthresh</text>
+
+      <polyline points="60,210 100,200 130,180 150,150 165,120 175,110 330,60 335,135 480,85 485,150 600,110"
+        fill="none" stroke="#4fd1c5" stroke-width="2" stroke-dasharray="2000" stroke-dashoffset="2000">
+        <animate attributeName="stroke-dashoffset" from="2000" to="0" dur="3.5s" begin="0s" fill="freeze"/>
+      </polyline>
+
+      <text x="95" y="192" font-size="8.5" fill="#4fd1c5">
+        <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.03;0.04;1" dur="3.5s" begin="0s" fill="freeze"/>
+        slow start (exponential)
+      </text>
+      <text x="250" y="80" font-size="8.5" fill="#4fd1c5">
+        <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.28;0.29;1" dur="3.5s" begin="0s" fill="freeze"/>
+        congestion avoidance (linear)
+      </text>
+      <g>
+        <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.49;0.50;1" dur="3.5s" begin="0s" fill="freeze"/>
+        <line x1="326" y1="55" x2="334" y2="63" stroke="#e05a5a" stroke-width="1.8"/>
+        <line x1="326" y1="63" x2="334" y2="55" stroke="#e05a5a" stroke-width="1.8"/>
+      </g>
+      <text x="345" y="45" font-size="8.5" fill="#e05a5a">
+        <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.49;0.50;1" dur="3.5s" begin="0s" fill="freeze"/>
+        loss detected: cwnd cut in half
+      </text>
+      <g>
+        <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.77;0.78;1" dur="3.5s" begin="0s" fill="freeze"/>
+        <line x1="476" y1="80" x2="484" y2="88" stroke="#e05a5a" stroke-width="1.8"/>
+        <line x1="476" y1="88" x2="484" y2="80" stroke="#e05a5a" stroke-width="1.8"/>
+      </g>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate').forEach(function (a) {
+            a.setAttribute('dur', '0.01s');
+            a.setAttribute('begin', '0s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>The classic TCP "sawtooth": exponential growth, a switch to cautious linear growth, a sharp cut on loss, and the climb starts again. This pattern is exactly why a long-lived TCP transfer's throughput graph looks jagged instead of flat.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <span class="callout-label">THE ACTUAL LIMIT IS WHICHEVER WINDOW IS SMALLER</span>
+    <p>A sender never gets to use more than <code>min(receive window, congestion window)</code> worth of unacknowledged data at once. A fast local network with a slow, congested path to the destination will be limited by cwnd; a fast path to a receiver with a tiny buffer will be limited by the receive window. Either one alone tells an incomplete story.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="tcp-handshake-termination.html">
+    <span class="nav-label">← PREVIOUS</span>
+    TCP 3-Way Handshake & Termination
+  </a>
+  <a href="udp-header.html">
+    <span class="nav-label">NEXT →</span>
+    UDP Header & Use Cases
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

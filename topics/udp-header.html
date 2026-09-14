@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UDP Header & Use Cases · netskillup</title>
+<meta name="description" content="UDP's deliberately minimal 8-byte header, why it drops every reliability mechanism TCP has, and exactly which applications actually want that trade.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--l4);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 04 · Layer 4: Transport</a>
+    <h1>UDP Header & Use Cases</h1>
+    <p class="topic-dek">UDP (User Datagram Protocol) doesn't fail at being TCP. It deliberately leaves out everything TCP (Transmission Control Protocol) adds, and that's exactly why certain applications choose it on purpose.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>The deliberately minimal alternative</h2>
+  <p>If TCP's header is a certified-mail envelope with tracking, delivery confirmation, and enough bookkeeping to detect and refix a lost carton, UDP is a postcard: address on the front, message on the back, dropped in the mail, and the sender simply moves on. No handshake, no acknowledgment, no retransmission, no ordering guarantee, no congestion backoff. If a UDP datagram doesn't arrive, or arrives out of order, or arrives twice, UDP itself will never notice, tell anyone, or fix it. Any application that cares has to handle that itself, or decide it doesn't matter.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of the UDP header: source port, destination port, length, and checksum, four 16-bit fields making up 8 bytes total">
+      <g font-family="monospace" font-size="9.5" fill="#e7ecf3">
+        <rect x="20" y="20" width="300" height="34" fill="none" stroke="#8d9bb3" stroke-width="1.3"/>
+        <text x="170" y="41" text-anchor="middle">Source Port</text>
+        <rect x="320" y="20" width="300" height="34" fill="none" stroke="#8d9bb3" stroke-width="1.3"/>
+        <text x="470" y="41" text-anchor="middle">Destination Port</text>
+
+        <rect x="20" y="54" width="300" height="34" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+        <text x="170" y="75" text-anchor="middle" fill="#4fd1c5">Length</text>
+        <rect x="320" y="54" width="300" height="34" fill="none" stroke="#8d9bb3" stroke-width="1.3"/>
+        <text x="470" y="75" text-anchor="middle">Checksum</text>
+      </g>
+      <text x="320" y="102" text-anchor="middle" font-size="9.5" fill="#5b6a86">8 bytes total, always, no matter how much data follows</text>
+    </svg>
+    <figcaption>The entire UDP header. Compare this to TCP's 20-byte minimum: there's no sequence number, no acknowledgment number, no window size, nothing tracking state at all.</figcaption>
+  </figure>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th>Field</th><th>Size</th><th>What it holds</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Source Port</td><td>16 bits</td><td>The sending application's port; can be all zeros if no reply is expected</td></tr>
+      <tr><td>Destination Port</td><td>16 bits</td><td>The receiving application's port, e.g. <code>53</code> for DNS (Domain Name System)</td></tr>
+      <tr><td>Length</td><td>16 bits</td><td>Size of the UDP header plus data, in bytes</td></tr>
+      <tr><td>Checksum</td><td>16 bits</td><td>Integrity check covering the header, data, and parts of the IP header; optional in IPv4, mandatory in IPv6</td></tr>
+    </tbody>
+  </table>
+
+  <h2>TCP versus UDP, side by side</h2>
+  <table class="compare-table">
+    <thead>
+      <tr><th></th><th>TCP</th><th>UDP</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Connection setup</td><td>Three-way handshake required</td><td>None, just send</td></tr>
+      <tr><td>Delivery guarantee</td><td>Reliable, retransmits lost segments</td><td>Best effort, nothing retransmitted</td></tr>
+      <tr><td>Ordering</td><td>Guaranteed, reassembled in order</td><td>Not guaranteed</td></tr>
+      <tr><td>Congestion control</td><td>Built in (see <a href="flow-congestion-control.html">Flow &amp; Congestion Control</a>)</td><td>None; the application must self-limit if it needs to</td></tr>
+      <tr><td>Header size</td><td>20 bytes minimum</td><td>8 bytes, fixed</td></tr>
+      <tr><td>Typical uses</td><td>HTTP/HTTPS, SSH, file transfer, email</td><td>DNS, DHCP, VoIP, video conferencing, online gaming</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Why anything would choose less reliability</h2>
+  <ul>
+    <li><strong>Real-time voice and video (VoIP, video conferencing):</strong> a dropped or late audio frame should just be skipped, not resent. By the time a retransmission arrived, the moment it belonged to would already be well past. Skipping a frame is a tiny glitch; waiting for a retransmit is a stall everyone notices.</li>
+    <li><strong>Online gaming:</strong> the same logic applies to position updates. A stale retransmitted position is worse than useless, since a newer one is already on the way.</li>
+    <li><strong>DNS queries:</strong> a single small request and a single small response. Paying for a full TCP handshake to ask one question is wasted overhead; if the answer doesn't come back, the resolver just asks again.</li>
+    <li><strong>DHCP (Dynamic Host Configuration Protocol):</strong> runs before a host even has an IP address, and needs to broadcast, something TCP's connection-oriented, unicast design can't do at all.</li>
+  </ul>
+
+  <div class="callout">
+    <span class="callout-label">WHY DNS SOMETIMES SWITCHES TO TCP ANYWAY</span>
+    <p>DNS defaults to UDP, but falls back to TCP when a response is too large for a single UDP datagram (historically 512 bytes, larger with the EDNS0 extension), and always uses TCP for zone transfers between DNS servers. UDP has no mechanism of its own for splitting a response across multiple datagrams and reassembling it, so anything that genuinely needs that borrows TCP instead.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="flow-congestion-control.html">
+    <span class="nav-label">← PREVIOUS</span>
+    Flow Control & Congestion Control
+  </a>
+  <a href="ports-sockets.html">
+    <span class="nav-label">NEXT →</span>
+    Ports & Sockets
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

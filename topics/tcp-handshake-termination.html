@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCP 3-Way Handshake & Termination · netskillup</title>
+<meta name="description" content="How two hosts open a TCP connection with a three-way handshake, and the four-step process (usually) required to close one cleanly.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--l4);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 04 · Layer 4: Transport</a>
+    <h1>TCP 3-Way Handshake & Termination</h1>
+    <p class="topic-dek">How two hosts agree to start a reliable conversation, built entirely out of the SYN, ACK, and FIN flags from the last topic, and the more careful dance required to end one cleanly.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>Opening a connection: the three-way handshake</h2>
+  <p>It's exactly like the ritual that opens a phone call. "Hello, can you hear me?" "Yes, and can you hear me?" "Yes." Three exchanges, not two, because the call needs to be confirmed working in <strong>both</strong> directions before either side starts talking business. TCP needs the same thing: it's full-duplex, so each side has to pick its own starting sequence number and have the other side confirm it received that number.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 175" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of the TCP three-way handshake: client sends SYN with sequence number 100, server replies SYN ACK with its own sequence number 300 and acknowledgment 101, client replies ACK with acknowledgment 301">
+      <text x="320" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">THE THREE-WAY HANDSHAKE</text>
+
+      <circle cx="70" cy="100" r="24" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="70" y="104" text-anchor="middle" font-size="9.5" fill="#5b9df9">CLIENT</text>
+
+      <circle cx="570" cy="100" r="24" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="570" y="104" text-anchor="middle" font-size="9.5" fill="#4fd1c5">SERVER</text>
+
+      <line x1="96" y1="100" x2="544" y2="100" stroke="#3a4a6b" stroke-width="1.2"/>
+
+      <circle r="5" fill="#5b9df9">
+        <animateMotion dur="9s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.02;0.21;1" path="M96,100 L544,100"/>
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.21;0.23;1" dur="9s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="58" text-anchor="middle" font-size="10" fill="#5b9df9">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.21;0.23;1" dur="9s" repeatCount="indefinite"/>
+        SYN: seq=100
+      </text>
+      <text x="320" y="72" text-anchor="middle" font-size="8.5" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.02;0.21;0.23;1" dur="9s" repeatCount="indefinite"/>
+        client proposes a starting sequence number
+      </text>
+
+      <circle r="5" fill="#4fd1c5">
+        <animateMotion dur="9s" repeatCount="indefinite" begin="0s" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.35;0.54;1" path="M544,100 L96,100"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.33;0.35;0.54;0.56;1" dur="9s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="130" text-anchor="middle" font-size="10" fill="#4fd1c5">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.33;0.35;0.54;0.56;1" dur="9s" repeatCount="indefinite"/>
+        SYN, ACK: seq=300, ack=101
+      </text>
+      <text x="320" y="144" text-anchor="middle" font-size="8.5" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.33;0.35;0.54;0.56;1" dur="9s" repeatCount="indefinite"/>
+        server proposes its own number, and confirms the client's
+      </text>
+
+      <circle r="5" fill="#5b9df9">
+        <animateMotion dur="9s" repeatCount="indefinite" begin="0s" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.68;0.87;1" path="M96,100 L544,100"/>
+        <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.66;0.68;0.87;0.89" dur="9s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="58" text-anchor="middle" font-size="10" fill="#5b9df9">
+        <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.66;0.68;0.87;0.89" dur="9s" repeatCount="indefinite"/>
+        ACK: seq=101, ack=301
+      </text>
+      <text x="320" y="72" text-anchor="middle" font-size="8.5" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.66;0.68;0.87;0.89" dur="9s" repeatCount="indefinite"/>
+        client confirms the server's number too, connection is open
+      </text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate, animateMotion').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Each side's ack number is the other side's sequence number plus one. By the third segment, both sides have proposed a starting number and had it confirmed.</figcaption>
+  </figure>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th>Step</th><th>Direction</th><th>Flags</th><th>Establishes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Client → Server</td><td>SYN</td><td>The client's initial sequence number (ISN)</td></tr>
+      <tr><td>2</td><td>Server → Client</td><td>SYN, ACK</td><td>The server's own ISN, and confirmation of the client's</td></tr>
+      <tr><td>3</td><td>Client → Server</td><td>ACK</td><td>Confirmation of the server's ISN; data can now flow either way</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="callout-label">WHY THIS SPECIFIC NUMBER, THREE</span>
+    <p>Two segments aren't enough: if the client only sent SYN and the server replied SYN ACK, the client would know the server's number, but the server would have no confirmation the client actually received it. A fourth segment isn't needed either, since the third segment's ACK can piggyback directly on top of it without adding a separate step. Three is the minimum that confirms both directions.</p>
+  </div>
+
+  <h2>Closing a connection: four-way termination</h2>
+  <p>Because TCP is full-duplex, either side can still have data left to send even after the other side is done. Closing a connection means each direction has to be shut down on its own, which is normally four segments instead of two. The side that closes first sends FIN and enters <strong>FIN_WAIT</strong>; the other side, now in <strong>CLOSE_WAIT</strong>, can keep sending data on its still-open half of the connection until it's ready to send its own FIN.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 175" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of TCP connection termination: client sends FIN, server ACKs and the connection becomes half-closed, server later sends its own FIN, client ACKs and enters TIME_WAIT">
+      <text x="320" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">FOUR-WAY TERMINATION</text>
+
+      <circle cx="70" cy="100" r="24" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="70" y="104" text-anchor="middle" font-size="9.5" fill="#5b9df9">CLIENT</text>
+
+      <circle cx="570" cy="100" r="24" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="570" y="104" text-anchor="middle" font-size="9.5" fill="#4fd1c5">SERVER</text>
+
+      <line x1="96" y1="100" x2="544" y2="100" stroke="#3a4a6b" stroke-width="1.2"/>
+
+      <circle r="5" fill="#5b9df9">
+        <animateMotion dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.015;0.16;1" path="M96,100 L544,100"/>
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.015;0.16;0.18;1" dur="12s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="58" text-anchor="middle" font-size="10" fill="#5b9df9">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.015;0.16;0.18;1" dur="12s" repeatCount="indefinite"/>
+        FIN
+      </text>
+      <text x="320" y="72" text-anchor="middle" font-size="8.5" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.015;0.16;0.18;1" dur="12s" repeatCount="indefinite"/>
+        client has no more data to send
+      </text>
+
+      <circle r="5" fill="#4fd1c5">
+        <animateMotion dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.27;0.41;1" path="M544,100 L96,100"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.25;0.27;0.41;0.43;1" dur="12s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="130" text-anchor="middle" font-size="10" fill="#4fd1c5">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.25;0.27;0.41;0.43;1" dur="12s" repeatCount="indefinite"/>
+        ACK
+      </text>
+      <text x="320" y="144" text-anchor="middle" font-size="8.5" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.25;0.27;0.41;0.43;1" dur="12s" repeatCount="indefinite"/>
+        server acknowledges, connection is now half-closed
+      </text>
+
+      <circle r="5" fill="#4fd1c5">
+        <animateMotion dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.52;0.66;1" path="M544,100 L96,100"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.50;0.52;0.66;0.68;1" dur="12s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="130" text-anchor="middle" font-size="10" fill="#4fd1c5">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.50;0.52;0.66;0.68;1" dur="12s" repeatCount="indefinite"/>
+        FIN
+      </text>
+      <text x="320" y="144" text-anchor="middle" font-size="8.5" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.50;0.52;0.66;0.68;1" dur="12s" repeatCount="indefinite"/>
+        server is done sending too, now it also closes
+      </text>
+
+      <circle r="5" fill="#5b9df9">
+        <animateMotion dur="12s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.77;0.91;1" path="M96,100 L544,100"/>
+        <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.75;0.77;0.91;0.93" dur="12s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="58" text-anchor="middle" font-size="10" fill="#5b9df9">
+        <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.75;0.77;0.91;0.93" dur="12s" repeatCount="indefinite"/>
+        ACK
+      </text>
+      <text x="320" y="72" text-anchor="middle" font-size="8.5" fill="#5b6a86">
+        <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.75;0.77;0.91;0.93" dur="12s" repeatCount="indefinite"/>
+        client acknowledges, and enters TIME_WAIT
+      </text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate, animateMotion').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>The gap between step 2 and step 3 can be anywhere from instant to a while: the server keeps its half of the connection open for as long as it still has data to send.</figcaption>
+  </figure>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th>Step</th><th>Direction</th><th>Flags</th><th>What happens</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Initiator → Peer</td><td>FIN</td><td>Initiator has no more data to send, enters FIN_WAIT</td></tr>
+      <tr><td>2</td><td>Peer → Initiator</td><td>ACK</td><td>Peer acknowledges; connection is half-closed, peer enters CLOSE_WAIT</td></tr>
+      <tr><td>3</td><td>Peer → Initiator</td><td>FIN</td><td>Peer is also done sending, once it's ready</td></tr>
+      <tr><td>4</td><td>Initiator → Peer</td><td>ACK</td><td>Initiator acknowledges, enters TIME_WAIT before fully closing</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="callout-label">WHY TIME_WAIT EXISTS</span>
+    <p>After sending the final ACK, the initiator doesn't close immediately. It waits in TIME_WAIT for a period (typically twice the maximum segment lifetime) in case that final ACK got lost and the peer retransmits its FIN. Without this wait, a lost ACK could leave the peer stuck resending a FIN that never gets acknowledged. It's also why a server restarted quickly can sometimes fail to rebind a port that's still finishing TIME_WAIT from a previous connection.</p>
+  </div>
+
+  <div class="callout">
+    <span class="callout-label">WHEN RST REPLACES A CLEAN CLOSE</span>
+    <p>Not every connection ends this gracefully. A RST (reset) tears a connection down immediately, with no half-closed state and no TIME_WAIT: it's what happens when a segment arrives for a port nothing is listening on, or when an application aborts a connection after an error instead of finishing its data cleanly.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="tcp-header.html">
+    <span class="nav-label">← PREVIOUS</span>
+    TCP Header Structure
+  </a>
+  <a href="flow-congestion-control.html">
+    <span class="nav-label">NEXT →</span>
+    Flow Control & Congestion Control
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

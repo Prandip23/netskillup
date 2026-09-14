@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCP Header Structure · netskillup</title>
+<meta name="description" content="Field by field, what's inside a TCP header and why each one exists: ports, sequence and acknowledgment numbers, the six control flags, window size, and checksum.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--l4);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 04 · Layer 4: Transport</a>
+    <h1>TCP Header Structure</h1>
+    <p class="topic-dek">TCP (Transmission Control Protocol) turns an unreliable, best-effort IP (Internet Protocol) network into something that behaves like an ordered, reliable conversation. Every field in this header exists to support that job.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>What this header is actually for</h2>
+  <p>IP's job stops at "get this packet from one host toward another, best effort, no promises." It doesn't guarantee delivery, doesn't guarantee order, and a packet can even arrive duplicated. TCP sits directly on top of IP and makes up the difference. Every field below exists to support one of three jobs: identifying which application conversation a segment belongs to, tracking exactly which bytes have arrived, and controlling how much data is allowed to be in flight at once.</p>
+  <p>Picture a warehouse shipping cartons through a courier that makes no promises on its own: no guaranteed delivery, no guaranteed order, cartons can even get duplicated in transit. TCP's header is the packing slip stapled to every carton: which shipment this carton belongs to, which carton number it is within the batch, a receipt confirming which cartons already arrived, how much room the receiving dock currently has for more, a stamp for special handling, and a tamper seal. That's the whole header, mapped field by field below.</p>
+
+  <h2>The header, field by field</h2>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of the TCP header laid out as 32-bit rows: source and destination port, sequence number, acknowledgment number, data offset/reserved/flags/window size, checksum/urgent pointer, options, and the data that follows the header">
+      <g font-family="monospace" fill="#e7ecf3">
+        <rect x="20" y="20" width="300" height="34" fill="none" stroke="#8d9bb3" stroke-width="1.3"/>
+        <text x="170" y="41" text-anchor="middle" font-size="9.5">Source Port</text>
+        <rect x="320" y="20" width="300" height="34" fill="none" stroke="#8d9bb3" stroke-width="1.3"/>
+        <text x="470" y="41" text-anchor="middle" font-size="9.5">Destination Port</text>
+
+        <rect x="20" y="54" width="600" height="34" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+        <text x="320" y="75" text-anchor="middle" font-size="9.5" fill="#5b9df9">Sequence Number</text>
+
+        <rect x="20" y="88" width="600" height="34" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+        <text x="320" y="109" text-anchor="middle" font-size="9.5" fill="#5b9df9">Acknowledgment Number</text>
+
+        <rect x="20" y="122" width="80" height="34" fill="none" stroke="#8d9bb3" stroke-width="1.3"/>
+        <text x="60" y="143" text-anchor="middle" font-size="8">Data Offset</text>
+        <rect x="100" y="122" width="70" height="34" fill="none" stroke="#8d9bb3" stroke-width="1.3"/>
+        <text x="135" y="143" text-anchor="middle" font-size="8">Reserved</text>
+        <rect x="170" y="122" width="90" height="34" fill="none" stroke="#f2a93b" stroke-width="1.8"/>
+        <text x="215" y="143" text-anchor="middle" font-size="9.5" fill="#f2a93b">Flags</text>
+        <rect x="260" y="122" width="360" height="34" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+        <text x="440" y="143" text-anchor="middle" font-size="9.5" fill="#4fd1c5">Window Size</text>
+
+        <rect x="20" y="156" width="300" height="34" fill="none" stroke="#8d9bb3" stroke-width="1.3"/>
+        <text x="170" y="177" text-anchor="middle" font-size="9.5">Checksum</text>
+        <rect x="320" y="156" width="300" height="34" fill="none" stroke="#8d9bb3" stroke-width="1.3"/>
+        <text x="470" y="177" text-anchor="middle" font-size="9.5">Urgent Pointer</text>
+
+        <rect x="20" y="190" width="600" height="34" fill="none" stroke="#8d9bb3" stroke-width="1.3" stroke-dasharray="5 4"/>
+        <text x="320" y="211" text-anchor="middle" font-size="9.5">Options (0–40 bytes, rarely used)</text>
+
+        <rect x="20" y="224" width="600" height="34" fill="none" stroke="#b18cf0" stroke-width="1.6" stroke-dasharray="5 4"/>
+        <text x="320" y="245" text-anchor="middle" font-size="9.5" fill="#b18cf0">Data: the application payload TCP is carrying</text>
+      </g>
+    </svg>
+    <figcaption>The TCP header. Everything above the Options row is a fixed 20 bytes; Options and Data are both variable length.</figcaption>
+  </figure>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th>Field</th><th>Size</th><th>What it holds</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Source Port</td><td>16 bits</td><td>The sending application's port, identifying which local conversation this segment belongs to</td></tr>
+      <tr><td>Destination Port</td><td>16 bits</td><td>The receiving application's port, e.g. <code>443</code> for HTTPS</td></tr>
+      <tr><td>Sequence Number</td><td>32 bits</td><td>The byte offset of the first byte of data in this segment, relative to the connection's initial sequence number</td></tr>
+      <tr><td>Acknowledgment Number</td><td>32 bits</td><td>The next byte the sender of this segment expects to receive, valid whenever ACK is set</td></tr>
+      <tr><td>Data Offset</td><td>4 bits</td><td>Header length in 32-bit words, telling the receiver where the header ends and Data begins</td></tr>
+      <tr><td>Reserved</td><td>6 bits</td><td>Set to 0, unused</td></tr>
+      <tr><td>Flags</td><td>6 bits</td><td>URG, ACK, PSH, RST, SYN, FIN, one bit each; see below</td></tr>
+      <tr><td>Window Size</td><td>16 bits</td><td>How many more bytes the sender of this segment can currently receive, the core of flow control</td></tr>
+      <tr><td>Checksum</td><td>16 bits</td><td>Integrity check covering the TCP header and data</td></tr>
+      <tr><td>Urgent Pointer</td><td>16 bits</td><td>Only meaningful when URG is set; rarely used in practice</td></tr>
+      <tr><td>Options</td><td>0–40 bytes</td><td>Optional extensions, most commonly MSS (Maximum Segment Size) and window scaling</td></tr>
+      <tr><td>Data</td><td>Variable</td><td>The actual application payload: an HTTP request, part of a file transfer, anything</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The six control flags</h2>
+  <table class="compare-table">
+    <thead>
+      <tr><th>Flag</th><th>Means</th><th>Typically set when</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>SYN</td><td>Synchronize sequence numbers, start a new connection</td><td>Only on the first two segments of the three-way handshake</td></tr>
+      <tr><td>ACK</td><td>The acknowledgment number field is valid</td><td>On effectively every segment after the handshake's first one</td></tr>
+      <tr><td>FIN</td><td>This sender has no more data to send</td><td>Initiating a normal, graceful close</td></tr>
+      <tr><td>RST</td><td>Abort the connection immediately, no graceful close</td><td>The destination port is closed, or a hard error occurred</td></tr>
+      <tr><td>PSH</td><td>Push buffered data up to the application right away</td><td>Interactive traffic, like a single SSH (Secure Shell) keypress that shouldn't wait to be batched</td></tr>
+      <tr><td>URG</td><td>The Urgent Pointer field is significant</td><td>Rare in modern traffic</td></tr>
+    </tbody>
+  </table>
+  <p>The three-way handshake and connection termination, both built entirely from these flags, get their own full walkthrough in the <a href="tcp-handshake-termination.html">next topic</a>.</p>
+
+  <h2>Sequence and acknowledgment numbers: TCP counts bytes, not packets</h2>
+  <p>A sequence number doesn't count segments. It counts <strong>bytes</strong>. Each connection starts with a random initial sequence number (ISN), and every byte of data sent after that gets its own implicit position in the stream. A segment's Sequence Number field is just the position of its first byte; its Acknowledgment Number, sent by the other side, is the position of the next byte it's still waiting for.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of a client sending 200 bytes of data starting at sequence number 1000, and the server acknowledging with ack number 1200, the next byte it expects">
+      <circle cx="70" cy="80" r="22" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="70" y="84" text-anchor="middle" font-size="9.5" fill="#5b9df9">CLIENT</text>
+
+      <circle cx="570" cy="80" r="22" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="570" y="84" text-anchor="middle" font-size="9.5" fill="#4fd1c5">SERVER</text>
+
+      <line x1="94" y1="70" x2="546" y2="70" stroke="#3a4a6b" stroke-width="1.2"/>
+      <line x1="94" y1="90" x2="546" y2="90" stroke="#3a4a6b" stroke-width="1.2"/>
+
+      <circle r="5" fill="#5b9df9">
+        <animateMotion dur="7s" repeatCount="indefinite" path="M94,70 L546,70"/>
+        <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.45;0.5;1" dur="7s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="55" text-anchor="middle" font-size="9.5" fill="#5b9df9">
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.42;0.48" dur="7s" repeatCount="indefinite"/>
+        seq=1000, 200 bytes of data
+      </text>
+
+      <circle r="5" fill="#4fd1c5">
+        <animateMotion dur="7s" repeatCount="indefinite" begin="-3.5s" path="M546,90 L94,90"/>
+        <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.48;0.53;0.95;1" dur="7s" repeatCount="indefinite"/>
+      </circle>
+      <text x="320" y="115" text-anchor="middle" font-size="9.5" fill="#4fd1c5">
+        <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.53;0.58;0.92;0.97" dur="7s" repeatCount="indefinite"/>
+        ack=1200, "send me byte 1200 next"
+      </text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate, animateMotion').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>The server's ack number (1200) is exactly the client's sequence number (1000) plus the number of bytes sent (200): confirmation that every one of those bytes actually arrived.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <span class="callout-label">WHY WIRESHARK SHOWS SMALL, ROUND SEQUENCE NUMBERS</span>
+    <p>Real initial sequence numbers are large and effectively random, chosen that way so an attacker can't easily guess them and inject forged segments into someone else's connection. Packet capture tools like Wireshark show "relative" sequence numbers instead, starting each connection at 0, purely to make captures easier to read. The actual numbers on the wire are the real, random ones.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="packet-flow.html">
+    <span class="nav-label">← PREVIOUS</span>
+    Packet Flow Across Networks
+  </a>
+  <a href="tcp-handshake-termination.html">
+    <span class="nav-label">NEXT →</span>
+    TCP 3-Way Handshake & Termination
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -65,11 +65,11 @@ const SITE_DATA = [
     title: "Layer 4: Transport",
     blurb: "TCP reliability mechanics and the UDP alternative.",
     topics: [
-      { title: "TCP Header Structure", slug: "tcp-header", status: "planned" },
-      { title: "TCP 3-Way Handshake & Termination", slug: "tcp-handshake-termination", status: "planned" },
-      { title: "Flow Control & Congestion Control", slug: "flow-congestion-control", status: "planned" },
-      { title: "UDP Header & Use Cases", slug: "udp-header", status: "planned" },
-      { title: "Ports & Sockets", slug: "ports-sockets", status: "planned" },
+      { title: "TCP Header Structure", slug: "tcp-header", status: "published" },
+      { title: "TCP 3-Way Handshake & Termination", slug: "tcp-handshake-termination", status: "published" },
+      { title: "Flow Control & Congestion Control", slug: "flow-congestion-control", status: "published" },
+      { title: "UDP Header & Use Cases", slug: "udp-header", status: "published" },
+      { title: "Ports & Sockets", slug: "ports-sockets", status: "published" },
     ],
   },
   {

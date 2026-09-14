@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ports & Sockets · netskillup</title>
+<meta name="description" content="What a port number actually identifies, the well-known/registered/ephemeral ranges, and why a socket, not just a port, is the real identifier of a connection.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="../index.html" class="site-mark">
+      <span class="dot" aria-hidden="true"></span>
+      netskillup
+    </a>
+  </div>
+</header>
+
+<div class="topic-header" style="--module-color: var(--l4);">
+  <div class="wrap">
+    <a class="breadcrumb" href="../index.html#modules">← Module 04 · Layer 4: Transport</a>
+    <h1>Ports & Sockets</h1>
+    <p class="topic-dek">A port number alone doesn't identify a conversation. It takes the full combination, a socket, to tell two connections to the exact same service apart.</p>
+  </div>
+</div>
+
+<article class="topic-body wrap">
+
+  <h2>What a port actually is</h2>
+  <p>An IP (Internet Protocol) address gets a segment to the right host. A port number, a 16-bit field in both the <a href="tcp-header.html">TCP</a> and <a href="udp-header.html">UDP</a> headers, gets it to the right <strong>application</strong> on that host. Without ports, a single host could only ever run one network application at a time, since there'd be no way to tell a web server's traffic from a DNS (Domain Name System) resolver's.</p>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th>Range</th><th>Name</th><th>Typical use</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>0–1023</td><td>Well-known ports</td><td>Standard services: 22 (SSH), 53 (DNS), 80 (HTTP), 443 (HTTPS)</td></tr>
+      <tr><td>1024–49151</td><td>Registered ports</td><td>Assigned to specific applications: 3389 (RDP), 5432 (PostgreSQL)</td></tr>
+      <tr><td>49152–65535</td><td>Dynamic / ephemeral ports</td><td>Assigned temporarily by the OS (Operating System) for the client side of an outgoing connection</td></tr>
+    </tbody>
+  </table>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th>Port</th><th>Protocol</th><th>Service</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>20 / 21</td><td>TCP</td><td>FTP (File Transfer Protocol): data / control</td></tr>
+      <tr><td>22</td><td>TCP</td><td>SSH (Secure Shell)</td></tr>
+      <tr><td>23</td><td>TCP</td><td>Telnet</td></tr>
+      <tr><td>25</td><td>TCP</td><td>SMTP (Simple Mail Transfer Protocol)</td></tr>
+      <tr><td>53</td><td>UDP / TCP</td><td>DNS</td></tr>
+      <tr><td>67 / 68</td><td>UDP</td><td>DHCP (Dynamic Host Configuration Protocol)</td></tr>
+      <tr><td>80</td><td>TCP</td><td>HTTP (Hypertext Transfer Protocol)</td></tr>
+      <tr><td>110</td><td>TCP</td><td>POP3 (Post Office Protocol v3)</td></tr>
+      <tr><td>143</td><td>TCP</td><td>IMAP (Internet Message Access Protocol)</td></tr>
+      <tr><td>443</td><td>TCP</td><td>HTTPS</td></tr>
+      <tr><td>3389</td><td>TCP</td><td>RDP (Remote Desktop Protocol)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>A socket is what actually identifies a conversation</h2>
+  <p>An IP address is a building's street address. A port number is the apartment inside that building mail is headed for. But if you're expecting several different replies from the same apartment, one for a package, one for a bill, just knowing the apartment number isn't enough to sort your own incoming mail. A <strong>socket</strong> is the full pairing stapled to every exchange: which address and apartment it came from, which address and apartment it's going to, and which protocol it's using. Formally, it's a five-part combination: protocol, source IP, source port, destination IP, destination port. Change any one of those five, and it's a different socket, a completely distinct connection, even if everything else about it is identical.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of two simultaneous browser tabs on the same client, both connected to the same server on port 443, distinguished only by their different client-side ephemeral ports">
+      <circle cx="80" cy="100" r="24" fill="none" stroke="#8d9bb3" stroke-width="1.6"/>
+      <text x="80" y="104" text-anchor="middle" font-size="9" fill="#8d9bb3">YOU</text>
+
+      <circle cx="560" cy="100" r="26" fill="none" stroke="#4fd1c5" stroke-width="1.8"/>
+      <text x="560" y="98" text-anchor="middle" font-size="9" fill="#4fd1c5">SERVER</text>
+      <text x="560" y="111" text-anchor="middle" font-size="8.5" fill="#4fd1c5">:443</text>
+
+      <line x1="103" y1="85" x2="536" y2="92" stroke="#5b9df9" stroke-width="1.4"/>
+      <line x1="103" y1="115" x2="536" y2="108" stroke="#b18cf0" stroke-width="1.4"/>
+
+      <circle r="4.5" fill="#5b9df9">
+        <animateMotion dur="3.6s" repeatCount="indefinite" path="M103,85 L536,92"/>
+      </circle>
+      <circle r="4.5" fill="#b18cf0">
+        <animateMotion dur="3.6s" repeatCount="indefinite" begin="-1.8s" path="M103,115 L536,108"/>
+      </circle>
+
+      <text x="320" y="60" text-anchor="middle" font-size="9.5" fill="#5b9df9">Tab 1: source port 51000 ↔ 443</text>
+      <text x="320" y="150" text-anchor="middle" font-size="9.5" fill="#b18cf0">Tab 2: source port 51001 ↔ 443</text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animateMotion').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Same client, same server, same destination port 443, at the same time. The two connections are only distinguishable because the client's OS gave each tab a different ephemeral source port.</figcaption>
+  </figure>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th></th><th>Protocol</th><th>Source</th><th>Destination</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Tab 1's socket</td><td>TCP</td><td>192.168.1.10:51000</td><td>93.184.216.34:443</td></tr>
+      <tr><td>Tab 2's socket</td><td>TCP</td><td>192.168.1.10:51001</td><td>93.184.216.34:443</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="callout-label">WHY YOUR OS PICKS A RANDOM SOURCE PORT FOR OUTGOING CONNECTIONS</span>
+    <p>Every time an application opens an outgoing connection, the OS assigns it an unused port from the ephemeral range, exactly so the situation above works: the OS itself is what keeps every simultaneous outgoing connection from the same host distinct. This is also the exact mechanism <a href="nat-pat.html">PAT</a> depends on, rewriting each internal host's chosen source port to a unique public one so replies for every device come back to the right place.</p>
+  </div>
+
+</article>
+
+<nav class="topic-nav wrap">
+  <a href="udp-header.html">
+    <span class="nav-label">← PREVIOUS</span>
+    UDP Header & Use Cases
+  </a>
+  <span>
+    <span class="nav-label">NEXT · PLANNED</span>
+    DNS Hierarchy & Record Types
+  </span>
+</nav>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 netskillup</span>
+    <a href="../index.html">← back to index</a>
+  </div>
+</footer>
+
+</body>
+</html>
