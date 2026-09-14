@@ -46,34 +46,47 @@
   <p>Every outbound connection gets a unique combination of (public IP, public port) assigned to it, and the router keeps a translation table mapping that pair back to the original (private IP, private port) it came from. When a reply comes back addressed to that public IP and port, the router looks up the table and rewrites it back to the correct private device, exactly like a receptionist routing an incoming call to the right desk extension based on which line it came in on.</p>
 
   <figure class="diagram-block">
-    <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of two private hosts sharing one public IP through PAT, with a translation table mapping each private address and port to a unique public port">
-      <circle cx="60" cy="50" r="18" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
-      <text x="60" y="54" text-anchor="middle" font-size="9" fill="#5b9df9">A</text>
-      <text x="60" y="80" text-anchor="middle" font-size="9" fill="#5b6a86">192.168.1.10:5001</text>
+    <svg viewBox="0 0 640 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of two private hosts sharing one public IP through PAT, with a translation table mapping each host's private port to its own unique public port">
+      <circle cx="60" cy="55" r="18" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="60" y="59" text-anchor="middle" font-size="9" fill="#5b9df9">A</text>
+      <text x="60" y="85" text-anchor="middle" font-size="9" fill="#5b6a86">192.168.1.10:5001</text>
 
-      <circle cx="60" cy="170" r="18" fill="none" stroke="#b18cf0" stroke-width="1.6"/>
-      <text x="60" y="174" text-anchor="middle" font-size="9" fill="#b18cf0">B</text>
-      <text x="60" y="200" text-anchor="middle" font-size="9" fill="#5b6a86">192.168.1.11:5001</text>
+      <circle cx="60" cy="185" r="18" fill="none" stroke="#b18cf0" stroke-width="1.6"/>
+      <text x="60" y="189" text-anchor="middle" font-size="9" fill="#b18cf0">B</text>
+      <text x="60" y="215" text-anchor="middle" font-size="9" fill="#5b6a86">192.168.1.11:5001</text>
 
-      <rect x="220" y="70" width="200" height="80" rx="4" fill="none" stroke="#f2a93b" stroke-width="1.8"/>
-      <text x="320" y="55" text-anchor="middle" font-size="10.5" fill="#f2a93b">NAT / PAT table</text>
-      <text x="320" y="94" text-anchor="middle" font-size="9" font-family="monospace" fill="#5b9df9">A: :5001 → :40001</text>
-      <text x="320" y="114" text-anchor="middle" font-size="9" font-family="monospace" fill="#b18cf0">B: :5001 → :40002</text>
-      <text x="320" y="134" text-anchor="middle" font-size="8" fill="#5b6a86">(private port → public port)</text>
+      <text x="320" y="55" text-anchor="middle" font-size="11" fill="#f2a93b">NAT / PAT translation table</text>
+      <rect x="190" y="68" width="260" height="112" rx="4" fill="none" stroke="#f2a93b" stroke-width="1.8"/>
 
-      <circle cx="580" cy="110" r="20" fill="none" stroke="#4fd1c5" stroke-width="1.8"/>
-      <text x="580" y="114" text-anchor="middle" font-size="9" fill="#4fd1c5">203.0.113.9</text>
+      <text x="222" y="88" text-anchor="middle" font-size="8" fill="#5b6a86">HOST</text>
+      <text x="312" y="88" text-anchor="middle" font-size="8" fill="#5b6a86">PRIVATE</text>
+      <text x="408" y="88" text-anchor="middle" font-size="8" fill="#5b6a86">PUBLIC</text>
+      <line x1="200" y1="97" x2="440" y2="97" stroke="#3a4a6b" stroke-width="1"/>
 
-      <line x1="78" y1="52" x2="218" y2="90" stroke="#5b9df9" stroke-width="1.6">
+      <text x="222" y="122" text-anchor="middle" font-size="10.5" fill="#5b9df9">A</text>
+      <text x="312" y="122" text-anchor="middle" font-size="10.5" font-family="monospace" fill="#5b9df9">:5001</text>
+      <text x="408" y="122" text-anchor="middle" font-size="10.5" font-family="monospace" fill="#5b9df9">:40001</text>
+
+      <text x="222" y="150" text-anchor="middle" font-size="10.5" fill="#b18cf0">B</text>
+      <text x="312" y="150" text-anchor="middle" font-size="10.5" font-family="monospace" fill="#b18cf0">:5001</text>
+      <text x="408" y="150" text-anchor="middle" font-size="10.5" font-family="monospace" fill="#b18cf0">:40002</text>
+
+      <text x="320" y="170" text-anchor="middle" font-size="8" fill="#5b6a86">same private port in, a different public port out</text>
+
+      <circle cx="580" cy="124" r="20" fill="none" stroke="#4fd1c5" stroke-width="1.8"/>
+      <text x="580" y="128" text-anchor="middle" font-size="9" fill="#4fd1c5">203.0.113.9</text>
+
+      <line x1="78" y1="58" x2="188" y2="94" stroke="#5b9df9" stroke-width="1.6">
         <animate attributeName="opacity" values="0.3;1;0.3" dur="2.6s" repeatCount="indefinite"/>
       </line>
-      <line x1="78" y1="168" x2="218" y2="128" stroke="#b18cf0" stroke-width="1.6">
+      <line x1="78" y1="182" x2="188" y2="154" stroke="#b18cf0" stroke-width="1.6">
         <animate attributeName="opacity" values="0.3;1;0.3" dur="2.6s" repeatCount="indefinite" begin="-1.3s"/>
       </line>
-      <line x1="422" y1="110" x2="558" y2="110" stroke="#f2a93b" stroke-width="1.8">
+      <line x1="452" y1="124" x2="558" y2="124" stroke="#f2a93b" stroke-width="1.8">
         <animate attributeName="opacity" values="0.3;1;0.3" dur="2.6s" repeatCount="indefinite" begin="-0.6s"/>
       </line>
-      <text x="480" y="140" text-anchor="middle" font-size="9" fill="#5b6a86">one public IP, two distinct source ports</text>
+      <text x="505" y="108" text-anchor="middle" font-size="8.5" fill="#5b6a86">one public IP,</text>
+      <text x="505" y="120" text-anchor="middle" font-size="8.5" fill="#5b6a86">two public ports</text>
 
       <script type="text/javascript"><![CDATA[
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
