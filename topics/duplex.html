@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Duplex: Half vs Full — netskillup</title>
-<meta name="description" content="Half-duplex vs full-duplex explained through walkie-talkies and phone calls — and why it made collisions disappear from modern networks.">
+<meta name="description" content="Half-duplex vs full-duplex explained through walkie-talkies and phone calls, and why it made collisions disappear from modern networks.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -25,17 +25,17 @@
   <div class="wrap">
     <a class="breadcrumb" href="../index.html#modules">← Module 01 · Networking Fundamentals</a>
     <h1>Duplex: Half vs Full</h1>
-    <p class="topic-dek">Whether a link can carry traffic in both directions at the same instant — and the single biggest reason collisions basically don't happen anymore.</p>
+    <p class="topic-dek">Whether a link can carry traffic in both directions at the same instant, and the single biggest reason collisions basically don't happen anymore.</p>
   </div>
 </div>
 
 <article class="topic-body wrap">
 
   <h2>Half-duplex — walkie-talkies</h2>
-  <p>On a half-duplex link, only one side can transmit at a time. If both sides try to talk at once, the signals collide and both transmissions are lost. This is exactly how a walkie-talkie works: you press the button, say your piece, say "over," and only then does the other person reply. You physically cannot both talk and clearly hear the other person at the same moment. Old hub-based Ethernet and early wireless links worked this way — and it's the entire reason collision domains and CSMA/CD (the "listen before you talk, and detect if you collided" logic) had to exist in the first place.</p>
+  <p>On a half-duplex link, only one side can transmit at a time. If both sides try to talk at once, the signals collide and both transmissions are lost. This is exactly how a walkie-talkie works: you press the button, say your piece, say "over," and only then does the other person reply. You physically cannot both talk and clearly hear the other person at the same moment. Old hub-based Ethernet and early wireless links worked this way, and it's the entire reason collision domains and CSMA/CD (Carrier Sense Multiple Access with Collision Detection: the "listen before you talk, and detect if you collided" logic) had to exist in the first place.</p>
 
   <h2>Full-duplex — a phone call</h2>
-  <p>On a full-duplex link, both sides can transmit and receive at the exact same time, over separate transmit and receive paths (on twisted-pair Ethernet, literally separate wire pairs). This is a phone call: you can talk while the other person is talking, interrupt, and hear them simultaneously — there's no "over." Modern switched Ethernet is full-duplex by default, which is why collisions are essentially a non-issue on any current network: there's no shared medium left to collide on.</p>
+  <p>On a full-duplex link, both sides can transmit and receive at the exact same time, over separate transmit and receive paths (on twisted-pair Ethernet, literally separate wire pairs). This is a phone call: you can talk while the other person is talking, interrupt, and hear them simultaneously. There's no "over." Modern switched Ethernet is full-duplex by default, which is why collisions are essentially a non-issue on any current network: there's no shared medium left to collide on.</p>
 
   <figure class="diagram-block">
     <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram comparing half-duplex, where only one device transmits at a time, to full-duplex, where both devices transmit simultaneously">
@@ -115,7 +115,7 @@
     </thead>
     <tbody>
       <tr><td>Can both sides transmit at once?</td><td>No</td><td>Yes</td></tr>
-      <tr><td>Collisions possible?</td><td>Yes</td><td>No — nothing to collide with</td></tr>
+      <tr><td>Collisions possible?</td><td>Yes</td><td>No, nothing to collide with</td></tr>
       <tr><td>Analogy</td><td>Walkie-talkie</td><td>Phone call</td></tr>
       <tr><td>Where you'll see it today</td><td>Old hubs, some wireless/satellite links</td><td>Virtually all modern switched Ethernet</td></tr>
     </tbody>
@@ -123,7 +123,7 @@
 
   <div class="callout">
     <span class="callout-label">CONNECTING THE DOTS</span>
-    <p>This is why the <a href="broadcast-vs-collision-domain.html">collision domain</a> topic earlier called collisions "mostly historical" — full-duplex links plus switches (one collision domain per port) together removed the conditions a collision needs to happen at all.</p>
+    <p>This is why the <a href="broadcast-vs-collision-domain.html">collision domain</a> topic earlier called collisions "mostly historical": full-duplex links plus switches (one collision domain per port) together removed the conditions a collision needs to happen at all.</p>
   </div>
 
 </article>

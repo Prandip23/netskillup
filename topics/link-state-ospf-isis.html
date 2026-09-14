@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -33,7 +33,7 @@
 
   <h2>Everyone gets the same map</h2>
   <p>The previous topic's distance-vector routers only know direction and distance, secondhand, from their neighbors. A <strong>link-state</strong> router does something fundamentally different: it floods a small description of its own directly-connected links (an LSA, Link-State Advertisement) to the entire routing domain, and receives everyone else's in return. Every router ends up holding an identical, complete map of the topology, and independently runs <strong>Dijkstra's shortest path algorithm</strong> on that map to compute its own best route to everywhere.</p>
-  <p>Nobody is trusting a rumor anymore — every router has the actual map and draws its own path, the way two people using the same detailed city map might still choose different routes depending on where they're each starting from.</p>
+  <p>Nobody is trusting a rumor anymore. Every router has the actual map and draws its own path, the way two people using the same detailed city map might still choose different routes depending on where they're each starting from.</p>
 
   <figure class="diagram-block">
     <svg viewBox="0 0 640 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of link-state advertisements flooding from one router to all others, so every router ends up with the same complete topology map">
@@ -55,7 +55,7 @@
         <line x1="304" y1="104" x2="136" y2="138"><animate attributeName="opacity" values="0.2;1;0.2" dur="2.2s" repeatCount="indefinite" begin="-1s"/></line>
         <line x1="338" y1="104" x2="504" y2="138"><animate attributeName="opacity" values="0.2;1;0.2" dur="2.2s" repeatCount="indefinite" begin="-1.5s"/></line>
       </g>
-      <text x="320" y="180" text-anchor="middle" font-size="10.5" fill="#5b6a86">R1's LSA reaches every other router — and every router floods its own the same way</text>
+      <text x="320" y="180" text-anchor="middle" font-size="10.5" fill="#5b6a86">R1's LSA reaches every other router, and every router floods its own the same way</text>
 
       <script type="text/javascript"><![CDATA[
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -69,11 +69,11 @@
   </figure>
 
   <h2>OSPF and areas</h2>
-  <p>Flooding the entire topology to every router works fine on a small network, but scales badly for the same reason a single giant broadcast domain does: too much update traffic, too much CPU spent recomputing paths every time anything, anywhere, changes. OSPF's fix is <strong>areas</strong> — the topology gets split into Area 0 (the mandatory "backbone") plus additional numbered areas connected to it. Full LSA flooding only happens <em>within</em> an area; between areas, routers exchange summarized reachability information instead of the raw topology.</p>
+  <p>Flooding the entire topology to every router works fine on a small network, but scales badly for the same reason a single giant broadcast domain does: too much update traffic, too much CPU (Central Processing Unit) spent recomputing paths every time anything, anywhere, changes. OSPF's (Open Shortest Path First) fix is <strong>areas</strong>: the topology gets split into Area 0 (the mandatory "backbone") plus additional numbered areas connected to it. Full LSA flooding only happens <em>within</em> an area; between areas, routers exchange summarized reachability information instead of the raw topology.</p>
   <p>OSPF's cost metric is based on interface bandwidth (lower cost for faster links), and on shared broadcast segments a <strong>DR/BDR</strong> (Designated Router / Backup Designated Router) election reduces how many routers need to exchange LSAs directly with each other.</p>
 
   <h2>IS-IS: the same idea, a different lineage</h2>
-  <p>IS-IS (Intermediate System to Intermediate System) is conceptually very close to OSPF, link-state, Dijkstra, the works, but comes from the OSI protocol suite rather than the IP world, and organizes its hierarchy into <strong>Level 1</strong> and <strong>Level 2</strong> routers instead of numbered areas. It's less common in enterprise networks than OSPF, but it's the backbone protocol of choice inside many large service-provider networks.</p>
+  <p>IS-IS (Intermediate System to Intermediate System) is conceptually very close to OSPF, link-state, Dijkstra, the works, but comes from the OSI (Open Systems Interconnection) protocol suite rather than the IP (Internet Protocol) world, and organizes its hierarchy into <strong>Level 1</strong> and <strong>Level 2</strong> routers instead of numbered areas. It's less common in enterprise networks than OSPF, but it's the backbone protocol of choice inside many large service-provider networks.</p>
 
   <table class="compare-table">
     <thead>

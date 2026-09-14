@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -25,20 +25,20 @@
   <div class="wrap">
     <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3 — Network</a>
     <h1>ICMP — Ping & Traceroute Mechanics</h1>
-    <p class="topic-dek">Not TCP, not UDP, no port numbers at all — ICMP is the network's own diagnostic and error-reporting channel, and it's the entire mechanism behind two of the most-used tools in networking.</p>
+    <p class="topic-dek">Not TCP (Transmission Control Protocol), not UDP (User Datagram Protocol), no port numbers at all. ICMP is the network's own diagnostic and error-reporting channel, and it's the entire mechanism behind two of the most-used tools in networking.</p>
   </div>
 </div>
 
 <article class="topic-body wrap">
 
   <h2>What ICMP actually is</h2>
-  <p>ICMP (Internet Control Message Protocol) rides directly inside IP (Protocol number 1, from the IPv4 header topic) rather than on top of TCP or UDP. It has no ports, no sessions, nothing to connect to — it exists purely to carry short, structured control and error messages between devices. Every ICMP message has a <strong>type</strong> and <strong>code</strong> that say exactly what it's reporting.</p>
+  <p>ICMP (Internet Control Message Protocol) rides directly inside IP (Internet Protocol; Protocol number 1, from the IPv4 header topic) rather than on top of TCP or UDP. It has no ports, no sessions, nothing to connect to. It exists purely to carry short, structured control and error messages between devices. Every ICMP message has a <strong>type</strong> and <strong>code</strong> that say exactly what it's reporting.</p>
 
   <h2>Ping: echo request and reply</h2>
   <p>Ping is the simplest possible use of ICMP: send a <strong>type 8, Echo Request</strong>, and if the destination is reachable and willing to answer, it sends back a <strong>type 0, Echo Reply</strong>. No data exchanged beyond "are you there," and how long the round trip took.</p>
 
   <h2>Traceroute: abusing TTL on purpose</h2>
-  <p>Recall from the IPv4 header topic that every router decrements a packet's TTL by one, and drops it with a <strong>type 11, Time Exceeded</strong> message if TTL hits zero. Traceroute turns that error condition into a mapping tool: it sends a packet with <code>TTL=1</code>, which dies at the very first router, revealing that router's address in the Time Exceeded reply. Then it sends one with <code>TTL=2</code>, which dies at the second router. It keeps incrementing until a packet finally survives all the way to the destination.</p>
+  <p>Recall from the IPv4 header topic that every router decrements a packet's TTL (Time to Live) by one, and drops it with a <strong>type 11, Time Exceeded</strong> message if TTL hits zero. Traceroute turns that error condition into a mapping tool: it sends a packet with <code>TTL=1</code>, which dies at the very first router, revealing that router's address in the Time Exceeded reply. Then it sends one with <code>TTL=2</code>, which dies at the second router. It keeps incrementing until a packet finally survives all the way to the destination.</p>
 
   <figure class="diagram-block">
     <svg viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of traceroute sending packets with increasing TTL, each one dying at the next router until one reaches the destination">
@@ -91,23 +91,23 @@
     <figcaption>Three probes, three increasing TTLs. Each Time Exceeded reply hands traceroute the address of one more hop along the path.</figcaption>
   </figure>
 
-  <p>Each router's Time Exceeded reply comes from that router's own address, so by the time a probe finally survives to the destination, traceroute has assembled the full list of routers in between — one hop revealed per probe.</p>
+  <p>Each router's Time Exceeded reply comes from that router's own address, so by the time a probe finally survives to the destination, traceroute has assembled the full list of routers in between, one hop revealed per probe.</p>
 
   <table class="compare-table">
     <thead>
       <tr><th>ICMP message</th><th>Type</th><th>Meaning</th></tr>
     </thead>
     <tbody>
-      <tr><td>Echo Request</td><td>8</td><td>"Are you there?" — what ping sends</td></tr>
-      <tr><td>Echo Reply</td><td>0</td><td>"Yes." — what ping receives back</td></tr>
+      <tr><td>Echo Request</td><td>8</td><td>"Are you there?", what ping sends</td></tr>
+      <tr><td>Echo Reply</td><td>0</td><td>"Yes.", what ping receives back</td></tr>
       <tr><td>Destination Unreachable</td><td>3</td><td>A router or host couldn't deliver the packet at all</td></tr>
-      <tr><td>Time Exceeded</td><td>11</td><td>TTL hit zero — the mechanism traceroute is built on</td></tr>
+      <tr><td>Time Exceeded</td><td>11</td><td>TTL hit zero, the mechanism traceroute is built on</td></tr>
     </tbody>
   </table>
 
   <div class="callout">
     <span class="callout-label">A NO-REPLY DOESN'T MEAN A DEAD HOST</span>
-    <p>Firewalls very commonly block ICMP outright as a hardening measure, since it can also be used to probe or map a network. A host that never replies to ping might be perfectly reachable on every port that actually matters — treat "no ping" as "ICMP is filtered," not proof the host is down.</p>
+    <p>Firewalls very commonly block ICMP outright as a hardening measure, since it can also be used to probe or map a network. A host that never replies to ping might be perfectly reachable on every port that actually matters. Treat "no ping" as "ICMP is filtered," not proof the host is down.</p>
   </div>
 
 </article>

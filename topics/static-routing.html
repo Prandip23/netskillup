@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -32,7 +32,7 @@
 <article class="topic-body wrap">
 
   <h2>What a static route actually is</h2>
-  <p>A static route is an administrator manually entering a destination network and how to reach it, either a next-hop IP address or an outgoing interface. That's the entire mechanism: no protocol runs in the background, no negotiation with neighboring routers, nothing gets learned automatically.</p>
+  <p>A static route is an administrator manually entering a destination network and how to reach it, either a next-hop IP (Internet Protocol) address or an outgoing interface. That's the entire mechanism: no protocol runs in the background, no negotiation with neighboring routers, nothing gets learned automatically.</p>
 
   <figure class="diagram-block">
     <svg viewBox="0 0 640 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of two routers each needing a manually configured static route to reach the other's local network">
@@ -55,7 +55,7 @@
       <text x="270" y="115" text-anchor="middle" font-size="9" fill="#5b6a86">ip route 10.0.2.0/24 → R2</text>
       <text x="410" y="45" text-anchor="middle" font-size="9" fill="#5b6a86">ip route 10.0.1.0/24 → R1</text>
     </svg>
-    <figcaption>Two entries, typed by hand, one on each router — and this is only two routers. A full mesh of ten would need dozens.</figcaption>
+    <figcaption>Two entries, typed by hand, one on each router, and this is only two routers. A full mesh of ten would need dozens.</figcaption>
   </figure>
 
   <h2>Where it's the right tool</h2>
@@ -66,7 +66,7 @@
   </ul>
 
   <h2>Where it falls apart</h2>
-  <p>Static routes don't adapt. If the configured next-hop goes down, the route stays in the table (unless the router also loses reachability to the next-hop itself) and traffic keeps getting sent into a dead end until a human notices and fixes it. And every network has to be entered by hand, on every router that needs to reach it — a topology with dozens of routers becomes an enormous, error-prone amount of manual configuration. That's exactly the problem the dynamic routing protocols later in this module exist to solve.</p>
+  <p>Static routes don't adapt. If the configured next-hop goes down, the route stays in the table (unless the router also loses reachability to the next-hop itself) and traffic keeps getting sent into a dead end until a human notices and fixes it. And every network has to be entered by hand, on every router that needs to reach it. A topology with dozens of routers becomes an enormous, error-prone amount of manual configuration. That's exactly the problem the dynamic routing protocols later in this module exist to solve.</p>
 
   <div class="callout">
     <span class="callout-label">THE ONE PLACE STATIC ROUTES SHINE EVEN IN A DYNAMIC NETWORK</span>

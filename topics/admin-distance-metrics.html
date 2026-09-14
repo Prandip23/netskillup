@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -32,10 +32,10 @@
 <article class="topic-body wrap">
 
   <h2>Two different questions</h2>
-  <p>Once longest prefix match (previous topic) has narrowed things down to routes for the exact same destination network, a router can still end up with more than one candidate — maybe a static route <em>and</em> an OSPF route both claim to know how to reach <code>10.0.2.0/24</code>. Two separate numbers resolve that, each answering a different question:</p>
+  <p>Once longest prefix match (previous topic) has narrowed things down to routes for the exact same destination network, a router can still end up with more than one candidate: maybe a static route <em>and</em> an OSPF (Open Shortest Path First) route both claim to know how to reach <code>10.0.2.0/24</code>. Two separate numbers resolve that, each answering a different question:</p>
   <ul>
     <li><strong>Administrative Distance (AD):</strong> "Which <em>source</em> of routing information do I trust more?" Lower wins. This only matters when routes for the same destination come from <em>different</em> protocols or origins.</li>
-    <li><strong>Metric:</strong> "Which specific path does this one protocol think is best?" Only compared between routes learned from the <em>same</em> protocol — RIP's hop count isn't comparable to OSPF's cost, they're different units entirely.</li>
+    <li><strong>Metric:</strong> "Which specific path does this one protocol think is best?" Only compared between routes learned from the <em>same</em> protocol. RIP's (Routing Information Protocol) hop count isn't comparable to OSPF's cost, they're different units entirely.</li>
   </ul>
   <p>It's the difference between picking which map app to trust when two apps disagree about the best route, versus that one app's own opinion of which of its own suggested routes is fastest.</p>
 
@@ -59,7 +59,7 @@
 
   <div class="callout">
     <span class="callout-label">THE MISTAKE THIS PREVENTS</span>
-    <p>Mixing up AD and metric leads to confusing troubleshooting: seeing a static route (AD 1) silently override an OSPF route (AD 110) to the same destination looks like a bug until you remember AD picks the trusted source first — the metric never even gets compared in that case.</p>
+    <p>Mixing up AD and metric leads to confusing troubleshooting: seeing a static route (AD 1) silently override an OSPF route (AD 110) to the same destination looks like a bug until you remember AD picks the trusted source first. The metric never even gets compared in that case.</p>
   </div>
 
 </article>

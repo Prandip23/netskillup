@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -35,7 +35,7 @@
   <p>Every entry describes: a destination network (as an address and prefix, like <code>10.0.2.0/24</code>), the <strong>next-hop</strong> address to forward toward, the outgoing interface, and a metric/administrative distance (covered in the next topic) used to break ties between competing sources of routes.</p>
 
   <h2>When more than one entry matches</h2>
-  <p>Routing tables are built with prefixes of different lengths, and a single destination IP can legitimately match several entries at once — a broad <code>10.0.0.0/16</code> entry and a more specific <code>10.0.2.0/24</code> entry could both technically cover the same address. The router always picks the entry with the <strong>longest matching prefix</strong>, meaning the most specific one, regardless of which entry appears first in the table or which one has a "better" metric.</p>
+  <p>Routing tables are built with prefixes of different lengths, and a single destination IP (Internet Protocol) address can legitimately match several entries at once: a broad <code>10.0.0.0/16</code> entry and a more specific <code>10.0.2.0/24</code> entry could both technically cover the same address. The router always picks the entry with the <strong>longest matching prefix</strong>, meaning the most specific one, regardless of which entry appears first in the table or which one has a "better" metric.</p>
   <p>This is exactly how postal sorting works: a rule for "Springfield, Illinois" is more specific than a rule for "the state of Illinois," and a sorter routes mail using whichever rule matches most precisely, not whichever rule was written first.</p>
 
   <figure class="diagram-block">
@@ -61,17 +61,17 @@
       </defs>
       <text x="565" y="146" text-anchor="middle" font-size="10" fill="#4fd1c5">used</text>
 
-      <text x="320" y="190" text-anchor="middle" font-size="10" fill="#5b6a86">/24 beats /16, and /16 beats the /0 default — the most specific match always wins, no exceptions.</text>
+      <text x="320" y="190" text-anchor="middle" font-size="10" fill="#5b6a86">/24 beats /16, and /16 beats the /0 default: the most specific match always wins, no exceptions.</text>
     </svg>
     <figcaption>Three entries all technically cover 10.0.2.55. Only the most specific one is ever actually used.</figcaption>
   </figure>
 
   <h2>The default route</h2>
-  <p>A <code>0.0.0.0/0</code> entry, the <strong>default route</strong> (sometimes called the "route of last resort"), matches literally every address with the least specificity possible — a prefix length of zero. It only gets used when nothing more specific matches anything at all, which is exactly what makes it the right entry for "everywhere else on the internet I don't have an explicit route for."</p>
+  <p>A <code>0.0.0.0/0</code> entry, the <strong>default route</strong> (sometimes called the "route of last resort"), matches literally every address with the least specificity possible: a prefix length of zero. It only gets used when nothing more specific matches anything at all, which is exactly what makes it the right entry for "everywhere else on the internet I don't have an explicit route for."</p>
 
   <div class="callout">
     <span class="callout-label">METRIC AND AD ONLY MATTER AFTER THIS</span>
-    <p>Longest prefix match is evaluated first, before administrative distance or metric ever come into play. Those only break ties between multiple routes to the <em>exact same</em> prefix — they never override a more specific match. That distinction is the whole subject of the next topic.</p>
+    <p>Longest prefix match is evaluated first, before administrative distance or metric ever come into play. Those only break ties between multiple routes to the <em>exact same</em> prefix. They never override a more specific match. That distinction is the whole subject of the next topic.</p>
   </div>
 
 </article>

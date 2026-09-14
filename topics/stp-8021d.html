@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -25,22 +25,22 @@
   <div class="wrap">
     <a class="breadcrumb" href="../index.html#modules">← Module 02 · Layer 2 — Data Link</a>
     <h1>Spanning Tree Protocol (802.1D)</h1>
-    <p class="topic-dek">Redundant links are good for resilience and terrible for Ethernet, which has no TTL. STP is what keeps the second one from destroying the network.</p>
+    <p class="topic-dek">Redundant links are good for resilience and terrible for Ethernet, which has no TTL (Time To Live). STP is what keeps the second one from destroying the network.</p>
   </div>
 </div>
 
 <article class="topic-body wrap">
 
   <h2>Why a backup cable can take down a whole network</h2>
-  <p>Wiring two switches together twice sounds like sensible redundancy. On an IP network it would be, because IP packets carry a TTL that gets decremented and eventually killed off. An Ethernet frame carries no such thing. If three switches are cabled in a triangle with no loop prevention, a single broadcast frame gets flooded out every other port, arrives at the next switch, gets flooded again, and keeps circulating forever, doubling in volume every trip around the loop. This is a <strong>broadcast storm</strong>, and it can saturate a network in seconds.</p>
+  <p>Wiring two switches together twice sounds like sensible redundancy. On an IP (Internet Protocol) network it would be, because IP packets carry a TTL that gets decremented and eventually killed off. An Ethernet frame carries no such thing. If three switches are cabled in a triangle with no loop prevention, a single broadcast frame gets flooded out every other port, arrives at the next switch, gets flooded again, and keeps circulating forever, doubling in volume every trip around the loop. This is a <strong>broadcast storm</strong>, and it can saturate a network in seconds.</p>
   <p>Picture three neighborhoods connected by three roads forming a loop, with no traffic authority. One piece of junk mail addressed to "everyone" gets photocopied and forwarded at every intersection, forever, in both directions. The fix isn't removing a road, it's temporarily closing exactly one of them until it's needed.</p>
 
   <h2>How STP picks which link to close</h2>
   <ol>
-    <li><strong>Elect a root bridge.</strong> Every switch advertises a Bridge ID (priority + MAC address) in a <strong>BPDU</strong> (Bridge Protocol Data Unit). The switch with the lowest Bridge ID becomes the root of the tree everyone else measures distance from.</li>
+    <li><strong>Elect a root bridge.</strong> Every switch advertises a Bridge ID (priority + MAC, or Media Access Control, address) in a <strong>BPDU</strong> (Bridge Protocol Data Unit). The switch with the lowest Bridge ID becomes the root of the tree everyone else measures distance from.</li>
     <li><strong>Every other switch picks a root port.</strong> The port with the lowest-cost path back to the root bridge stays forwarding.</li>
     <li><strong>Every segment picks a designated port.</strong> The switch with the lowest-cost path to the root, for that specific segment, forwards on it.</li>
-    <li><strong>Everything else blocks.</strong> Any port that isn't a root port or a designated port goes into <strong>blocking</strong> — physically still connected, but not forwarding data, so the loop never closes.</li>
+    <li><strong>Everything else blocks.</strong> Any port that isn't a root port or a designated port goes into <strong>blocking</strong>: physically still connected, but not forwarding data, so the loop never closes.</li>
   </ol>
 
   <figure class="diagram-block">
@@ -62,7 +62,7 @@
       <text x="410" y="100" font-size="9" fill="#4fd1c5">designated (forwarding)</text>
 
       <line x1="164" y1="170" x2="476" y2="170" stroke="#e05a5a" stroke-width="2" stroke-dasharray="6 4"/>
-      <text x="320" y="192" text-anchor="middle" font-size="10" fill="#e05a5a">blocked — would complete the loop</text>
+      <text x="320" y="192" text-anchor="middle" font-size="10" fill="#e05a5a">blocked: would complete the loop</text>
     </svg>
     <figcaption>SW2 and SW3 both have a path to the root already. The direct link between them stays physically connected but blocked, ready to take over if either forwarding link fails.</figcaption>
   </figure>

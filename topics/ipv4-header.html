@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -32,7 +32,7 @@
 <article class="topic-body wrap">
 
   <h2>The header, field by field</h2>
-  <p>A router doesn't care what's inside a packet's payload, HTTP request or DNS query or anything else. It only reads the IPv4 header wrapped around that payload, and mostly just a handful of fields in it.</p>
+  <p>A router doesn't care what's inside a packet's payload, HTTP (Hypertext Transfer Protocol) request or DNS (Domain Name System) query or anything else. It only reads the IPv4 header wrapped around that payload, and mostly just a handful of fields in it.</p>
 
   <figure class="diagram-block">
     <svg viewBox="0 0 640 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of the IPv4 header laid out as 32-bit rows: version/IHL/DSCP/total length, identification/flags/fragment offset, TTL/protocol/checksum, source address, destination address, and options">
@@ -72,11 +72,11 @@
 
   <h2>The fields that actually drive behavior</h2>
   <ul>
-    <li><strong>TTL (Time to Live):</strong> starts at some value (commonly 64 or 128) and is decremented by <strong>every</strong> router the packet passes through. Hit zero, and the packet is dropped, with an ICMP Time Exceeded message sent back — this single field is the entire mechanism behind <code>traceroute</code>, covered in the next topic.</li>
-    <li><strong>Protocol:</strong> tells the receiving host what's riding inside the payload — <code>6</code> means TCP, <code>17</code> means UDP, <code>1</code> means ICMP is next.</li>
-    <li><strong>Source / Destination IP Address:</strong> what routing decisions are actually based on — the destination address gets looked up against the routing table at every hop.</li>
-    <li><strong>Flags / Fragment Offset:</strong> handle splitting a packet that's too large for a link's MTU into smaller fragments, and reassembling them at the far end.</li>
-    <li><strong>Header Checksum:</strong> a simple integrity check on the header itself (not the payload) — recalculated at every hop since TTL changes each time.</li>
+    <li><strong>TTL (Time to Live):</strong> starts at some value (commonly 64 or 128) and is decremented by <strong>every</strong> router the packet passes through. Hit zero, and the packet is dropped, with an ICMP (Internet Control Message Protocol) Time Exceeded message sent back. This single field is the entire mechanism behind <code>traceroute</code>, covered in the next topic.</li>
+    <li><strong>Protocol:</strong> tells the receiving host what's riding inside the payload: <code>6</code> means TCP (Transmission Control Protocol), <code>17</code> means UDP (User Datagram Protocol), <code>1</code> means ICMP is next.</li>
+    <li><strong>Source / Destination IP (Internet Protocol) Address:</strong> what routing decisions are actually based on. The destination address gets looked up against the routing table at every hop.</li>
+    <li><strong>Flags / Fragment Offset:</strong> handle splitting a packet that's too large for a link's MTU (Maximum Transmission Unit) into smaller fragments, and reassembling them at the far end.</li>
+    <li><strong>Header Checksum:</strong> a simple integrity check on the header itself (not the payload), recalculated at every hop since TTL changes each time.</li>
   </ul>
 
   <div class="callout">

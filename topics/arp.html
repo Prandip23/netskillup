@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -25,14 +25,14 @@
   <div class="wrap">
     <a class="breadcrumb" href="../index.html#modules">← Module 02 · Layer 2 — Data Link</a>
     <h1>ARP</h1>
-    <p class="topic-dek">A device knows the IP address it wants to reach. It has no idea what MAC address that is. ARP is the one-question, one-answer exchange that fixes that.</p>
+    <p class="topic-dek">A device knows the IP (Internet Protocol) address it wants to reach. It has no idea what MAC address that is. ARP (Address Resolution Protocol) is the one-question, one-answer exchange that fixes that.</p>
   </div>
 </div>
 
 <article class="topic-body wrap">
 
   <h2>The problem ARP solves</h2>
-  <p>Every Ethernet frame needs a destination MAC address before it can be sent, but applications and routing tables only ever deal in IP addresses. Something has to bridge that gap on the local segment. That's the <strong>Address Resolution Protocol</strong>: given an IP address, find the MAC address of whatever device is actually holding it.</p>
+  <p>Every Ethernet frame needs a destination MAC (Media Access Control) address before it can be sent, but applications and routing tables only ever deal in IP addresses. Something has to bridge that gap on the local segment. That's the <strong>Address Resolution Protocol</strong>: given an IP address, find the MAC address of whatever device is actually holding it.</p>
   <p>It works like calling out across an open-plan office: "Who has desk assignment 10.0.0.5?" You don't know or care who that is yet, you just want them to identify themselves. Whoever holds that assignment calls back directly: "That's me, and here's exactly which desk to walk to."</p>
 
   <h2>Request and reply</h2>
@@ -89,7 +89,7 @@
         }
       ]]></script>
     </svg>
-    <figcaption>C and D both hear the broadcast request but only B, the owner of 10.0.0.5, replies — directly to A, not to everyone.</figcaption>
+    <figcaption>C and D both hear the broadcast request but only B, the owner of 10.0.0.5, replies. It answers directly to A, not to everyone.</figcaption>
   </figure>
 
   <h2>The ARP cache</h2>
@@ -109,7 +109,7 @@
 
   <div class="callout">
     <span class="callout-label">WHY ARP NEVER CROSSES A ROUTER</span>
-    <p>ARP is a broadcast, and routers don't forward broadcasts between networks — that's exactly what makes them a broadcast domain boundary (see <a href="broadcast-vs-collision-domain.html">Collision Domain vs Broadcast Domain</a>). To reach a device on another network, a host ARPs for its <em>default gateway's</em> MAC address instead, and lets routing take over from there.</p>
+    <p>ARP is a broadcast, and routers don't forward broadcasts between networks. That's exactly what makes them a broadcast domain boundary (see <a href="broadcast-vs-collision-domain.html">Collision Domain vs Broadcast Domain</a>). To reach a device on another network, a host ARPs for its <em>default gateway's</em> MAC address instead, and lets routing take over from there.</p>
   </div>
 
 </article>

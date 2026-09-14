@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Network Topologies — netskillup</title>
-<meta name="description" content="Bus, star, ring, mesh, and hybrid topologies explained with real-world analogies and diagrams — what each one is, and why almost nothing uses pure bus or ring anymore.">
+<meta name="description" content="Bus, star, ring, mesh, and hybrid topologies explained with real-world analogies and diagrams: what each one is, and why almost nothing uses pure bus or ring anymore.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -25,7 +25,7 @@
   <div class="wrap">
     <a class="breadcrumb" href="../index.html#modules">← Module 01 · Networking Fundamentals</a>
     <h1>Network Topologies</h1>
-    <p class="topic-dek">The shape of how devices are physically or logically wired together — and why that shape decides how a network fails.</p>
+    <p class="topic-dek">The shape of how devices are physically or logically wired together, and why that shape decides how a network fails.</p>
   </div>
 </div>
 
@@ -111,19 +111,19 @@
   </figure>
 
   <h2>Bus</h2>
-  <p>Every device taps into a single shared cable — like one long hallway that every apartment opens directly onto. It's cheap (minimal cabling) but fragile: a single break anywhere in that hallway cuts off everyone past the break, and every device hears every other device's traffic, so collisions are common. This is how early Ethernet (10BASE2/10BASE5, coaxial cable) actually worked. You will not find a real bus network in production today — it's here mostly so you recognize the term and understand why it was abandoned.</p>
+  <p>Every device taps into a single shared cable, like one long hallway that every apartment opens directly onto. It's cheap (minimal cabling) but fragile: a single break anywhere in that hallway cuts off everyone past the break, and every device hears every other device's traffic, so collisions are common. This is how early Ethernet (10BASE2/10BASE5, coaxial cable) actually worked. You won't find a real bus network in production today. It's here mostly so you recognize the term and understand why it was abandoned.</p>
 
   <h2>Star</h2>
-  <p>Every device connects to one central point — like every house in a neighborhood having its own private road to a roundabout. This is what a modern switch does: each device gets its own cable back to the switch, so one bad cable only takes down one device. The trade-off is the reverse of bus: if the central switch itself dies, everyone connected to it loses connectivity at once. This is the topology behind virtually every office and home network today.</p>
+  <p>Every device connects to one central point, like every house in a neighborhood having its own private road to a roundabout. This is what a modern switch does: each device gets its own cable back to the switch, so one bad cable only takes down one device. The trade-off is the reverse of bus: if the central switch itself dies, everyone connected to it loses connectivity at once. This is the topology behind virtually every office and home network today.</p>
 
   <h2>Ring</h2>
-  <p>Each device connects to exactly two neighbors, forming a loop — like a circular one-way street where mail passes from house to house until it reaches its destination. Token Ring and FDDI networks worked this way. A single break in a simple ring stops traffic entirely, which is why real implementations often used a <em>dual counter-rotating ring</em> — a second loop running the opposite direction as backup. You'll mostly encounter ring topology today in metro/service-provider fiber rings (SONET/SDH), not in office LANs.</p>
+  <p>Each device connects to exactly two neighbors, forming a loop, like a one-way loop road where traffic passes from stop to stop all the way around until it's back where it started. Token Ring and FDDI (Fiber Distributed Data Interface) networks worked this way, literally passing a token around the loop to decide which device could transmit next. A single break in a simple ring stops traffic entirely, so real implementations often used a <em>dual counter-rotating ring</em>: a second loop running the opposite direction as backup. You'll mostly encounter ring topology today in metro and service-provider fiber rings like SONET (Synchronous Optical Network) and SDH (Synchronous Digital Hierarchy), not in office LANs (Local Area Networks).</p>
 
   <h2>Mesh</h2>
-  <p>Every device connects directly to every other device — like a friend group where everyone has everyone else's phone number, with no need to go through a middleman. This is maximally resilient (many paths survive any single failure) but the cabling cost grows fast: for <code>n</code> devices you need <code>n(n-1)/2</code> links, so a full mesh of 10 devices needs 45 connections. In practice you'll see <strong>partial mesh</strong> — critical core devices (like data center routers) meshed together, while everything else uses star.</p>
+  <p>Every device connects directly to every other device, like a friend group where everyone has everyone else's phone number, with no need to go through a middleman. This is maximally resilient (many paths survive any single failure), but the cabling cost grows fast: for <code>n</code> devices you need <code>n(n-1)/2</code> links, so a full mesh of 10 devices needs 45 connections. In practice you'll see <strong>partial mesh</strong>, where critical core devices (like data center routers) are meshed together while everything else uses star.</p>
 
   <h2>Hybrid</h2>
-  <p>Almost every real network is a hybrid. A typical company might use star topology within each office floor (everyone cabled to a floor switch), those floor switches connected in a resilient ring or partial mesh at the building core, and multiple buildings connected to each other over a WAN. You mix topologies to get star's easy fault isolation at the edge and mesh/ring's resilience at the core, without paying full-mesh cost everywhere.</p>
+  <p>Almost every real network is a hybrid. A typical company might use star topology within each office floor (everyone cabled to a floor switch), those floor switches connected in a resilient ring or partial mesh at the building core, and multiple buildings connected to each other over a WAN (Wide Area Network). You mix topologies to get star's easy fault isolation at the edge and mesh/ring's resilience at the core, without paying full-mesh cost everywhere.</p>
 
   <div class="callout">
     <span class="callout-label">WHAT TO ACTUALLY REMEMBER</span>

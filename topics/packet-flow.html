@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -32,14 +32,14 @@
 <article class="topic-body wrap">
 
   <h2>The walk-through</h2>
-  <p>This is worth working through slowly, out loud, the first few times — it's the single best way to check that all the pieces from this module and the last one actually fit together instead of sitting in your head as separate facts.</p>
+  <p>This is worth working through slowly, out loud, the first few times. It's the single best way to check that all the pieces from this module and the last one actually fit together instead of sitting in your head as separate facts.</p>
   <ol>
-    <li><strong>Is the destination local?</strong> The sending host compares the destination IP against its own subnet mask. Same subnet, and it can ARP for the destination directly and send straight to it at Layer 2.</li>
-    <li><strong>Not local — ARP for the gateway.</strong> If the destination is on a different network, the host doesn't ARP for the destination at all. It ARPs for its <strong>default gateway's</strong> MAC address, since that's who it actually needs to hand the frame to next.</li>
-    <li><strong>The gateway does a routing lookup.</strong> The router receives the frame, strips the Layer 2 header, and looks at the destination IP. It checks its routing table using <strong>longest prefix match</strong> to find the most specific route, decrements the packet's <strong>TTL</strong> by one, and rewrites the Layer 2 header with the next hop's MAC address.</li>
-    <li><strong>Possibly NAT, at the edge.</strong> If this router sits at the boundary of a private network, it may also rewrite the packet's source IP (and port, under PAT) before sending it onward, recording the translation in its NAT table so the reply can find its way back.</li>
-    <li><strong>Repeat, hop by hop.</strong> Every router along the path repeats step 3: look up longest prefix match, decrement TTL, rewrite the Layer 2 header, forward. The IP header's source and destination addresses never change in transit — only the Layer 2 addressing and the TTL do, at every hop.</li>
-    <li><strong>Arrival, and the trip back.</strong> The destination network's router ARPs for (or already knows) the final host's MAC address and delivers the frame. Any reply retraces a route, possibly a completely different one, back toward the original sender — routing tables on each side don't have to agree on a single shared path.</li>
+    <li><strong>Is the destination local?</strong> The sending host compares the destination IP (Internet Protocol) address against its own subnet mask. Same subnet, and it can ARP (Address Resolution Protocol) for the destination directly and send straight to it at Layer 2.</li>
+    <li><strong>Not local — ARP for the gateway.</strong> If the destination is on a different network, the host doesn't ARP for the destination at all. It ARPs for its <strong>default gateway's</strong> MAC (Media Access Control) address, since that's who it actually needs to hand the frame to next.</li>
+    <li><strong>The gateway does a routing lookup.</strong> The router receives the frame, strips the Layer 2 header, and looks at the destination IP. It checks its routing table using <strong>longest prefix match</strong> to find the most specific route, decrements the packet's <strong>TTL</strong> (Time to Live) by one, and rewrites the Layer 2 header with the next hop's MAC address.</li>
+    <li><strong>Possibly NAT, at the edge.</strong> If this router sits at the boundary of a private network, it may also rewrite the packet's source IP (and port, under PAT, or Port Address Translation) before sending it onward, recording the translation in its NAT (Network Address Translation) table so the reply can find its way back.</li>
+    <li><strong>Repeat, hop by hop.</strong> Every router along the path repeats step 3: look up longest prefix match, decrement TTL, rewrite the Layer 2 header, forward. The IP header's source and destination addresses never change in transit. Only the Layer 2 addressing and the TTL do, at every hop.</li>
+    <li><strong>Arrival, and the trip back.</strong> The destination network's router ARPs for (or already knows) the final host's MAC address and delivers the frame. Any reply retraces a route, possibly a completely different one, back toward the original sender. Routing tables on each side don't have to agree on a single shared path.</li>
   </ol>
 
   <figure class="diagram-block">
@@ -80,7 +80,7 @@
       </text>
       <text x="500" y="100" text-anchor="middle" font-size="8.5" fill="#4fd1c5">
         <animate attributeName="opacity" values="0;0;0;0;1;1;0" keyTimes="0;0.76;0.8;0.85;0.9;0.98;1" dur="5s" repeatCount="indefinite"/>
-        delivered — reply may take a different path back
+        delivered: reply may take a different path back
       </text>
 
       <script type="text/javascript"><![CDATA[
@@ -91,7 +91,7 @@
         }
       ]]></script>
     </svg>
-    <figcaption>One packet, four hops: an ARP resolution, a routing decision, a NAT rewrite, and final delivery — every one of them a topic in this module.</figcaption>
+    <figcaption>One packet, four hops: an ARP resolution, a routing decision, a NAT rewrite, and final delivery, every one of them a topic in this module.</figcaption>
   </figure>
 
   <div class="callout">

@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -25,19 +25,19 @@
   <div class="wrap">
     <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3 — Network</a>
     <h1>BGP Basics</h1>
-    <p class="topic-dek">Every protocol so far in this module routes traffic inside one organization's network. BGP is what routes traffic between organizations — which is to say, it's what the actual internet runs on.</p>
+    <p class="topic-dek">Every protocol so far in this module routes traffic inside one organization's network. BGP is what routes traffic between organizations, which is to say, it's what the actual internet runs on.</p>
   </div>
 </div>
 
 <article class="topic-body wrap">
 
   <h2>Autonomous Systems: the internet's real "networks"</h2>
-  <p>OSPF and EIGRP assume one administrator controls the whole topology. The internet is the opposite: thousands of independently-operated networks, each one an <strong>Autonomous System (AS)</strong>, identified by an AS number, that has to agree to exchange traffic with its neighbors without any single authority dictating the whole map. BGP (Border Gateway Protocol) is the protocol those ASes use to tell each other what they can reach.</p>
-  <p>It's less like a road network inside one city, and more like national airlines negotiating bilateral agreements about which routes they'll fly between each other's countries — every relationship is its own negotiated agreement, not a single global authority assigning routes.</p>
+  <p>OSPF (Open Shortest Path First) and EIGRP (Enhanced Interior Gateway Routing Protocol) assume one administrator controls the whole topology. The internet is the opposite: thousands of independently-operated networks, each one an <strong>Autonomous System (AS)</strong>, identified by an AS number, that has to agree to exchange traffic with its neighbors without any single authority dictating the whole map. BGP (Border Gateway Protocol) is the protocol those ASes use to tell each other what they can reach.</p>
+  <p>It's less like a road network inside one city, and more like national airlines negotiating bilateral agreements about which routes they'll fly between each other's countries. Every relationship is its own negotiated agreement, not a single global authority assigning routes.</p>
 
   <h2>eBGP vs. iBGP</h2>
   <ul>
-    <li><strong>eBGP</strong> (external): a session between routers in <em>different</em> ASes — this is the actual internet-facing peering or transit relationship.</li>
+    <li><strong>eBGP</strong> (external): a session between routers in <em>different</em> ASes. This is the actual internet-facing peering or transit relationship.</li>
     <li><strong>iBGP</strong> (internal): a session between routers <em>inside the same</em> AS, used to make sure everything learned from the outside world gets distributed consistently throughout that AS's own network.</li>
   </ul>
 
@@ -71,7 +71,7 @@
 
   <div class="callout">
     <span class="callout-label">WHY THIS ISN'T "JUST A BIGGER OSPF"</span>
-    <p>An enterprise network can safely trust every router in it, because one team controls all of them. The internet can't make that assumption at all — BGP's entire design (policy-based path selection, explicit peering agreements) exists because every AS boundary is also a trust boundary.</p>
+    <p>An enterprise network can safely trust every router in it, because one team controls all of them. The internet can't make that assumption at all. BGP's entire design (policy-based path selection, explicit peering agreements) exists because every AS boundary is also a trust boundary.</p>
   </div>
 
 </article>

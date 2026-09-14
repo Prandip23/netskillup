@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -25,20 +25,20 @@
   <div class="wrap">
     <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3 — Network</a>
     <h1>NAT & PAT</h1>
-    <p class="topic-dek">Hundreds of private devices, one public IP address, and somehow the replies still find their way back to the right device. This is how.</p>
+    <p class="topic-dek">Hundreds of private devices, one public IP (Internet Protocol) address, and somehow the replies still find their way back to the right device. This is how.</p>
   </div>
 </div>
 
 <article class="topic-body wrap">
 
   <h2>The problem: too many devices, too few public addresses</h2>
-  <p>Private IPv4 ranges (like <code>192.168.0.0/16</code> or <code>10.0.0.0/8</code>) can be reused by literally every home and office network on earth, because they're never routed on the public internet. But a device using one of those addresses can't be reached from the internet directly — something has to translate between the private address inside the network and a real, routable public address at the edge. That something is <strong>NAT</strong> (Network Address Translation).</p>
+  <p>Private IPv4 ranges (like <code>192.168.0.0/16</code> or <code>10.0.0.0/8</code>) can be reused by literally every home and office network on earth, because they're never routed on the public internet. But a device using one of those addresses can't be reached from the internet directly. Something has to translate between the private address inside the network and a real, routable public address at the edge. That something is <strong>NAT</strong> (Network Address Translation).</p>
   <p>It's exactly like an office building with one public street address, where every employee has their own internal extension. Mail addressed to the building's street address still needs a mailroom to figure out which specific desk it's actually for.</p>
 
   <h2>Static NAT, dynamic NAT, and PAT</h2>
   <ul>
-    <li><strong>Static NAT:</strong> one private address always maps to the same one public address — a fixed, permanent mapping, typically for a server that needs to be reachable at a consistent public IP.</li>
-    <li><strong>Dynamic NAT:</strong> private addresses are mapped to public addresses from a shared pool, on a first-come basis — still one-to-one at any given moment, but not a fixed pairing.</li>
+    <li><strong>Static NAT:</strong> one private address always maps to the same one public address, a fixed, permanent mapping, typically for a server that needs to be reachable at a consistent public IP.</li>
+    <li><strong>Dynamic NAT:</strong> private addresses are mapped to public addresses from a shared pool, on a first-come basis, still one-to-one at any given moment, but not a fixed pairing.</li>
     <li><strong>PAT</strong> (Port Address Translation, also called NAT overload): many private addresses share a <em>single</em> public address, distinguished from each other by port number. This is what almost every home and small-office router actually does.</li>
   </ul>
 
@@ -87,7 +87,7 @@
 
   <div class="callout">
     <span class="callout-label">THE TRADE-OFF NAT MAKES</span>
-    <p>NAT solved the IPv4 address shortage well enough to buy the internet another two decades, but it breaks true end-to-end connectivity: an outside device can't initiate a connection to a device that's only reachable through PAT, and some protocols need extra workarounds (like STUN/TURN for real-time voice/video) specifically because of it. IPv6's address space is large enough that most devices don't need NAT at all — every device just gets its own real, globally routable address.</p>
+    <p>NAT solved the IPv4 address shortage well enough to buy the internet another two decades, but it breaks true end-to-end connectivity: an outside device can't initiate a connection to a device that's only reachable through PAT, and some protocols need extra workarounds (like STUN, Session Traversal Utilities for NAT, and TURN, Traversal Using Relays around NAT, for real-time voice/video) specifically because of it. IPv6's address space is large enough that most devices don't need NAT at all. Every device just gets its own real, globally routable address.</p>
   </div>
 
 </article>

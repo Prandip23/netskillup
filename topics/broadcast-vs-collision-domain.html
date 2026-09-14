@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -25,30 +25,30 @@
   <div class="wrap">
     <a class="breadcrumb" href="../index.html#modules">← Module 01 · Networking Fundamentals</a>
     <h1>Collision Domain vs Broadcast Domain</h1>
-    <p class="topic-dek">Two different kinds of "who has to share this segment" — one about electrical contention, one about who hears a broadcast. Confusing them is one of the most common early mistakes.</p>
+    <p class="topic-dek">Two different kinds of "who has to share this segment": one about electrical contention, one about who hears a broadcast. Confusing them is one of the most common early mistakes.</p>
   </div>
 </div>
 
 <article class="topic-body wrap">
 
   <h2>Collision domain</h2>
-  <p>A collision domain is a segment of network where two devices transmitting <strong>at the same time</strong> can collide — their signals interfere on the shared medium and both transmissions are corrupted. This only matters on shared, half-duplex media.</p>
+  <p>A collision domain is a segment of network where two devices transmitting <strong>at the same time</strong> can collide: their signals interfere on the shared medium and both transmissions are corrupted. This only matters on shared, half-duplex media.</p>
   <ul>
-    <li>A <code>hub</code> repeats every bit it receives out every other port — all connected devices are in <strong>one</strong> collision domain.</li>
+    <li>A <code>hub</code> repeats every bit it receives out every other port, so all connected devices are in <strong>one</strong> collision domain.</li>
     <li>A <code>switch</code> gives each port its own collision domain. Combined with full-duplex links, collisions are effectively eliminated on modern switched networks.</li>
     <li>A <code>router</code> also separates collision domains, one per interface.</li>
   </ul>
 
   <div class="callout">
     <span class="callout-label">WHY THIS RARELY COMES UP ANYMORE</span>
-    <p>Hubs are essentially extinct in production networks. Full-duplex switched Ethernet means collision domains are mostly a historical/exam concept today — but it's still the correct mental model for <em>why</em> switches replaced hubs.</p>
+    <p>Hubs are essentially extinct in production networks. Full-duplex switched Ethernet means collision domains are mostly a historical concept today, but it's still the correct mental model for <em>why</em> switches replaced hubs.</p>
   </div>
 
   <h2>Broadcast domain</h2>
-  <p>A broadcast domain is the set of devices that receive a Layer 2 broadcast frame (destination MAC <code>FFFF.FFFF.FFFF</code>) sent by any one device in that domain.</p>
+  <p>A broadcast domain is the set of devices that receive a Layer 2 broadcast frame (destination MAC, or Media Access Control, address <code>FFFF.FFFF.FFFF</code>) sent by any one device in that domain.</p>
   <ul>
-    <li>A <code>switch</code> does <strong>not</strong> break up a broadcast domain — every port in the same VLAN floods and receives broadcasts together.</li>
-    <li>A <code>router</code> (or a Layer 3 switch doing inter-VLAN routing) <strong>does</strong> break up broadcast domains — each subnet/VLAN is its own broadcast domain.</li>
+    <li>A <code>switch</code> does <strong>not</strong> break up a broadcast domain, so every port in the same VLAN (Virtual Local Area Network) floods and receives broadcasts together.</li>
+    <li>A <code>router</code> (or a Layer 3 switch doing inter-VLAN routing) <strong>does</strong> break up broadcast domains: each subnet/VLAN is its own broadcast domain.</li>
     <li><strong>VLANs</strong> exist specifically to create multiple broadcast domains on a single physical switch, without needing separate hardware per segment.</li>
   </ul>
 
@@ -114,7 +114,7 @@
         }
       ]]></script>
     </svg>
-    <figcaption>Left: every device shares one collision domain through the hub. Right: two switches each form their own broadcast domain — a broadcast from HOST behind SW-A never reaches SW-B unless R1 explicitly routes it (which routers don't do for broadcasts).</figcaption>
+    <figcaption>Left: every device shares one collision domain through the hub. Right: two switches each form their own broadcast domain. A broadcast from a host behind SW-A never reaches SW-B unless R1 explicitly routes it, which routers don't do for broadcasts.</figcaption>
   </figure>
 
   <h2>Side by side</h2>
@@ -124,13 +124,13 @@
     </thead>
     <tbody>
       <tr><td>Hub</td><td>No</td><td>No</td></tr>
-      <tr><td>Switch</td><td>Yes — per port</td><td>No</td></tr>
-      <tr><td>Router / L3 switch</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>Switch</td><td>Yes, per port</td><td>No</td></tr>
+      <tr><td>Router / Layer 3 switch</td><td>Yes</td><td>Yes</td></tr>
     </tbody>
   </table>
 
   <h2>Why it matters in practice</h2>
-  <p>Broadcast domain size is the real design constraint in modern networks. Too large a broadcast domain means ARP requests, DHCP discovers, and other broadcast traffic gets flooded to hundreds of hosts that don't care — wasting bandwidth and CPU. This is the entire justification for VLANs: they let you keep broadcast domains small and purposeful without running separate physical switches for every segment.</p>
+  <p>Broadcast domain size is the real design constraint in modern networks. Too large a broadcast domain means ARP (Address Resolution Protocol) requests, DHCP (Dynamic Host Configuration Protocol) discovers, and other broadcast traffic gets flooded to hundreds of hosts that don't care, wasting bandwidth and CPU (Central Processing Unit) cycles. This is the entire justification for VLANs: they let you keep broadcast domains small and purposeful without running separate physical switches for every segment.</p>
 
 </article>
 

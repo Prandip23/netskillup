@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -32,15 +32,15 @@
 <article class="topic-body wrap">
 
   <h2>What a switch actually looks at</h2>
-  <p>A switch never opens an IP packet or reads a URL. It reads exactly one thing: the Ethernet frame wrapped around whatever payload it's carrying, and mostly just two fields inside it, the source and destination MAC addresses. Think of a frame like an internal office courier envelope: it doesn't matter what department wrote the memo inside, the courier only reads "to desk 14B, from desk 3A" on the outside and moves on.</p>
+  <p>A switch never opens an IP (Internet Protocol) packet or reads a URL (Uniform Resource Locator). It reads exactly one thing: the Ethernet frame wrapped around whatever payload it's carrying, and mostly just two fields inside it, the source and destination MAC (Media Access Control) addresses. Think of a frame like an internal office courier envelope: it doesn't matter what department wrote the memo inside, the courier only reads "to desk 14B, from desk 3A" on the outside and moves on.</p>
 
   <h2>MAC address structure</h2>
   <p>A MAC address is 48 bits, written as six hex byte pairs like <code>3C:5A:B4:02:9F:E1</code>. It's burned into (or configured on) a network interface and is meant to be globally unique.</p>
   <ul>
-    <li>The first 24 bits are the <strong>OUI</strong> (Organizationally Unique Identifier) — assigned to the manufacturer. <code>3C:5A:B4</code> might be Cisco, another block might be Intel; you can look up a device's vendor from just its OUI.</li>
+    <li>The first 24 bits are the <strong>OUI</strong> (Organizationally Unique Identifier), assigned to the manufacturer. <code>3C:5A:B4</code> might be Cisco, another block might be Intel; you can look up a device's vendor from just its OUI.</li>
     <li>The last 24 bits are a serial number the manufacturer assigns, unique within that OUI.</li>
-    <li>A frame sent to <code>FF:FF:FF:FF:FF:FF</code> is a <strong>broadcast</strong> — every device on the segment accepts it.</li>
-    <li>Certain address ranges are reserved for <strong>multicast</strong> — one frame, accepted by a specific group of interested devices rather than everyone.</li>
+    <li>A frame sent to <code>FF:FF:FF:FF:FF:FF</code> is a <strong>broadcast</strong>: every device on the segment accepts it.</li>
+    <li>Certain address ranges are reserved for <strong>multicast</strong>: one frame, accepted by a specific group of interested devices rather than everyone.</li>
   </ul>
 
   <figure class="diagram-block">
@@ -83,8 +83,8 @@
   <ul>
     <li><strong>Destination MAC:</strong> the switch checks this against its MAC address table to decide which single port to forward the frame out of. No match means it floods out every port except the one it arrived on.</li>
     <li><strong>Source MAC:</strong> every time a frame arrives, the switch notes "this MAC lives on this port" and stores it in its MAC table, so the next reply back doesn't need to be flooded.</li>
-    <li><strong>Type/Length:</strong> tells the receiving device what's riding inside the payload — <code>0x0800</code> means an IPv4 packet is next, <code>0x0806</code> means ARP, <code>0x86DD</code> means IPv6.</li>
-    <li><strong>FCS:</strong> a CRC checksum the receiver uses to detect a corrupted frame and silently drop it. There's no built-in retransmission at this layer — that's Transport's job, further up the stack.</li>
+    <li><strong>Type/Length:</strong> tells the receiving device what's riding inside the payload: <code>0x0800</code> means an IPv4 (Internet Protocol version 4) packet is next, <code>0x0806</code> means ARP (Address Resolution Protocol), <code>0x86DD</code> means IPv6 (Internet Protocol version 6).</li>
+    <li><strong>FCS</strong> (Frame Check Sequence): a CRC (Cyclic Redundancy Check) checksum the receiver uses to detect a corrupted frame and silently drop it. There's no built-in retransmission at this layer. That's Transport's job, further up the stack.</li>
   </ul>
 
   <div class="callout">

@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -32,12 +32,12 @@
 <article class="topic-body wrap">
 
   <h2>What it actually restricts</h2>
-  <p>Recall from <a href="ethernet-frame-mac.html">Ethernet Frame & MAC Addressing</a> that a switch learns a MAC address for whatever port it sees that address arrive on. Nothing stops someone from plugging an unauthorized laptop into an open conference-room jack, or worse, plugging in a cheap unmanaged hub to fan one jack out to several devices. Port security caps how many MAC addresses a single port is allowed to learn, like a keycard reader that locks the door the moment a sixth unrecognized badge tries to swipe through, when only five badges were ever supposed to exist for that door.</p>
+  <p>Recall from <a href="ethernet-frame-mac.html">Ethernet Frame & MAC Addressing</a> that a switch learns a MAC (Media Access Control) address for whatever port it sees that address arrive on. Nothing stops someone from plugging an unauthorized laptop into an open conference-room jack, or worse, plugging in a cheap unmanaged hub to fan one jack out to several devices. Port security caps how many MAC addresses a single port is allowed to learn, like a keycard reader that locks the door the moment a sixth unrecognized badge tries to swipe through, when only five badges were ever supposed to exist for that door.</p>
 
   <h2>How addresses get allowed onto a port</h2>
   <ul>
     <li><strong>Static:</strong> the administrator manually types in the exact MAC address(es) permitted on the port.</li>
-    <li><strong>Dynamic:</strong> the switch learns whatever MAC address(es) show up first, up to the configured maximum — but forgets them on reboot.</li>
+    <li><strong>Dynamic:</strong> the switch learns whatever MAC address(es) show up first, up to the configured maximum, but forgets them on reboot.</li>
     <li><strong>Sticky:</strong> the switch learns them dynamically, the same as above, but then saves them into the running configuration so they survive a reboot without retyping anything.</li>
   </ul>
 
@@ -62,7 +62,7 @@
       <line x1="542" y1="95" x2="312" y2="95" stroke="#e05a5a" stroke-width="1.8" stroke-dasharray="4 4">
         <animate attributeName="opacity" values="0.3;1;0.3" dur="1.4s" repeatCount="indefinite"/>
       </line>
-      <text x="560" y="130" text-anchor="middle" font-size="9.5" fill="#e05a5a">unrecognized MAC — violation</text>
+      <text x="560" y="130" text-anchor="middle" font-size="9.5" fill="#e05a5a">unrecognized MAC: violation</text>
 
       <script type="text/javascript"><![CDATA[
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -82,7 +82,7 @@
     <tbody>
       <tr><td>Protect</td><td>Silently drops traffic from the offending MAC. No log, no counter.</td></tr>
       <tr><td>Restrict</td><td>Drops the traffic, but also logs it and increments a violation counter.</td></tr>
-      <tr><td>Shutdown (default)</td><td>Puts the entire port into <code>err-disabled</code> state — it stops passing any traffic at all until an administrator manually re-enables it.</td></tr>
+      <tr><td>Shutdown (default)</td><td>Puts the entire port into <code>err-disabled</code> state. It stops passing any traffic at all until an administrator manually re-enables it.</td></tr>
     </tbody>
   </table>
 

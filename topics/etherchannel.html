@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -32,7 +32,7 @@
 <article class="topic-body wrap">
 
   <h2>The problem: STP has to block your extra bandwidth</h2>
-  <p>Cable two switches together with two separate physical links and spanning tree sees exactly what the last two topics described: a loop. It picks one link to forward on and <strong>blocks</strong> the other outright, sitting idle unless the first one fails. You paid for double the bandwidth and STP is only letting you use half of it.</p>
+  <p>Cable two switches together with two separate physical links and spanning tree sees exactly what the last two topics described: a loop. It picks one link to forward on and <strong>blocks</strong> the other outright, sitting idle unless the first one fails. You paid for double the bandwidth and STP (Spanning Tree Protocol) is only letting you use half of it.</p>
   <p><strong>EtherChannel</strong> (the generic term is <em>link aggregation</em>) solves this by bundling multiple physical links into a single logical link before STP ever sees them. Picture a toll plaza widened from one lane to four: instead of building a whole second redundant highway that traffic control has to keep closed, you widen the one road everyone already agrees is open.</p>
 
   <figure class="diagram-block">
@@ -53,7 +53,7 @@
       <circle r="3.5" fill="#4fd1c5"><animateMotion dur="2.4s" repeatCount="indefinite" begin="-1.2s" path="M100,95 L540,95"/></circle>
       <circle r="3.5" fill="#4fd1c5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="-0.3s" path="M100,110 L540,110"/></circle>
 
-      <text x="320" y="35" text-anchor="middle" font-size="11" fill="#4fd1c5">One logical link — spanning tree sees this, not four separate ones</text>
+      <text x="320" y="35" text-anchor="middle" font-size="11" fill="#4fd1c5">One logical link: spanning tree sees this, not four separate ones</text>
       <text x="320" y="145" text-anchor="middle" font-size="10" fill="#5b6a86">A hash (source/destination MAC, IP, or port) decides which member link each flow rides on</text>
 
       <script type="text/javascript"><![CDATA[
@@ -64,14 +64,14 @@
         }
       ]]></script>
     </svg>
-    <figcaption>Four physical links act as one EtherChannel. Lose one member and the bundle keeps running on the rest — no STP recalculation needed.</figcaption>
+    <figcaption>Four physical links act as one EtherChannel. Lose one member and the bundle keeps running on the rest, no STP recalculation needed.</figcaption>
   </figure>
 
   <h2>How traffic is actually split across the links</h2>
-  <p>A single flow (say, one file transfer) still rides entirely on one member link — EtherChannel doesn't slice individual frames across cables. What it does is hash each flow (based on some combination of source/destination MAC, IP address, or port number, depending on configuration) to consistently pick <em>which</em> member link that flow rides on. Different flows land on different links, and in aggregate, traffic spreads across the whole bundle.</p>
+  <p>A single flow (say, one file transfer) still rides entirely on one member link. EtherChannel doesn't slice individual frames across cables. What it does is hash each flow, based on some combination of source/destination MAC (Media Access Control) address, IP (Internet Protocol) address, or port number depending on configuration, to consistently pick <em>which</em> member link that flow rides on. Different flows land on different links, and in aggregate, traffic spreads across the whole bundle.</p>
 
   <h2>PAgP vs. LACP</h2>
-  <p>Two link members won't bundle themselves just because they're plugged in with matching config — a control protocol negotiates the bundle and continuously verifies every member is still healthy and consistently configured.</p>
+  <p>Two link members won't bundle themselves just because they're plugged in with matching config. A control protocol negotiates the bundle and continuously verifies every member is still healthy and consistently configured.</p>
   <ul>
     <li><strong>PAgP</strong> (Port Aggregation Protocol): Cisco proprietary, older.</li>
     <li><strong>LACP</strong> (802.3ad / Link Aggregation Control Protocol): the open, vendor-neutral standard, and the default choice on modern networks with mixed hardware.</li>
@@ -79,7 +79,7 @@
 
   <div class="callout">
     <span class="callout-label">THE FAILURE MODE TO WATCH FOR</span>
-    <p>Member links need matching speed, duplex, and VLAN/trunk configuration. Mismatch one of them and instead of a clean error, the bundle can silently fail to form or drop into an inconsistent state — some links up, some in a non-bundled err state — which looks like a partial outage rather than an obvious misconfiguration.</p>
+    <p>Member links need matching speed, duplex, and VLAN (Virtual Local Area Network) / trunk configuration. Mismatch one of them and instead of a clean error, the bundle can silently fail to form or drop into an inconsistent state — some links up, some in a non-bundled err state — which looks like a partial outage rather than an obvious misconfiguration.</p>
   </div>
 
 </article>

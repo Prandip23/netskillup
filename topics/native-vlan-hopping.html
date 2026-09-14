@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -32,11 +32,11 @@
 <article class="topic-body wrap">
 
   <h2>The native VLAN</h2>
-  <p>A trunk port tags every frame with its VLAN ID, with one exception: the <strong>native VLAN</strong>. Frames belonging to it cross the trunk completely untagged, the same way they would on a plain access port. This exists mostly for backward compatibility with older equipment that never understood 802.1Q tags at all.</p>
-  <p>By default, the native VLAN is VLAN 1 on every port, on every switch, out of the box — which means if nobody changes it, every trunk in a network is quietly agreeing to treat the same VLAN as the "untagged, trust it" one.</p>
+  <p>A trunk port tags every frame with its VLAN (Virtual Local Area Network) ID, with one exception: the <strong>native VLAN</strong>. Frames belonging to it cross the trunk completely untagged, the same way they would on a plain access port. This exists mostly for backward compatibility with older equipment that never understood 802.1Q tags at all.</p>
+  <p>By default, the native VLAN is VLAN 1 on every port, on every switch, out of the box. That means if nobody changes it, every trunk in a network is quietly agreeing to treat the same VLAN as the "untagged, trust it" one.</p>
 
-  <h2>Double tagging: how VLAN hopping actually works</h2>
-  <p>An attacker on an access port can't normally reach a different VLAN — their switch strips any tag they try to add and treats the frame as belonging to their own access VLAN. Double tagging abuses the native VLAN's blind spot instead of fighting that rule directly.</p>
+  <h2>Double tagging: How VLAN hopping actually works</h2>
+  <p>An attacker on an access port can't normally reach a different VLAN. Their switch strips any tag they try to add and treats the frame as belonging to their own access VLAN. Double tagging abuses the native VLAN's blind spot instead of fighting that rule directly.</p>
   <p>The attacker crafts a frame with <em>two</em> stacked 802.1Q tags: the outer tag set to the native VLAN, the inner tag set to the VLAN they actually want to reach.</p>
 
   <figure class="diagram-block">
@@ -76,17 +76,17 @@
         </marker>
       </defs>
 
-      <text x="320" y="150" text-anchor="middle" font-size="12" fill="#f2a93b">One tag was stripped, one was trusted — the frame just hopped from VLAN 1 into VLAN 20.</text>
+      <text x="320" y="150" text-anchor="middle" font-size="12" fill="#f2a93b">One tag was stripped, one was trusted: the frame just hopped from VLAN 1 into VLAN 20.</text>
       <text x="320" y="180" text-anchor="middle" font-size="10.5" fill="#5b6a86">This only works one direction, and only if the attacker's access VLAN happens to match the trunk's native VLAN.</text>
     </svg>
     <figcaption>Double tagging: the outer tag gets consumed by the first switch's native-VLAN handling, leaving the inner tag to be trusted by the next one.</figcaption>
   </figure>
 
-  <p>The first switch, seeing the outer tag matches its native VLAN, strips it and forwards the frame as if it were a plain untagged native-VLAN frame — carrying the inner tag along for the ride. The next switch down the line unwraps that inner tag and treats it as a completely legitimate frame for the target VLAN. The attacker's traffic just crossed a VLAN boundary it was never granted access to.</p>
+  <p>The first switch, seeing the outer tag matches its native VLAN, strips it and forwards the frame as if it were a plain untagged native-VLAN frame, carrying the inner tag along for the ride. The next switch down the line unwraps that inner tag and treats it as a completely legitimate frame for the target VLAN. The attacker's traffic just crossed a VLAN boundary it was never granted access to.</p>
 
   <div class="callout">
     <span class="callout-label">HOW THIS IS ACTUALLY PREVENTED</span>
-    <p>Three habits close this off: set every trunk's native VLAN to something unused (never the default VLAN 1), explicitly tag native VLAN traffic instead of leaving it untagged, and disable auto-trunk negotiation (DTP) on ports that shouldn't become trunks in the first place. Any one of these breaks the attack; doing all three is standard hardening.</p>
+    <p>Three habits close this off: set every trunk's native VLAN to something unused (never the default VLAN 1), explicitly tag native VLAN traffic instead of leaving it untagged, and disable auto-trunk negotiation (DTP, Dynamic Trunking Protocol) on ports that shouldn't become trunks in the first place. Any one of these breaks the attack; doing all three is standard hardening.</p>
   </div>
 
 </article>

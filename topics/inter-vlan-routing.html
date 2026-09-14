@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -25,14 +25,14 @@
   <div class="wrap">
     <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3 — Network</a>
     <h1>Inter-VLAN Routing</h1>
-    <p class="topic-dek">A switch will never forward traffic between two VLANs, on purpose — that's the whole point of a VLAN. Something at Layer 3 has to do it deliberately.</p>
+    <p class="topic-dek">A switch will never forward traffic between two VLANs (Virtual Local Area Networks), on purpose. That's the whole point of a VLAN. Something at Layer 3 has to do it deliberately.</p>
   </div>
 </div>
 
 <article class="topic-body wrap">
 
   <h2>Recall why this is even necessary</h2>
-  <p>Back in <a href="broadcast-vs-collision-domain.html">Collision Domain vs Broadcast Domain</a>: a router (or something doing Layer 3 work) is what breaks up broadcast domains, and VLANs exist specifically to create multiple broadcast domains on one switch. So naturally, getting traffic <em>between</em> two VLANs requires exactly the kind of device that breaks broadcast domains apart in the first place — a switch alone will never do it.</p>
+  <p>Back in <a href="broadcast-vs-collision-domain.html">Collision Domain vs Broadcast Domain</a>: a router (or something doing Layer 3 work) is what breaks up broadcast domains, and VLANs exist specifically to create multiple broadcast domains on one switch. So naturally, getting traffic <em>between</em> two VLANs requires exactly the kind of device that breaks broadcast domains apart in the first place. A switch alone will never do it.</p>
 
   <h2>Option 1: Router-on-a-stick</h2>
   <p>A single physical link runs from the switch to a router as an 802.1Q trunk, and the router carries a separate <strong>subinterface</strong> for each VLAN, each one acting as that VLAN's gateway. One physical interface, logically sliced into as many virtual ones as there are VLANs.</p>
@@ -69,7 +69,7 @@
       <tr><th></th><th>Router-on-a-stick</th><th>L3 switch with SVIs</th></tr>
     </thead>
     <tbody>
-      <tr><td>Extra hardware needed</td><td>A router, plus a trunk link</td><td>None — the switch does it natively</td></tr>
+      <tr><td>Extra hardware needed</td><td>A router, plus a trunk link</td><td>None, the switch does it natively</td></tr>
       <tr><td>Throughput</td><td>Limited by the one trunk link</td><td>Wire-speed, routed in hardware</td></tr>
       <tr><td>Common in</td><td>Small networks, labs, legacy setups</td><td>Most modern production networks</td></tr>
     </tbody>
@@ -77,7 +77,7 @@
 
   <div class="callout">
     <span class="callout-label">WHY MOST PRODUCTION NETWORKS SKIP THE ROUTER ENTIRELY</span>
-    <p>Router-on-a-stick is genuinely useful for learning the concept with minimal hardware, but every inter-VLAN packet has to leave the switch, cross the trunk, get routed, and come back — a real bottleneck under load. An L3 switch's SVIs remove that round trip entirely, which is why they're the default choice once a network outgrows a lab setup.</p>
+    <p>Router-on-a-stick is genuinely useful for learning the concept with minimal hardware, but every inter-VLAN packet has to leave the switch, cross the trunk, get routed, and come back: a real bottleneck under load. An L3 switch's SVIs remove that round trip entirely, which is why they're the default choice once a network outgrows a lab setup.</p>
   </div>
 
 </article>

@@ -16,7 +16,7 @@
   <div class="wrap">
     <a href="../index.html" class="site-mark">
       <span class="dot" aria-hidden="true"></span>
-      netskillup <small>/ on-prem</small>
+      netskillup
     </a>
   </div>
 </header>
@@ -25,14 +25,14 @@
   <div class="wrap">
     <a class="breadcrumb" href="../index.html#modules">← Module 02 · Layer 2 — Data Link</a>
     <h1>RSTP & MST</h1>
-    <p class="topic-dek">Same job as classic STP — one active path per segment, loops prevented — but reaching that state in under a second instead of the better part of a minute.</p>
+    <p class="topic-dek">Same job as classic STP (Spanning Tree Protocol) — one active path per segment, loops prevented — but reaching that state in under a second instead of the better part of a minute.</p>
   </div>
 </div>
 
 <article class="topic-body wrap">
 
   <h2>RSTP (802.1w): the same tree, a faster handshake</h2>
-  <p>802.1D blocks a port and then just <em>waits</em>, stepping through timers because it has no way to know for certain the topology is actually safe yet. RSTP replaces that waiting with an active conversation between neighboring switches: a <strong>proposal/agreement</strong> handshake, where a switch proposes "I'll be your designated port," the neighbor checks that its own ports are safe to synchronize, and agrees. That back-and-forth typically finishes in well under a second, instead of 30–50.</p>
+  <p>802.1D blocks a port and then just <em>waits</em>, stepping through timers because it has no way to know for certain the topology is actually safe yet. RSTP (Rapid Spanning Tree Protocol) replaces that waiting with an active conversation between neighboring switches: a <strong>proposal/agreement</strong> handshake, where a switch proposes "I'll be your designated port," the neighbor checks that its own ports are safe to synchronize, and agrees. That back-and-forth typically finishes in well under a second, instead of 30–50.</p>
 
   <figure class="diagram-block">
     <svg viewBox="0 0 640 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated proposal and agreement handshake between two switches running RSTP">
@@ -65,7 +65,7 @@
         }
       ]]></script>
     </svg>
-    <figcaption>RSTP negotiates instead of waiting out a timer — a port moves to forwarding as soon as its neighbor confirms it's safe.</figcaption>
+    <figcaption>RSTP negotiates instead of waiting out a timer. A port moves to forwarding as soon as its neighbor confirms it's safe.</figcaption>
   </figure>
 
   <p>RSTP also adds two port roles beyond 802.1D's blocking/root/designated set, so a failover has less work to do:</p>
@@ -80,7 +80,7 @@
       <tr><th></th><th>STP (802.1D)</th><th>RSTP (802.1w)</th></tr>
     </thead>
     <tbody>
-      <tr><td>How it converges</td><td>Passive — waits out fixed timers</td><td>Active — proposal/agreement handshake</td></tr>
+      <tr><td>How it converges</td><td>Passive, waits out fixed timers</td><td>Active, proposal/agreement handshake</td></tr>
       <tr><td>Typical convergence</td><td>30–50 seconds</td><td>Under a second</td></tr>
       <tr><td>Port states</td><td>Blocking, Listening, Learning, Forwarding</td><td>Discarding, Learning, Forwarding</td></tr>
       <tr><td>Extra roles</td><td>None</td><td>Alternate, Backup, Edge</td></tr>
@@ -88,12 +88,12 @@
   </table>
 
   <h2>MST (802.1s): one tree isn't always the goal</h2>
-  <p>Running a single spanning tree across every VLAN means every VLAN blocks the exact same link, which wastes the bandwidth of every other physical link for every VLAN that isn't using it. Cisco's PVST+ solves that by running one full spanning tree instance <em>per VLAN</em>, so different VLANs can block different links and actually load-balance — but that means hundreds of VLANs can mean hundreds of spanning tree instances, all consuming CPU and BPDUs.</p>
+  <p>Running a single spanning tree across every VLAN (Virtual Local Area Network) means every VLAN blocks the exact same link, which wastes the bandwidth of every other physical link for every VLAN that isn't using it. Cisco's PVST+ (Per-VLAN Spanning Tree Plus) solves that by running one full spanning tree instance <em>per VLAN</em>, so different VLANs can block different links and actually load-balance. But that means hundreds of VLANs can mean hundreds of spanning tree instances, all consuming CPU (Central Processing Unit) cycles and BPDUs (Bridge Protocol Data Units).</p>
   <p><strong>Multiple Spanning Tree (MST)</strong> is the middle ground: VLANs are grouped into a small number of instances, and each instance runs its own independent tree. You get the load-balancing benefit of per-VLAN trees, the CPU and BPDU overhead of only a handful of instances instead of hundreds.</p>
 
   <div class="callout">
     <span class="callout-label">WHAT TO ACTUALLY REMEMBER</span>
-    <p>In real deployments, RSTP (or a vendor's rapid variant of per-VLAN STP) is the default almost everywhere today — plain 802.1D is mostly there so you recognize the port states and timers by name. MST only earns its complexity on networks with enough VLANs that per-VLAN instances would genuinely overload the switches.</p>
+    <p>In real deployments, RSTP (or a vendor's rapid variant of per-VLAN STP) is the default almost everywhere today. Plain 802.1D is mostly there so you recognize the port states and timers by name. MST only earns its complexity on networks with enough VLANs that per-VLAN instances would genuinely overload the switches.</p>
   </div>
 
 </article>
