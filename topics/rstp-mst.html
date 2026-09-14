@@ -38,8 +38,8 @@
     <svg viewBox="0 0 640 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated proposal and agreement handshake between two switches running RSTP">
       <circle cx="120" cy="80" r="26" fill="none" stroke="#4fd1c5" stroke-width="1.8"/>
       <text x="120" y="84" text-anchor="middle" font-size="10" fill="#4fd1c5">SW1</text>
-      <circle cx="520" cy="80" r="26" fill="none" stroke="#8d9bb3" stroke-width="1.8"/>
-      <text x="520" y="84" text-anchor="middle" font-size="10" fill="#8d9bb3">SW2</text>
+      <circle cx="520" cy="80" r="26" fill="none" stroke="#f2a93b" stroke-width="1.8"/>
+      <text x="520" y="84" text-anchor="middle" font-size="10" fill="#f2a93b">SW2</text>
 
       <line x1="146" y1="72" x2="494" y2="72" stroke="#f2a93b" stroke-width="1.8">
         <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.05;0.45;0.5;1" dur="3.2s" repeatCount="indefinite"/>
@@ -74,6 +74,57 @@
     <li><strong>Backup port:</strong> a backup for a designated port on the same segment.</li>
     <li><strong>Edge port:</strong> a port known to only ever face an end device (never another switch), so it can skip straight to forwarding with no negotiation needed at all.</li>
   </ul>
+
+  <p>Here's what those roles actually look like once they're assigned on a real three-switch topology, with one redundant link between SW2 and SW3:</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of three switches in a triangle with RSTP port roles labeled: designated ports on the root SW1, root ports on SW2 and SW3, a designated and an alternate port on the SW2-SW3 redundant link, and an edge port facing a PC. Data continuously flows along both forwarding branches from SW1 while the alternate link stays idle">
+      <text x="320" y="16" text-anchor="middle" font-size="10" fill="#f2a93b">ROOT BRIDGE</text>
+      <circle cx="320" cy="45" r="24" fill="none" stroke="#f2a93b" stroke-width="1.8"/>
+      <text x="320" y="49" text-anchor="middle" font-size="10" fill="#f2a93b">SW1</text>
+
+      <circle cx="140" cy="185" r="22" fill="none" stroke="#8d9bb3" stroke-width="1.6"/>
+      <text x="140" y="189" text-anchor="middle" font-size="10" fill="#cbd4e3">SW2</text>
+
+      <circle cx="500" cy="185" r="22" fill="none" stroke="#8d9bb3" stroke-width="1.6"/>
+      <text x="500" y="189" text-anchor="middle" font-size="10" fill="#cbd4e3">SW3</text>
+
+      <rect x="15" y="170" width="50" height="30" rx="3" fill="none" stroke="#8d9bb3" stroke-width="1.4"/>
+      <text x="40" y="189" text-anchor="middle" font-size="9" fill="#cbd4e3">PC</text>
+
+      <path id="rstpPathA" d="M302,62 L156,170" fill="none" stroke="#4fd1c5" stroke-width="2"/>
+      <path id="rstpPathB" d="M338,62 L484,170" fill="none" stroke="#4fd1c5" stroke-width="2"/>
+      <line x1="162" y1="185" x2="478" y2="185" stroke="#e05a5a" stroke-width="2" stroke-dasharray="6 4"/>
+      <line x1="65" y1="185" x2="118" y2="185" stroke="#b18cf0" stroke-width="1.8"/>
+
+      <text x="270" y="76" text-anchor="middle" font-size="9" fill="#f2a93b">DP</text>
+      <text x="200" y="150" text-anchor="middle" font-size="9" fill="#4fd1c5">RP</text>
+      <text x="376" y="76" text-anchor="middle" font-size="9" fill="#f2a93b">DP</text>
+      <text x="446" y="150" text-anchor="middle" font-size="9" fill="#4fd1c5">RP</text>
+      <text x="205" y="203" text-anchor="middle" font-size="9" fill="#f2a93b">DP</text>
+      <text x="440" y="203" text-anchor="middle" font-size="9" fill="#e05a5a">AP</text>
+      <text x="90" y="163" text-anchor="middle" font-size="9" fill="#b18cf0">Edge</text>
+
+      <circle r="4" fill="#4fd1c5">
+        <animateMotion dur="2.4s" repeatCount="indefinite"><mpath href="#rstpPathA"/></animateMotion>
+      </circle>
+      <circle r="4" fill="#4fd1c5">
+        <animateMotion dur="2.7s" repeatCount="indefinite" begin="-1.2s"><mpath href="#rstpPathB"/></animateMotion>
+      </circle>
+
+      <text x="320" y="236" text-anchor="middle" font-size="10" fill="#5b6a86">RP = root port · DP = designated port · AP = alternate port (discarding, no traffic)</text>
+      <text x="320" y="252" text-anchor="middle" font-size="10" fill="#5b6a86">Edge skips straight to forwarding, no negotiation needed</text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animateMotion').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>SW1 is root, so both its ports are designated. SW2 and SW3 each use their lowest-cost port to SW1 as their root port. On the SW2–SW3 link, SW2's port wins as designated and SW3's port becomes alternate: physically connected, but discarding, exactly like blocking in classic STP.</figcaption>
+  </figure>
 
   <table class="compare-table">
     <thead>

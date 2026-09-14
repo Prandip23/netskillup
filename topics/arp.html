@@ -107,6 +107,22 @@
     </tbody>
   </table>
 
+  <h2>ARP cache vs. the switch's CAM table</h2>
+  <p>The ARP cache and a switch's <strong>CAM table</strong> (Content Addressable Memory table, also called the MAC address table) get mixed up constantly, because both are just small lookup tables sitting one layer apart. They solve two different problems.</p>
+  <p>The ARP cache lives on an <strong>end host</strong> and maps an <strong>IP address to a MAC address</strong>: "who do I send this frame to?" The CAM table lives on a <strong>switch</strong> and maps a <strong>MAC address to a physical port</strong>: "which wire does this address actually live on?" A switch never looks at IP addresses to build its CAM table at all. It just watches source MAC addresses go by on each port, the same mechanism covered in <a href="ethernet-frame-mac.html">Ethernet Frame & MAC Addressing</a>.</p>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th></th><th>ARP Cache</th><th>CAM Table</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Lives on</td><td>Each end host</td><td>Each switch</td></tr>
+      <tr><td>Maps</td><td>IP address → MAC address</td><td>MAC address → switch port</td></tr>
+      <tr><td>Built by</td><td>ARP requests and replies</td><td>Watching source MAC addresses on incoming frames</td></tr>
+      <tr><td>Answers</td><td>"Who do I send this frame to?"</td><td>"Which wire does this address live on?"</td></tr>
+    </tbody>
+  </table>
+
   <div class="callout">
     <span class="callout-label">WHY ARP NEVER CROSSES A ROUTER</span>
     <p>ARP is a broadcast, and routers don't forward broadcasts between networks. That's exactly what makes them a broadcast domain boundary (see <a href="broadcast-vs-collision-domain.html">Collision Domain vs Broadcast Domain</a>). To reach a device on another network, a host ARPs for its <em>default gateway's</em> MAC address instead, and lets routing take over from there.</p>
