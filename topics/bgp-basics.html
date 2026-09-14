@@ -67,7 +67,92 @@
   </figure>
 
   <h2>"Best" isn't just "shortest"</h2>
-  <p>Interior protocols like OSPF pick the lowest-cost path, full stop. BGP is different on purpose: it's as much a policy and business tool as a technical one, since real transit and peering relationships involve contracts, cost, and trust, not just distance. Instead of a simple metric, BGP compares a whole ordered list of <strong>path attributes</strong>, including <code>AS-PATH</code> (how many ASes the route passes through), <code>LOCAL_PREF</code> (a locally-configured preference for one path over another), and <code>MED</code> (a hint from a neighboring AS about which of its own entry points it'd prefer you use), before falling back to anything resembling "shortest."</p>
+  <p>Interior protocols like OSPF pick the lowest-cost path, full stop. BGP is different on purpose: it's as much a policy and business tool as a technical one, since real transit and peering relationships involve contracts, cost, and trust, not just distance. Instead of a simple metric, BGP compares a whole ordered list of <strong>path attributes</strong>, and it works through them in a fixed order, stopping at the first one that produces a single winner.</p>
+
+  <h2>The path attributes, and where each one lives</h2>
+  <p>Not every attribute travels the same distance. Some never leave the router they're configured on; others cross AS boundaries and get compared against everyone else's:</p>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th>Attribute</th><th>Where it's exchanged</th><th>Wins with</th><th>What it's for</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>WEIGHT</td><td>Local to one router only, never advertised at all</td><td>Higher</td><td>A quick, router-specific override with zero blast radius elsewhere</td></tr>
+      <tr><td>LOCAL_PREF</td><td>iBGP only, inside your own AS</td><td>Higher</td><td>Making every router in your AS agree on which exit point to prefer for outbound traffic</td></tr>
+      <tr><td>AS-PATH</td><td>Everywhere, eBGP and iBGP</td><td>Shorter</td><td>Loop prevention (reject any path that already contains your own AS) and a rough distance signal</td></tr>
+      <tr><td>ORIGIN</td><td>Everywhere</td><td>IGP over EGP over Incomplete</td><td>How the route first entered BGP; rarely the deciding factor today</td></tr>
+      <tr><td>MED</td><td>Sent to eBGP neighbors, compared only within routes from the same neighboring AS</td><td>Lower</td><td>A hint to a neighboring AS about which of your entry points you'd prefer they use</td></tr>
+      <tr><td>NEXT_HOP</td><td>Everywhere; rewritten by eBGP, normally left alone by iBGP</td><td>N/A</td><td>The actual IP address traffic gets forwarded toward next</td></tr>
+    </tbody>
+  </table>
+
+  <p>LOCAL_PREF only ever matters inside your own AS, since it's an iBGP-only attribute your own routers use to agree with each other. MED is the opposite kind of local: it only gets compared between routes offered by the <em>same</em> neighboring AS, so it can't override a shorter path from a completely different neighbor.</p>
+
+  <h2>The order BGP actually checks them in</h2>
+  <p>Real implementations vary slightly, but the practical order is close to this, and it's evaluated top to bottom until one candidate route is left standing:</p>
+  <ol>
+    <li>Highest WEIGHT</li>
+    <li>Highest LOCAL_PREF</li>
+    <li>Prefer a locally originated route</li>
+    <li>Shortest AS-PATH</li>
+    <li>Lowest ORIGIN type</li>
+    <li>Lowest MED (same neighboring AS only)</li>
+    <li>Prefer eBGP-learned over iBGP-learned</li>
+    <li>Lowest IGP metric to reach NEXT_HOP</li>
+  </ol>
+  <p>That order is why the common assumption "BGP always picks the shortest AS-PATH" is wrong: LOCAL_PREF is checked first, so a network engineer can deliberately override a shorter external path just by configuring a higher LOCAL_PREF on the longer one.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of two candidate BGP routes to the same prefix. Route A has a longer AS-PATH but a higher LOCAL_PREF, Route B has a shorter AS-PATH but a lower LOCAL_PREF. The router checks LOCAL_PREF before AS-PATH, so Route A wins">
+      <rect x="30" y="30" width="260" height="110" rx="6" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="160" y="50" text-anchor="middle" font-size="11" fill="#4fd1c5">ROUTE A, via AS 300</text>
+      <text x="160" y="72" text-anchor="middle" font-size="10" fill="#cbd4e3">WEIGHT 0</text>
+      <text x="160" y="90" text-anchor="middle" font-size="10" fill="#cbd4e3">LOCAL_PREF 200</text>
+      <text x="160" y="108" text-anchor="middle" font-size="10" fill="#cbd4e3">AS-PATH: 300 400 (2 hops)</text>
+      <rect x="140" y="118" width="40" height="16" rx="3" fill="none" stroke="#4fd1c5" stroke-width="1.4">
+        <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.5;0.6;1" dur="5s" repeatCount="indefinite"/>
+      </rect>
+      <text x="160" y="130" text-anchor="middle" font-size="8.5" fill="#4fd1c5">
+        <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.5;0.6;1" dur="5s" repeatCount="indefinite"/>
+        WINNER
+      </text>
+
+      <rect x="350" y="30" width="260" height="110" rx="6" fill="none" stroke="#8d9bb3" stroke-width="1.6">
+        <animate attributeName="stroke" values="#8d9bb3;#8d9bb3;#5b6a86;#5b6a86" keyTimes="0;0.5;0.6;1" dur="5s" repeatCount="indefinite"/>
+      </rect>
+      <text x="480" y="50" text-anchor="middle" font-size="11" fill="#8d9bb3">ROUTE B, via AS 500</text>
+      <text x="480" y="72" text-anchor="middle" font-size="10" fill="#cbd4e3">WEIGHT 0</text>
+      <text x="480" y="90" text-anchor="middle" font-size="10" fill="#cbd4e3">LOCAL_PREF 100</text>
+      <text x="480" y="108" text-anchor="middle" font-size="10" fill="#cbd4e3">AS-PATH: 500 (1 hop)</text>
+      <g stroke="#e05a5a" stroke-width="2">
+        <line x1="440" y1="115" x2="520" y2="135">
+          <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.5;0.6;1" dur="5s" repeatCount="indefinite"/>
+        </line>
+        <line x1="440" y1="135" x2="520" y2="115">
+          <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.5;0.6;1" dur="5s" repeatCount="indefinite"/>
+        </line>
+      </g>
+
+      <text x="320" y="170" text-anchor="middle" font-size="10.5" fill="#f2a93b">
+        <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.5;0.6;1" dur="5s" repeatCount="indefinite"/>
+        Step 1: WEIGHT ties at 0 on both, keep comparing
+      </text>
+      <text x="320" y="170" text-anchor="middle" font-size="10.5" fill="#f2a93b">
+        <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.5;0.6;1" dur="5s" repeatCount="indefinite"/>
+        Step 2: LOCAL_PREF 200 beats 100 · Route A wins here
+      </text>
+      <text x="320" y="192" text-anchor="middle" font-size="10" fill="#5b6a86">Route B's shorter AS-PATH never even gets checked</text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Route B has the shorter AS-PATH, the attribute most people assume decides everything, but LOCAL_PREF is checked first, and Route A's higher value wins before AS-PATH is ever compared.</figcaption>
+  </figure>
 
   <div class="callout">
     <span class="callout-label">WHY THIS ISN'T "JUST A BIGGER OSPF"</span>
