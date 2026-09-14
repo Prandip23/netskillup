@@ -32,7 +32,12 @@
 <article class="topic-body wrap">
 
   <h2>What this header is actually for</h2>
-  <p>IP's job stops at "get this packet from one host toward another, best effort, no promises." It doesn't guarantee delivery, doesn't guarantee order, and a packet can even arrive duplicated. TCP sits directly on top of IP and makes up the difference. Every field below exists to support one of three jobs: identifying which application conversation a segment belongs to, tracking exactly which bytes have arrived, and controlling how much data is allowed to be in flight at once.</p>
+  <p>IP's job stops at "get this packet from one host toward another, best effort, no promises." It doesn't guarantee delivery, doesn't guarantee order, and a packet can even arrive duplicated. TCP sits directly on top of IP and makes up the difference. Every field below exists to support one of three jobs:</p>
+  <ol>
+    <li>Identifying which application conversation a segment belongs to.</li>
+    <li>Tracking exactly which bytes have arrived.</li>
+    <li>Controlling how much data is allowed to be in flight at once.</li>
+  </ol>
   <p>Picture a warehouse shipping cartons through a courier that makes no promises on its own: no guaranteed delivery, no guaranteed order, cartons can even get duplicated in transit. TCP's header is the packing slip stapled to every carton: which shipment this carton belongs to, which carton number it is within the batch, a receipt confirming which cartons already arrived, how much room the receiving dock currently has for more, a stamp for special handling, and a tamper seal. That's the whole header, mapped field by field below.</p>
 
   <h2>The header, field by field</h2>
