@@ -57,7 +57,7 @@
       <line x1="416" y1="100" x2="562" y2="100" stroke="#3a4a6b" stroke-width="1.2"/>
 
       <circle r="4" fill="#f2a93b">
-        <animateMotion dur="4.5s" repeatCount="indefinite" keyPoints="0;0.14;0.14" keyTimes="0;0.28;1" calcMode="linear" path="M40,100 L220,100"/>
+        <animateMotion dur="4.5s" repeatCount="indefinite" keyPoints="0;0;1;1" keyTimes="0;0.05;0.3;1" calcMode="linear" path="M40,100 L220,100"/>
       </circle>
       <text x="130" y="80" text-anchor="middle" font-size="9.5" fill="#f2a93b">
         <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.3;0.35" dur="4.5s" repeatCount="indefinite"/>
@@ -65,7 +65,7 @@
       </text>
 
       <circle r="4" fill="#5b9df9">
-        <animateMotion dur="4.5s" repeatCount="indefinite" keyPoints="0;0.3;0.3" keyTimes="0;0.65;1" calcMode="linear" path="M40,100 L400,100"/>
+        <animateMotion dur="4.5s" repeatCount="indefinite" keyPoints="0;0;1;1" keyTimes="0;0.35;0.65;1" calcMode="linear" path="M40,100 L400,100"/>
       </circle>
       <text x="310" y="140" text-anchor="middle" font-size="9.5" fill="#5b9df9">
         <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.35;0.4;0.65;0.7" dur="4.5s" repeatCount="indefinite"/>
@@ -73,7 +73,7 @@
       </text>
 
       <circle r="4" fill="#4fd1c5">
-        <animateMotion dur="4.5s" repeatCount="indefinite" keyPoints="0;0.45;0.45" keyTimes="0;1;1" calcMode="linear" path="M40,100 L580,100"/>
+        <animateMotion dur="4.5s" repeatCount="indefinite" keyPoints="0;0;1;1" keyTimes="0;0.7;0.8;1" calcMode="linear" path="M40,100 L580,100"/>
       </circle>
       <text x="490" y="80" text-anchor="middle" font-size="9.5" fill="#4fd1c5">
         <animate attributeName="opacity" values="0;0;0;1;1" keyTimes="0;0.7;0.75;0.8;1" dur="4.5s" repeatCount="indefinite"/>
@@ -102,6 +102,28 @@
       <tr><td>Echo Reply</td><td>0</td><td>"Yes.", what ping receives back</td></tr>
       <tr><td>Destination Unreachable</td><td>3</td><td>A router or host couldn't deliver the packet at all</td></tr>
       <tr><td>Time Exceeded</td><td>11</td><td>TTL hit zero, the mechanism traceroute is built on</td></tr>
+    </tbody>
+  </table>
+
+  <h2>ICMP types and codes, in full</h2>
+  <p>Every ICMP message carries both fields: <strong>type</strong> says the general category, <strong>code</strong> narrows it down within that category. Some types only ever have one code; others, like Destination Unreachable, use the code to say exactly <em>why</em> the packet couldn't be delivered.</p>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th>Type</th><th>Code</th><th>Meaning</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>0</td><td>0</td><td>Echo Reply</td></tr>
+      <tr><td rowspan="5">3</td><td>0</td><td>Network Unreachable</td></tr>
+      <tr><td>1</td><td>Host Unreachable</td></tr>
+      <tr><td>2</td><td>Protocol Unreachable</td></tr>
+      <tr><td>3</td><td>Port Unreachable</td></tr>
+      <tr><td>4</td><td>Fragmentation Needed and DF set (see <a href="ipv4-fragmentation.html">IPv4 Fragmentation</a>)</td></tr>
+      <tr><td>5</td><td>0–3</td><td>Redirect, "use this other gateway instead"</td></tr>
+      <tr><td>8</td><td>0</td><td>Echo Request</td></tr>
+      <tr><td rowspan="2">11</td><td>0</td><td>TTL exceeded in transit, what traceroute is built on</td></tr>
+      <tr><td>1</td><td>Fragment reassembly time exceeded</td></tr>
+      <tr><td>12</td><td>0</td><td>Parameter Problem, a malformed IP header field</td></tr>
     </tbody>
   </table>
 

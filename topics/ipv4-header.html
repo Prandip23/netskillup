@@ -35,7 +35,7 @@
   <p>A router doesn't care what's inside a packet's payload, HTTP (Hypertext Transfer Protocol) request or DNS (Domain Name System) query or anything else. It only reads the IPv4 header wrapped around that payload, and mostly just a handful of fields in it.</p>
 
   <figure class="diagram-block">
-    <svg viewBox="0 0 640 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of the IPv4 header laid out as 32-bit rows: version/IHL/DSCP/total length, identification/flags/fragment offset, TTL/protocol/checksum, source address, destination address, and options">
+    <svg viewBox="0 0 640 310" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of the IPv4 header laid out as 32-bit rows: version/IHL/DSCP/total length, identification/flags/fragment offset, TTL/protocol/checksum, source address, destination address, options, and the payload that follows the header">
       <g font-family="monospace" font-size="9.5" fill="#e7ecf3">
         <rect x="20" y="20" width="140" height="34" fill="none" stroke="#8d9bb3" stroke-width="1.3"/>
         <text x="90" y="41" text-anchor="middle">Ver · IHL · DSCP</text>
@@ -64,11 +64,39 @@
 
         <rect x="20" y="190" width="600" height="34" fill="none" stroke="#8d9bb3" stroke-width="1.3"/>
         <text x="320" y="211" text-anchor="middle">Options (rarely used) + Padding</text>
+
+        <rect x="20" y="224" width="600" height="40" fill="none" stroke="#b18cf0" stroke-width="1.6" stroke-dasharray="5 4"/>
+        <text x="320" y="248" text-anchor="middle" fill="#b18cf0">Payload: the actual application data (HTTP, DNS, whatever's being sent)</text>
       </g>
-      <text x="320" y="245" text-anchor="middle" font-size="10.5" fill="#5b6a86">TTL, Protocol, and both addresses are the fields a router actually acts on for every packet it forwards.</text>
+      <text x="320" y="285" text-anchor="middle" font-size="10.5" fill="#5b6a86">TTL, Protocol, and both addresses are the fields a router actually acts on for every packet it forwards.</text>
     </svg>
-    <figcaption>The IPv4 header. Everything below the first row is 32 bits wide, exactly like the header diagrams you'll see in any packet capture tool.</figcaption>
+    <figcaption>The IPv4 header. Everything below the first row is 32 bits wide, exactly like the header diagrams you'll see in any packet capture tool. The payload isn't part of the header itself, but it's what the header exists to wrap.</figcaption>
   </figure>
+
+  <h2>Every field, decoded</h2>
+  <p>Field by field, in the order they appear in the diagram above:</p>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th>Field</th><th>Size</th><th>What it holds</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Version</td><td>4 bits</td><td>Always <code>4</code> for IPv4</td></tr>
+      <tr><td>IHL (Internet Header Length)</td><td>4 bits</td><td>Header length in 32-bit words; <code>5</code> (20 bytes) unless Options are present</td></tr>
+      <tr><td>DSCP (Differentiated Services Code Point)</td><td>6 bits</td><td>Traffic priority marking for QoS, e.g. <code>EF</code> (Expedited Forwarding) for voice</td></tr>
+      <tr><td>Total Length</td><td>16 bits</td><td>Whole packet's size in bytes, header plus payload, up to 65,535</td></tr>
+      <tr><td>Identification</td><td>16 bits</td><td>Shared across every fragment of the same original packet, so the destination knows which pieces belong together</td></tr>
+      <tr><td>Flags</td><td>3 bits</td><td>DF (Don't Fragment) and MF (More Fragments); see <a href="ipv4-fragmentation.html">IPv4 Fragmentation</a></td></tr>
+      <tr><td>Fragment Offset</td><td>13 bits</td><td>Where this fragment's data starts within the original payload, in 8-byte units</td></tr>
+      <tr><td>TTL (Time to Live)</td><td>8 bits</td><td>Decremented at every hop; the packet is dropped once it hits 0</td></tr>
+      <tr><td>Protocol</td><td>8 bits</td><td>What's riding inside: <code>6</code> = TCP, <code>17</code> = UDP, <code>1</code> = ICMP</td></tr>
+      <tr><td>Header Checksum</td><td>16 bits</td><td>Integrity check on the header only, recalculated at every hop</td></tr>
+      <tr><td>Source Address</td><td>32 bits</td><td>Sender's IP address</td></tr>
+      <tr><td>Destination Address</td><td>32 bits</td><td>Receiver's IP address, what routers actually look up</td></tr>
+      <tr><td>Options</td><td>0–40 bytes</td><td>Rarely used in practice: timestamps, security markings, source routing</td></tr>
+      <tr><td>Payload</td><td>Variable</td><td>The actual application data the header exists to deliver: an HTTP request, a DNS query, anything</td></tr>
+    </tbody>
+  </table>
 
   <h2>The fields that actually drive behavior</h2>
   <ul>

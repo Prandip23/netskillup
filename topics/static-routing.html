@@ -25,7 +25,7 @@
   <div class="wrap">
     <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3 — Network</a>
     <h1>Static Routing</h1>
-    <p class="topic-dek">The simplest possible way to tell a router how to reach a network: just tell it. No protocol, no negotiation, no automatic adaptation either.</p>
+    <p class="topic-dek">The simplest possible way to tell a router how to reach a network: just tell it, no protocol, no negotiation, no automatic adaptation either.</p>
   </div>
 </div>
 
@@ -68,9 +68,83 @@
   <h2>Where it falls apart</h2>
   <p>Static routes don't adapt. If the configured next-hop goes down, the route stays in the table (unless the router also loses reachability to the next-hop itself) and traffic keeps getting sent into a dead end until a human notices and fixes it. And every network has to be entered by hand, on every router that needs to reach it. A topology with dozens of routers becomes an enormous, error-prone amount of manual configuration. That's exactly the problem the dynamic routing protocols later in this module exist to solve.</p>
 
+  <h2>A worked example: a floating static route as a backup ISP link</h2>
+  <p>The floating static route from the previous topic, worked through concretely. R1 has two paths out to the internet: a primary link through ISP-A, and a backup link through ISP-B that should only ever carry traffic if the primary is actually down.</p>
+  <p>Two static default routes point at the same destination, <code>0.0.0.0/0</code>, but with different administrative distances:</p>
+  <ul>
+    <li><code>ip route 0.0.0.0/0 203.0.113.1</code>: the primary route, left at its default administrative distance of 1.</li>
+    <li><code>ip route 0.0.0.0/0 198.51.100.1 5</code>: the backup route, with its administrative distance manually raised to 5.</li>
+  </ul>
+  <p>As long as R1 can reach 203.0.113.1, the AD-1 route wins outright (see <a href="admin-distance-metrics.html">Administrative Distance & Metrics</a>), and the AD-5 route never gets installed in the routing table at all, even though it's sitting there fully configured. The moment the primary link actually goes down, R1 can no longer reach 203.0.113.1, so that route disappears from the table on its own. With nothing left to outrank it, the AD-5 route becomes the best match and gets installed automatically: no script, no human, no dynamic protocol involved, just two static routes and the same administrative distance comparison from the previous topic.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of R1 with a primary static route to ISP-A at administrative distance 1 and a floating backup static route to ISP-B at administrative distance 5. Traffic flows over the primary link until it fails, then automatically shifts to the backup">
+      <text x="320" y="16" text-anchor="middle" font-size="10.5" fill="#8d9bb3">TWO STATIC ROUTES TO 0.0.0.0/0</text>
+
+      <rect x="20" y="95" width="90" height="50" rx="4" fill="none" stroke="#8d9bb3" stroke-width="1.6"/>
+      <text x="65" y="124" text-anchor="middle" font-size="10" fill="#cbd4e3">R1</text>
+
+      <rect x="500" y="20" width="120" height="55" rx="6" fill="none" stroke="#8d9bb3" stroke-width="1.4" stroke-dasharray="4 3"/>
+      <text x="560" y="52" text-anchor="middle" font-size="10" fill="#cbd4e3">ISP-A</text>
+
+      <rect x="500" y="165" width="120" height="55" rx="6" fill="none" stroke="#8d9bb3" stroke-width="1.4" stroke-dasharray="4 3"/>
+      <text x="560" y="197" text-anchor="middle" font-size="10" fill="#cbd4e3">ISP-B</text>
+
+      <path id="primaryPath" d="M110,110 L500,47" fill="none" stroke="none"/>
+      <path id="backupPath" d="M110,130 L500,192" fill="none" stroke="none"/>
+
+      <line x1="110" y1="110" x2="500" y2="47" stroke-width="2">
+        <animate attributeName="stroke" values="#4fd1c5;#4fd1c5;#e05a5a;#e05a5a;#4fd1c5;#4fd1c5" keyTimes="0;0.35;0.4;0.75;0.8;1" dur="6s" repeatCount="indefinite"/>
+      </line>
+      <line x1="110" y1="130" x2="500" y2="192" stroke-width="2">
+        <animate attributeName="stroke" values="#8d9bb3;#8d9bb3;#b18cf0;#b18cf0;#8d9bb3;#8d9bb3" keyTimes="0;0.4;0.45;0.75;0.8;1" dur="6s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-dasharray" values="5 4;5 4;0 0;0 0;5 4;5 4" keyTimes="0;0.4;0.45;0.75;0.8;1" dur="6s" repeatCount="indefinite"/>
+      </line>
+
+      <g stroke="#e05a5a" stroke-width="2">
+        <line x1="298" y1="71" x2="312" y2="85">
+          <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.35;0.4;0.75;0.8;1" dur="6s" repeatCount="indefinite"/>
+        </line>
+        <line x1="298" y1="85" x2="312" y2="71">
+          <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.35;0.4;0.75;0.8;1" dur="6s" repeatCount="indefinite"/>
+        </line>
+      </g>
+
+      <text x="300" y="65" text-anchor="middle" font-size="9.5" fill="#4fd1c5">AD 1 (primary)</text>
+      <text x="300" y="180" text-anchor="middle" font-size="9.5" fill="#8d9bb3">AD 5 (floating backup)</text>
+
+      <circle r="4" fill="#4fd1c5">
+        <animateMotion dur="1.8s" repeatCount="indefinite"><mpath href="#primaryPath"/></animateMotion>
+        <animate attributeName="opacity" values="1;1;0;0;1;1" keyTimes="0;0.35;0.4;0.75;0.8;1" dur="6s" repeatCount="indefinite"/>
+      </circle>
+      <circle r="4" fill="#b18cf0">
+        <animateMotion dur="2s" repeatCount="indefinite"><mpath href="#backupPath"/></animateMotion>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.4;0.45;0.8;0.85;1" dur="6s" repeatCount="indefinite"/>
+      </circle>
+
+      <text x="320" y="222" text-anchor="middle" font-size="10.5" fill="#4fd1c5">
+        <animate attributeName="opacity" values="1;1;0;0;1;1" keyTimes="0;0.35;0.4;0.75;0.8;1" dur="6s" repeatCount="indefinite"/>
+        PRIMARY UP · using the AD 1 route
+      </text>
+      <text x="320" y="222" text-anchor="middle" font-size="10.5" fill="#b18cf0">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.4;0.45;0.75;0.8;1" dur="6s" repeatCount="indefinite"/>
+        PRIMARY DOWN · AD 5 backup takes over
+      </text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate, animateMotion').forEach(function (a) {
+            a.setAttribute('dur', '999999s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Both routes are configured all the time. Only one is ever actually installed: the AD-1 route while the primary link is up, the AD-5 route automatically the moment it isn't.</figcaption>
+  </figure>
+
   <div class="callout">
-    <span class="callout-label">THE ONE PLACE STATIC ROUTES SHINE EVEN IN A DYNAMIC NETWORK</span>
-    <p>The floating static route from the previous topic: configured with a deliberately higher administrative distance than whatever dynamic protocol is running, sitting completely unused until the dynamic route disappears, then taking over automatically as a backup. It gets the reliability of a dynamic network with the predictability of a static one, exactly where you need it.</p>
+    <span class="callout-label">WHY THIS ONLY WORKS IF THE ROUTER CAN TELL THE LINK IS DOWN</span>
+    <p>A floating static route only fails over when R1 actually loses its route to the next-hop, typically because the outgoing interface itself goes down. If the physical link stays up but the ISP beyond it silently stops forwarding traffic, R1 has no way to know: the AD-1 route stays installed and "working" as far as the routing table is concerned, and the backup never kicks in. Real deployments usually pair this with a reachability check like IP SLA tracking to catch that case too.</p>
   </div>
 
 </article>
