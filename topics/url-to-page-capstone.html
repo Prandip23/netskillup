@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
 </head>
 <body>
 
@@ -32,7 +33,7 @@
 <article class="topic-body wrap">
 
   <h2>The walk-through</h2>
-  <p>This is worth working through slowly, out loud, the first few times. It's the single best way to check that every mechanism this site has covered actually fits together, instead of sitting in your head as separate, disconnected facts.</p>
+  <p>This is worth working through slowly, out loud, the first few times. It's the single best way to check that every mechanism you have covered actually fits together, instead of sitting in your head as separate, disconnected facts.</p>
   <ol>
     <li><strong>Parse the URL.</strong> Split it into a scheme (<code>https://</code>), a host (<code>example.com</code>), and a path (<code>/page</code>).</li>
     <li><strong>Check caches first.</strong> The browser checks its own cache, then the OS's (Operating System's) DNS cache, before asking anyone else anything.</li>
@@ -68,38 +69,38 @@
       </text>
 
       <text x="320" y="150" text-anchor="middle" font-size="10.5" fill="#5b9df9">
-        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.22;0.35;0.37;1" dur="20s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.20;0.22;0.35;0.37;1" dur="20s" repeatCount="indefinite"/>
         2. TCP three-way handshake
       </text>
       <text x="320" y="165" text-anchor="middle" font-size="9" fill="#5b6a86">
-        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.22;0.35;0.37;1" dur="20s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.20;0.22;0.35;0.37;1" dur="20s" repeatCount="indefinite"/>
         SYN, SYN-ACK, ACK: a connection is open
       </text>
 
       <text x="320" y="150" text-anchor="middle" font-size="10.5" fill="#b18cf0">
-        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.42;0.55;0.57;1" dur="20s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.40;0.42;0.55;0.57;1" dur="20s" repeatCount="indefinite"/>
         3. TLS handshake
       </text>
       <text x="320" y="165" text-anchor="middle" font-size="9" fill="#5b6a86">
-        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.42;0.55;0.57;1" dur="20s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.40;0.42;0.55;0.57;1" dur="20s" repeatCount="indefinite"/>
         certificate checked, session keys agreed on
       </text>
 
       <text x="320" y="150" text-anchor="middle" font-size="10.5" fill="#4fd1c5">
-        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.62;0.75;0.77;1" dur="20s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.60;0.62;0.75;0.77;1" dur="20s" repeatCount="indefinite"/>
         4. HTTP request and response
       </text>
       <text x="320" y="165" text-anchor="middle" font-size="9" fill="#5b6a86">
-        <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.62;0.75;0.77;1" dur="20s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.60;0.62;0.75;0.77;1" dur="20s" repeatCount="indefinite"/>
         encrypted, over the now-open connection
       </text>
 
       <text x="320" y="150" text-anchor="middle" font-size="10.5" fill="#e7ecf3">
-        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.82;0.97;1" dur="20s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.80;0.82;0.97;1" dur="20s" repeatCount="indefinite"/>
         5. Parse, fetch, render
       </text>
       <text x="320" y="165" text-anchor="middle" font-size="9" fill="#5b6a86">
-        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.82;0.97;1" dur="20s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.80;0.82;0.97;1" dur="20s" repeatCount="indefinite"/>
         the page you actually see finally appears
       </text>
 
