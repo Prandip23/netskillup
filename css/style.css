@@ -392,6 +392,13 @@ a.topic-row:hover {
   margin-top: 0;
 }
 
+.topic-body h3 {
+  font-family: var(--display);
+  font-size: 16.5px;
+  margin: 28px 0 10px;
+  color: var(--text);
+}
+
 .topic-body p {
   font-size: 15.5px;
   color: #cbd4e3;
@@ -460,6 +467,91 @@ a.topic-row:hover {
   color: var(--sec);
   display: block;
   margin-bottom: 6px;
+}
+
+.wire-detail {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  margin: 10px 0;
+  overflow: hidden;
+}
+
+.wire-detail + .wire-detail {
+  margin-top: 10px;
+}
+
+.wire-detail summary {
+  cursor: pointer;
+  padding: 12px 16px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+}
+
+.wire-detail summary::-webkit-details-marker {
+  display: none;
+}
+
+.wire-detail summary::before {
+  content: "▸";
+  color: var(--text-faint);
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.wire-detail[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.wire-detail summary:hover {
+  background: var(--bg-raised-hover);
+}
+
+.wire-detail summary .wire-tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-faint);
+  font-weight: 400;
+}
+
+.wire-body {
+  padding: 2px 16px 14px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.wire-body > p {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  margin: 10px 0;
+}
+
+.wire-field {
+  display: flex;
+  gap: 14px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 13px;
+}
+
+.wire-field:last-child {
+  border-bottom: none;
+}
+
+.wire-field-name {
+  font-family: var(--mono);
+  color: var(--text-muted);
+  flex: 0 0 180px;
+}
+
+.wire-field-value {
+  color: var(--text);
 }
 
 .compare-table {
@@ -535,5 +627,14 @@ a.topic-row:hover {
   .search-box {
     width: 100%;
     order: 3;
+  }
+
+  .wire-field {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .wire-field-name {
+    flex: none;
   }
 }

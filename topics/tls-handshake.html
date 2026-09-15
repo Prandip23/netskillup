@@ -111,6 +111,66 @@
     <figcaption>Two round trips of pure negotiation before a single byte of the actual page loads.</figcaption>
   </figure>
 
+  <h3>What's actually on the wire, message by message</h3>
+  <p>The diagram above shows the shape of the conversation. Here's what's actually inside each flight; expand any of them.</p>
+
+  <details class="wire-detail">
+    <summary>ClientHello <span class="wire-tag">client → server, plaintext</span></summary>
+    <div class="wire-body">
+      <div class="wire-field"><span class="wire-field-name">Version</span><span class="wire-field-value">3,3, the wire encoding for "TLS 1.2"</span></div>
+      <div class="wire-field"><span class="wire-field-name">Client Random</span><span class="wire-field-value">32 random bytes, generated fresh for this connection</span></div>
+      <div class="wire-field"><span class="wire-field-name">Session ID</span><span class="wire-field-value">Empty on a fresh connection, or a previous session's ID to try to resume it</span></div>
+      <div class="wire-field"><span class="wire-field-name">Cipher Suites</span><span class="wire-field-value">A list the client is willing to use, e.g. <code>TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256</code>, in preference order</span></div>
+      <div class="wire-field"><span class="wire-field-name">Extensions</span><span class="wire-field-value">server_name (SNI, Server Name Indication: which hostname it's asking for), supported_groups (which elliptic curves it can do Diffie-Hellman with), signature_algorithms, and others</span></div>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>ServerHello <span class="wire-tag">server → client, plaintext</span></summary>
+    <div class="wire-body">
+      <div class="wire-field"><span class="wire-field-name">Server Random</span><span class="wire-field-value">Another fresh 32 random bytes</span></div>
+      <div class="wire-field"><span class="wire-field-name">Session ID</span><span class="wire-field-value">A new one, or confirmation that the client's proposed resumption was accepted</span></div>
+      <div class="wire-field"><span class="wire-field-name">Cipher Suite</span><span class="wire-field-value">The single suite the server picked from the client's list</span></div>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>Certificate, ServerKeyExchange, ServerHelloDone <span class="wire-tag">server → client, plaintext</span></summary>
+    <div class="wire-body">
+      <p>Sent as one flight, back to back.</p>
+      <div class="wire-field"><span class="wire-field-name">Certificate</span><span class="wire-field-value">The server's X.509 certificate chain (see <a href="pki-certificates.html">PKI & Digital Certificates</a>), carrying its long-term public key</span></div>
+      <div class="wire-field"><span class="wire-field-name">ServerKeyExchange</span><span class="wire-field-value">The server's ephemeral Diffie-Hellman public key for this connection, plus a signature over it made with the certificate's private key, proving the server actually holds that key</span></div>
+      <div class="wire-field"><span class="wire-field-name">ServerHelloDone</span><span class="wire-field-value">An empty message: "that's everything from me for now"</span></div>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>ClientKeyExchange, ChangeCipherSpec, Finished <span class="wire-tag">client → server</span></summary>
+    <div class="wire-body">
+      <div class="wire-field"><span class="wire-field-name">ClientKeyExchange</span><span class="wire-field-value">The client's own ephemeral Diffie-Hellman public key, still plaintext. Both sides can now compute the same shared secret independently</span></div>
+      <div class="wire-field"><span class="wire-field-name">ChangeCipherSpec</span><span class="wire-field-value">A single byte, <code>0x01</code>: "everything after this is encrypted with the keys we just derived"</span></div>
+      <div class="wire-field"><span class="wire-field-name">Finished</span><span class="wire-field-value">The first encrypted message: a 12-byte value proving the client derived the same keys and saw the same handshake so far</span></div>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>ServerChangeCipherSpec, Finished <span class="wire-tag">server → client</span></summary>
+    <div class="wire-body">
+      <div class="wire-field"><span class="wire-field-name">ChangeCipherSpec</span><span class="wire-field-value">The server's own switch-to-encrypted signal</span></div>
+      <div class="wire-field"><span class="wire-field-name">Finished</span><span class="wire-field-value">The server's own 12-byte proof. Once the client verifies it, application data can flow both directions</span></div>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>How the session keys actually get derived <span class="wire-tag">math, not wire bytes</span></summary>
+    <div class="wire-body">
+      <p>Nothing sent so far is the actual encryption key. Both sides separately compute it from what was exchanged, and never transmit it.</p>
+      <div class="wire-field"><span class="wire-field-name">1. Pre-Master Secret</span><span class="wire-field-value">Both sides combine their own private key with the other side's public key (Diffie-Hellman). Same math, same result on both ends, without either one ever sending the secret itself</span></div>
+      <div class="wire-field"><span class="wire-field-name">2. Master Secret</span><span class="wire-field-value">A 48-byte value derived by repeatedly running HMAC-SHA256 over the pre-master secret, the literal string "master secret", and both randoms</span></div>
+      <div class="wire-field"><span class="wire-field-name">3. Key expansion</span><span class="wire-field-value">The master secret is stretched the same way into six separate keys: a MAC key and a write key for each direction, plus an IV for each</span></div>
+    </div>
+  </details>
+
   <h2>TLS 1.3: One round trip, sometimes zero</h2>
   <p>TLS 1.3 cuts this down by having the client guess which key exchange method the server will accept and send its key share immediately in the ClientHello, instead of waiting to be told. If the guess is right, the whole handshake collapses into a single round trip.</p>
 
@@ -173,6 +233,50 @@
     </svg>
     <figcaption>Half the round trips of TLS 1.2. Reconnecting to a server visited recently can drop to zero extra round trips (0-RTT) using a resumed session, though 0-RTT data carries its own replay-attack caveats.</figcaption>
   </figure>
+
+  <h3>What's actually on the wire, message by message</h3>
+
+  <details class="wire-detail">
+    <summary>ClientHello <span class="wire-tag">client → server, plaintext</span></summary>
+    <div class="wire-body">
+      <div class="wire-field"><span class="wire-field-name">Cipher Suites</span><span class="wire-field-value">A much shorter list, every option now an AEAD (Authenticated Encryption with Associated Data) cipher, e.g. <code>TLS_AES_128_GCM_SHA256</code>, <code>TLS_CHACHA20_POLY1305_SHA256</code></span></div>
+      <div class="wire-field"><span class="wire-field-name">key_share</span><span class="wire-field-value">The new part: the client's own ephemeral Diffie-Hellman public key, sent immediately, guessing which group the server will accept</span></div>
+      <div class="wire-field"><span class="wire-field-name">supported_versions</span><span class="wire-field-value">Explicitly states TLS 1.3, since the version field itself still says 1.2 for compatibility with old middleboxes that choke on an unrecognized version</span></div>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>ServerHello <span class="wire-tag">server → client, plaintext, the last unencrypted message</span></summary>
+    <div class="wire-body">
+      <div class="wire-field"><span class="wire-field-name">key_share</span><span class="wire-field-value">The server's own ephemeral public key for the group it picked. The moment both sides have this, they can both compute the handshake keys</span></div>
+      <div class="wire-field"><span class="wire-field-name">Cipher Suite</span><span class="wire-field-value">The one chosen suite</span></div>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>EncryptedExtensions, Certificate, CertificateVerify, Finished <span class="wire-tag">server → client, encrypted</span></summary>
+    <div class="wire-body">
+      <p>Everything from here on is encrypted with handshake keys derived right after ServerHello. Four messages the server used to send as a separate, later flight in TLS 1.2 are now sent together, and hidden from anyone just watching the wire.</p>
+      <div class="wire-field"><span class="wire-field-name">EncryptedExtensions</span><span class="wire-field-value">Extensions that don't need to be public, now that encryption is already active</span></div>
+      <div class="wire-field"><span class="wire-field-name">Certificate</span><span class="wire-field-value">The server's certificate chain, same as before, just now encrypted</span></div>
+      <div class="wire-field"><span class="wire-field-name">CertificateVerify</span><span class="wire-field-value">A signature, made with the certificate's own private key, over everything exchanged so far. This is new: TLS 1.2 never proved the server holds that key this directly</span></div>
+      <div class="wire-field"><span class="wire-field-name">Finished</span><span class="wire-field-value">Proof the server derived the right keys, the same role it played in TLS 1.2</span></div>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>Finished <span class="wire-tag">client → server, encrypted</span></summary>
+    <div class="wire-body">
+      <p>The client's own proof. The moment the server verifies it, application data flows freely in both directions, and both sides derive a completely separate set of application traffic keys from the ones that encrypted the handshake itself.</p>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>0-RTT early data <span class="wire-tag">optional, only on a resumed connection</span></summary>
+    <div class="wire-body">
+      <p>If the client already holds a PSK (Pre-Shared Key) from a previous connection's session ticket, it can attach encrypted application data directly to its very first ClientHello, before the server has replied at all. That's what "0-RTT" means: zero extra round trips beyond just sending the request. The trade-off is that this early data has no forward secrecy yet and can be replayed by an attacker who captured it, so servers typically only accept it for requests that are safe to repeat, like a GET, never for anything that changes state.</p>
+    </div>
+  </details>
 
   <table class="compare-table">
     <thead>

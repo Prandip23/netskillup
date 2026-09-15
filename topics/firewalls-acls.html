@@ -109,24 +109,96 @@
     <figcaption>Same round trip, two different amounts of rule-checking. The stateful firewall does the checking once, up front, and trusts its own memory of the connection for the reply.</figcaption>
   </figure>
 
-  <h2>Next-generation firewalls (NGFW)</h2>
-  <p>Modern firewalls typically go further than tracking connection state alone. An NGFW adds application awareness (recognizing that traffic on port 443 is actually a specific application, not just "some HTTPS"), intrusion prevention, and deep packet inspection, filtering decisions based on more than IP addresses and ports.</p>
-
   <table class="compare-table">
     <thead>
-      <tr><th></th><th>Stateless ACL</th><th>Stateful firewall</th></tr>
+      <tr><th></th><th>Stateless ACL</th><th>Stateful firewall</th><th>NGFW</th></tr>
     </thead>
     <tbody>
-      <tr><td>Tracks connections</td><td>No</td><td>Yes</td></tr>
-      <tr><td>Return traffic</td><td>Needs its own explicit rule</td><td>Automatically permitted for established connections</td></tr>
-      <tr><td>Performance overhead</td><td>Lower</td><td>Slightly higher, tracks session state</td></tr>
-      <tr><td>Typical device</td><td>Router ACL</td><td>Dedicated firewall, or a Layer 3 switch with firewall features</td></tr>
+      <tr><td>Tracks connections</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>Return traffic</td><td>Needs its own explicit rule</td><td>Automatically permitted for established connections</td><td>Automatically permitted for established connections</td></tr>
+      <tr><td>Sees inside encrypted traffic</td><td>No</td><td>No</td><td>Yes, via SSL/TLS decryption</td></tr>
+      <tr><td>Acts on the application itself</td><td>No</td><td>No</td><td>Yes, up to Layer 7</td></tr>
+      <tr><td>Typical device</td><td>Router ACL</td><td>Dedicated firewall, or a Layer 3 switch with firewall features</td><td>Dedicated NGFW appliance, software, or cloud service (FWaaS)</td></tr>
     </tbody>
   </table>
 
   <div class="callout">
     <span class="callout-label">WHY "PERMIT ESTABLISHED" EXISTS AS ITS OWN KEYWORD</span>
     <p>Extended ACLs sometimes offer an <code>established</code> keyword, permitting a packet if its ACK bit is set. It's a limited, cruder approximation of statefulness, just checking one bit rather than tracking real connection state, and it exists specifically because plain ACLs have no memory of their own to rely on otherwise.</p>
+  </div>
+
+  <h2>Next-generation firewalls (NGFW): Beyond stateful inspection</h2>
+  <p>A traditional firewall, stateful or not, makes its decisions from the outside of a packet in: source and destination address, port, protocol, and connection state. A <strong>Next-Generation Firewall (NGFW)</strong> builds on all of that and adds something a plain stateful firewall never had: the ability to look at what's actually riding inside the connection, and act on that too.</p>
+  <p>The practical difference is which OSI layers each one can act on. A stateless ACL and a stateful firewall both stop at roughly Layer 4, addresses, ports, and connection state. An NGFW reaches all the way up to Layer 7, the application itself, which is what lets it tell "this is port 443 traffic" apart from "this is specifically a file-sharing app tunneling over port 443," something a port number alone could never reveal.</p>
+
+  <h3>Key features</h3>
+  <p>Each of these adds a different kind of visibility a stateful firewall alone doesn't have.</p>
+
+  <details class="wire-detail">
+    <summary>Deep Packet Inspection (DPI)</summary>
+    <div class="wire-body">
+      <p>Instead of stopping at header fields, DPI reads the actual contents of a packet's payload, looking for malware signatures, suspicious patterns, and protocol misuse that never shows up in an address or a port number.</p>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>Application awareness and control</summary>
+    <div class="wire-body">
+      <p>An NGFW identifies which specific application generated a given flow, even when that application deliberately uses a non-standard port or tunnels itself inside another protocol to blend in. Policy can then be written per application ("block this file-sharing app") instead of per port, which a port-based ACL can't express at all.</p>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>Intrusion Prevention System (IPS)</summary>
+    <div class="wire-body">
+      <p>An integrated IPS watches traffic for known vulnerability signatures, protocol anomalies, and exploitation attempts, and can drop or reset a connection the moment it recognizes one, not just log it after the fact.</p>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>Threat intelligence integration</summary>
+    <div class="wire-body">
+      <p>NGFWs pull in live feeds of known-malicious IP addresses, domains, and file signatures, so a brand-new attack pattern discovered elsewhere on the internet this morning can already be blocked here this afternoon, without waiting for a manual rule update.</p>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>SSL/TLS decryption</summary>
+    <div class="wire-body">
+      <p>Most traffic today is encrypted (see <a href="tls-handshake.html">TLS/SSL Handshake</a>), which normally hides everything above Layer 4 from inspection entirely. An NGFW can sit as a trusted intermediary, decrypt the traffic, inspect it, then re-encrypt it before forwarding, so DPI and IPS still have something to actually look at.</p>
+      <p>This is also the mechanism that lets an NGFW enforce an HTTP-to-HTTPS redirect policy: since it can see the plaintext request before re-encrypting it, it can recognize a client requesting the insecure <code>http://</code> version of a site and force that connection over to <code>https://</code> instead, or flag it when a site fails to redirect on its own.</p>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>URL filtering</summary>
+    <div class="wire-body">
+      <p>Enforces policy by category or specific address, blocking known-malicious or simply out-of-policy destinations before a connection to them is even allowed to complete.</p>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>User-based policy</summary>
+    <div class="wire-body">
+      <p>Traffic can be mapped to a specific signed-in user or group, not just an IP address, so policy travels with a person across whatever device or address they're currently using instead of being tied to a fixed IP.</p>
+    </div>
+  </details>
+
+  <h3>Deployment types</h3>
+  <table class="compare-table">
+    <thead>
+      <tr><th>Type</th><th>Runs as</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Hardware-based</td><td>A dedicated physical appliance inline on the network</td></tr>
+      <tr><td>Software-based</td><td>Installed on an existing server or network device, using its own CPU and memory</td></tr>
+      <tr><td>Cloud-based (FWaaS)</td><td>Firewall-as-a-Service, hosted and operated in the cloud rather than on premises</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="callout-label">WHY NONE OF THIS REPLACES THE EARLIER LAYERS</span>
+    <p>An NGFW's Layer 7 visibility is built on top of everything covered above, not instead of it. It still tracks connection state like a stateful firewall, and a plain ACL or stateless rule still has its place as a fast, simple first filter before traffic ever reaches the more expensive Layer 7 inspection.</p>
   </div>
 
 </article>

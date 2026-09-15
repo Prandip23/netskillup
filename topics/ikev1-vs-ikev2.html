@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IKEv1 vs IKEv2 · netskillup</title>
-<meta name="description" content="How two IPsec peers actually agree on and exchange keys before any protected traffic can flow, and what IKEv2 simplified compared to IKEv1.">
+<meta name="description" content="How two IPsec peers negotiate confidentiality, integrity, and authentication before a single packet is protected, message by message, in both IKE versions.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -26,7 +26,7 @@
   <div class="wrap">
     <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
     <h1>IKEv1 vs IKEv2</h1>
-    <p class="topic-dek">IKE (Internet Key Exchange) is how two IPsec peers actually agree on and exchange keys before AH or ESP can protect a single packet, and IKEv2 does it in noticeably fewer messages.</p>
+    <p class="topic-dek">IKE (Internet Key Exchange) is how two IPsec peers actually agree on and exchange keys before AH or ESP can protect a single packet, negotiating confidentiality, integrity, and authentication along the way.</p>
   </div>
 </div>
 
@@ -39,54 +39,53 @@
     <li><strong>Phase 2:</strong> use that protected channel to negotiate the actual keys AH/ESP will use to protect real traffic.</li>
   </ul>
 
-  <h2>IKEv1: Main mode or aggressive mode</h2>
-  <p>IKEv1's Phase 1 comes in two variants. <strong>Main mode</strong> takes six messages and never exposes either peer's identity in cleartext along the way. <strong>Aggressive mode</strong> collapses that down to three messages, faster, but at the cost of exposing identity information openly, making it the less secure option.</p>
+  <h2>How IKE actually delivers confidentiality, integrity, and authentication</h2>
+  <p>Every message below is doing one of three jobs, the same three that show up across this entire security module. IKE's whole Phase 1 negotiation exists to set these three properties up before anything sensitive gets sent.</p>
 
-  <h2>IKEv2: Simplified, and more capable</h2>
-  <p>IKEv2 replaced that split entirely with one fixed exchange: four messages total for the initial setup, no separate main/aggressive choice to make. It also added several things IKEv1 never had: built-in NAT traversal detection, built-in reliability with sequence numbers and retransmission (IKEv1 had no such mechanism of its own), and MOBIKE, which lets a VPN session survive a device switching networks, like moving from WiFi to cellular, without tearing the tunnel down.</p>
+  <table class="compare-table">
+    <thead>
+      <tr><th>Property</th><th>What it guarantees</th><th>How IKE provides it</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Confidentiality</td><td>Nobody watching the wire can read the content</td><td>An encryption algorithm negotiated in the first message pair, applied to every message from that point on</td></tr>
+      <tr><td>Integrity</td><td>Nobody altered the message in transit without it being noticed</td><td>An HMAC (Hashed Message Authentication Code) algorithm, negotiated alongside the encryption algorithm</td></tr>
+      <tr><td>Authentication</td><td>Each peer actually proves it is who it claims to be, not just that it can do math</td><td>A HASH payload (or a digital signature, with certificates) computed from the negotiated keys and each peer's identity, exchanged and checked at the end of Phase 1</td></tr>
+    </tbody>
+  </table>
+  <p>That last row is worth sitting with. The Diffie-Hellman exchange earlier in Phase 1 gives both sides a shared secret, but math alone doesn't prove who's on the other end, an attacker could run the same math. Authentication is the separate, explicit step that turns "we agree on a number" into "I know it's actually you."</p>
+
+  <h2>Phase 1: Main mode's six messages</h2>
+  <p>Main mode is the default, careful version of Phase 1: six messages, three round trips, and it never exposes either peer's identity before encryption has already started.</p>
 
   <figure class="diagram-block">
-    <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram comparing IKEv1 main mode, which takes six alternating messages between initiator and responder, with IKEv2, which accomplishes the same initial negotiation in four">
-      <text x="150" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">IKEV1 MAIN MODE: 6 MESSAGES</text>
-      <text x="490" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">IKEV2: 4 MESSAGES</text>
+    <svg viewBox="0 0 640 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of IKEv1 main mode: messages 1 and 2 negotiate the security association in the clear, messages 3 and 4 exchange Diffie-Hellman key material still in the clear, and messages 5 and 6 exchange encrypted identity and authentication data">
+      <text x="320" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">IKEV1 MAIN MODE (PHASE 1): 6 MESSAGES</text>
 
-      <circle cx="60" cy="100" r="20" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
-      <text x="60" y="104" text-anchor="middle" font-size="8" fill="#5b9df9">INIT</text>
-      <circle cx="260" cy="100" r="20" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
-      <text x="260" y="104" text-anchor="middle" font-size="8" fill="#4fd1c5">RESP</text>
+      <circle cx="140" cy="55" r="22" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="140" y="59" text-anchor="middle" font-size="9" fill="#5b9df9">INIT</text>
+      <circle cx="500" cy="55" r="22" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="500" y="59" text-anchor="middle" font-size="9" fill="#4fd1c5">RESP</text>
 
-      <g font-size="9.5" font-family="monospace">
-        <line x1="85" y1="40" x2="235" y2="40" stroke="#5b9df9" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0s" fill="freeze"/></line>
-        <text x="70" y="37" fill="#5b9df9"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0s" fill="freeze"/>1 →</text>
-        <line x1="235" y1="60" x2="85" y2="60" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.2s" fill="freeze"/></line>
-        <text x="70" y="57" fill="#4fd1c5"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.2s" fill="freeze"/>2 ←</text>
-        <line x1="85" y1="80" x2="235" y2="80" stroke="#5b9df9" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.4s" fill="freeze"/></line>
-        <text x="70" y="77" fill="#5b9df9"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.4s" fill="freeze"/>3 →</text>
-        <line x1="235" y1="100" x2="85" y2="100" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.6s" fill="freeze"/></line>
-        <text x="70" y="97" fill="#4fd1c5"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.6s" fill="freeze"/>4 ←</text>
-        <line x1="85" y1="120" x2="235" y2="120" stroke="#5b9df9" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.8s" fill="freeze"/></line>
-        <text x="70" y="117" fill="#5b9df9"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.8s" fill="freeze"/>5 →</text>
-        <line x1="235" y1="140" x2="85" y2="140" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="1s" fill="freeze"/></line>
-        <text x="70" y="137" fill="#4fd1c5"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="1s" fill="freeze"/>6 ←</text>
+      <g font-size="9" text-anchor="middle">
+        <line x1="163" y1="95" x2="477" y2="95" stroke="#8d9bb3" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0s" fill="freeze"/></line>
+        <text x="320" y="88" fill="#8d9bb3"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0s" fill="freeze"/>1 → SA proposal: encryption + HMAC choices</text>
+
+        <line x1="477" y1="123" x2="163" y2="123" stroke="#8d9bb3" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.25s" fill="freeze"/></line>
+        <text x="320" y="116" fill="#8d9bb3"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.25s" fill="freeze"/>2 ← SA accepted</text>
+
+        <line x1="163" y1="151" x2="477" y2="151" stroke="#f2a93b" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.5s" fill="freeze"/></line>
+        <text x="320" y="144" fill="#f2a93b"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.5s" fill="freeze"/>3 → DH public value + nonce (plaintext)</text>
+
+        <line x1="477" y1="179" x2="163" y2="179" stroke="#f2a93b" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.75s" fill="freeze"/></line>
+        <text x="320" y="172" fill="#f2a93b"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.75s" fill="freeze"/>4 ← DH public value + nonce (plaintext)</text>
+
+        <line x1="163" y1="207" x2="477" y2="207" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="1s" fill="freeze"/></line>
+        <text x="320" y="200" fill="#4fd1c5"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="1s" fill="freeze"/>5 → Identity + HASH (now encrypted)</text>
+
+        <line x1="477" y1="235" x2="163" y2="235" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="1.25s" fill="freeze"/></line>
+        <text x="320" y="228" fill="#4fd1c5"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="1.25s" fill="freeze"/>6 ← Identity + HASH (mutual auth complete)</text>
       </g>
-      <text x="150" y="165" text-anchor="middle" font-size="9" fill="#5b6a86">3 round trips before real key material is ready</text>
-
-      <circle cx="390" cy="100" r="20" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
-      <text x="390" y="104" text-anchor="middle" font-size="8" fill="#5b9df9">INIT</text>
-      <circle cx="590" cy="100" r="20" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
-      <text x="590" y="104" text-anchor="middle" font-size="8" fill="#4fd1c5">RESP</text>
-
-      <g font-size="9.5" font-family="monospace">
-        <line x1="415" y1="60" x2="565" y2="60" stroke="#5b9df9" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0s" fill="freeze"/></line>
-        <text x="400" y="57" fill="#5b9df9"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0s" fill="freeze"/>1 →</text>
-        <line x1="565" y1="80" x2="415" y2="80" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.2s" fill="freeze"/></line>
-        <text x="400" y="77" fill="#4fd1c5"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.2s" fill="freeze"/>2 ←</text>
-        <line x1="415" y1="100" x2="565" y2="100" stroke="#5b9df9" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.4s" fill="freeze"/></line>
-        <text x="400" y="97" fill="#5b9df9"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.4s" fill="freeze"/>3 →</text>
-        <line x1="565" y1="120" x2="415" y2="120" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.6s" fill="freeze"/></line>
-        <text x="400" y="117" fill="#4fd1c5"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.6s" fill="freeze"/>4 ←</text>
-      </g>
-      <text x="490" y="165" text-anchor="middle" font-size="9" fill="#5b6a86">2 round trips, one fixed exchange, no mode to choose</text>
+      <text x="320" y="262" text-anchor="middle" font-size="9" fill="#5b6a86">grey: negotiating in the clear · amber: keying material, still unauthenticated · teal: encrypted and authenticated</text>
 
       <script type="text/javascript"><![CDATA[
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -97,8 +96,147 @@
         }
       ]]></script>
     </svg>
-    <figcaption>Both are negotiating the same thing. IKEv2 just does it in two fewer messages, with no separate faster-but-less-secure mode to accidentally pick.</figcaption>
+    <figcaption>Encryption only starts after message 4. Messages 1 through 4 are visible to anyone watching the link; only 5 and 6, carrying identity and the authentication proof, are ever encrypted.</figcaption>
   </figure>
+
+  <details class="wire-detail">
+    <summary>Messages 1 and 2: the SA proposal <span class="wire-tag">plaintext</span></summary>
+    <div class="wire-body">
+      <div class="wire-field"><span class="wire-field-name">SPI</span><span class="wire-field-value">A Security Parameter Index the initiator generates to label this negotiation; the responder's own SPI starts at zero and gets filled in once it replies</span></div>
+      <div class="wire-field"><span class="wire-field-name">Proposal</span><span class="wire-field-value">Encryption algorithm, HMAC algorithm, Diffie-Hellman group, and authentication method (pre-shared key or certificate), offered by the initiator and matched or rejected by the responder</span></div>
+      <div class="wire-field"><span class="wire-field-name">Result</span><span class="wire-field-value">Both peers now agree on every algorithm they'll use for the rest of Phase 1, but nothing is encrypted or authenticated yet</span></div>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>Messages 3 and 4: the key exchange <span class="wire-tag">still plaintext</span></summary>
+    <div class="wire-body">
+      <div class="wire-field"><span class="wire-field-name">KE payload</span><span class="wire-field-value">Each side's Diffie-Hellman public value, in the group agreed on in messages 1 and 2</span></div>
+      <div class="wire-field"><span class="wire-field-name">Nonce</span><span class="wire-field-value">A fresh random value from each side, mixed into the key derivation so the resulting keys are unique to this exchange, not just this DH group</span></div>
+      <div class="wire-field"><span class="wire-field-name">Result</span><span class="wire-field-value">Both sides can now independently compute the same shared secret and derive the encryption and HMAC keys from it, but these two messages themselves went out unencrypted and unauthenticated, exactly the raw material an eavesdropper sees</span></div>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>Messages 5 and 6: identity and authentication <span class="wire-tag">encrypted</span></summary>
+    <div class="wire-body">
+      <div class="wire-field"><span class="wire-field-name">ID payload</span><span class="wire-field-value">Each peer's identity, an IP address, hostname, or distinguished name, now encrypted with the keys derived from messages 3 and 4</span></div>
+      <div class="wire-field"><span class="wire-field-name">HASH payload</span><span class="wire-field-value">A value computed from the negotiated keys, both nonces, and each peer's own identity, proving the sender actually derived the correct key material and really is who the ID payload claims</span></div>
+      <div class="wire-field"><span class="wire-field-name">Result</span><span class="wire-field-value">Once the responder's HASH in message 6 checks out, both peers are mutually authenticated and the IKE SA (Phase 1's protected channel) is complete</span></div>
+    </div>
+  </details>
+
+  <h2>Phase 1: Aggressive mode's three messages</h2>
+  <p>Aggressive mode collapses the same negotiation into three messages by combining what main mode spread across six, trading away main mode's one real protection: it sends identity and authentication data before encryption has started.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of IKEv1 aggressive mode: message 1 combines the SA proposal with DH key material, message 2 combines the accepted proposal, DH value, identity, and authentication hash all sent unencrypted, and message 3 sends the initiator's own authentication encrypted">
+      <text x="320" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">IKEV1 AGGRESSIVE MODE (PHASE 1): 3 MESSAGES</text>
+
+      <circle cx="140" cy="55" r="22" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="140" y="59" text-anchor="middle" font-size="9" fill="#5b9df9">INIT</text>
+      <circle cx="500" cy="55" r="22" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="500" y="59" text-anchor="middle" font-size="9" fill="#4fd1c5">RESP</text>
+
+      <g font-size="9" text-anchor="middle">
+        <line x1="163" y1="100" x2="477" y2="100" stroke="#8d9bb3" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0s" fill="freeze"/></line>
+        <text x="320" y="93" fill="#8d9bb3"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0s" fill="freeze"/>1 → SA proposal + DH value + nonce + ID</text>
+
+        <line x1="477" y1="135" x2="163" y2="135" stroke="#e05a5a" stroke-width="1.6" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.25s" fill="freeze"/></line>
+        <text x="320" y="128" fill="#e05a5a"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.25s" fill="freeze"/>2 ← SA + DH + ID + HASH, unencrypted</text>
+
+        <line x1="163" y1="170" x2="477" y2="170" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.5s" fill="freeze"/></line>
+        <text x="320" y="163" fill="#4fd1c5"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.5s" fill="freeze"/>3 → HASH (encrypted)</text>
+      </g>
+      <text x="320" y="200" text-anchor="middle" font-size="9" fill="#e05a5a">message 2 exposes both peers' identity and the responder's proof before any encryption exists</text>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate').forEach(function (a) {
+            a.setAttribute('dur', '0.01s');
+            a.setAttribute('begin', '0s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Half the round trips of main mode, at the cost of message 2 going out completely in the clear, identity, key material, and the responder's authentication proof all included.</figcaption>
+  </figure>
+
+  <details class="wire-detail">
+    <summary>Why message 2 is the actual weak point <span class="wire-tag">security note</span></summary>
+    <div class="wire-body">
+      <p>Main mode never sends identity or authentication data until messages 5 and 6, both already encrypted. Aggressive mode's message 2 bundles the responder's identity and its HASH payload into the very first reply, sent before any encryption key has been established at all. Anyone capturing that traffic gets the responder's identity for free, and pre-shared-key deployments using aggressive mode have historically been targeted with offline attacks against that exposed hash. This is exactly why main mode is the safer default whenever both peers can use it.</p>
+    </div>
+  </details>
+
+  <h2>Phase 2: Quick mode</h2>
+  <p>Once Phase 1 finishes, either mode, both peers have one protected channel (the IKE SA) they can now use as many times as needed. Quick mode is what actually runs inside that channel to negotiate the real IPsec SAs that AH or ESP will use.</p>
+
+  <details class="wire-detail">
+    <summary>Quick mode's three messages <span class="wire-tag">all encrypted, inside the Phase 1 SA</span></summary>
+    <div class="wire-body">
+      <div class="wire-field"><span class="wire-field-name">QM1 (initiator → responder)</span><span class="wire-field-value">Proposes the IPsec SA: which protocol (AH or ESP), which transform, and a fresh nonce</span></div>
+      <div class="wire-field"><span class="wire-field-name">QM2 (responder → initiator)</span><span class="wire-field-value">Accepts the proposal and returns its own fresh nonce</span></div>
+      <div class="wire-field"><span class="wire-field-name">QM3 (initiator → responder)</span><span class="wire-field-value">A final confirmation, proving the initiator is still live and really did receive QM2</span></div>
+      <p>The two nonces get mixed into the key derivation so the IPsec session keys are fresh, distinct from the Phase 1 keys, and not simply reused traffic-protection keys borrowed from the negotiation channel itself.</p>
+    </div>
+  </details>
+
+  <h2>IKEv2: One fixed exchange</h2>
+  <p>IKEv2 replaced the whole main/aggressive split with a single design: four messages, two named exchanges, no mode to accidentally pick wrong.</p>
+
+  <figure class="diagram-block">
+    <svg viewBox="0 0 640 225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of IKEv2's initial negotiation: IKE_SA_INIT exchanges the SA proposal and Diffie-Hellman key material in messages 1 and 2, then IKE_AUTH exchanges encrypted identity and authentication in messages 3 and 4">
+      <text x="320" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">IKEV2: 4 MESSAGES, TWO EXCHANGES</text>
+
+      <circle cx="140" cy="55" r="22" fill="none" stroke="#5b9df9" stroke-width="1.6"/>
+      <text x="140" y="59" text-anchor="middle" font-size="9" fill="#5b9df9">INIT</text>
+      <circle cx="500" cy="55" r="22" fill="none" stroke="#4fd1c5" stroke-width="1.6"/>
+      <text x="500" y="59" text-anchor="middle" font-size="9" fill="#4fd1c5">RESP</text>
+
+      <g font-size="9" text-anchor="middle">
+        <line x1="163" y1="100" x2="477" y2="100" stroke="#8d9bb3" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0s" fill="freeze"/></line>
+        <text x="320" y="93" fill="#8d9bb3"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0s" fill="freeze"/>1 → IKE_SA_INIT: SA proposal + DH + nonce</text>
+
+        <line x1="477" y1="135" x2="163" y2="135" stroke="#8d9bb3" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.25s" fill="freeze"/></line>
+        <text x="320" y="128" fill="#8d9bb3"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.25s" fill="freeze"/>2 ← IKE_SA_INIT: SA accepted + DH + nonce</text>
+
+        <line x1="163" y1="170" x2="477" y2="170" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.5s" fill="freeze"/></line>
+        <text x="320" y="163" fill="#4fd1c5"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.5s" fill="freeze"/>3 → IKE_AUTH: identity + AUTH (encrypted)</text>
+
+        <line x1="477" y1="200" x2="163" y2="200" stroke="#4fd1c5" stroke-width="1.4" stroke-dasharray="400" stroke-dashoffset="400"><animate attributeName="stroke-dashoffset" from="400" to="0" dur="0.35s" begin="0.75s" fill="freeze"/></line>
+        <text x="320" y="193" fill="#4fd1c5"><animate attributeName="opacity" values="0;1" dur="0.2s" begin="0.75s" fill="freeze"/>4 ← IKE_AUTH: identity + AUTH (encrypted)</text>
+      </g>
+
+      <script type="text/javascript"><![CDATA[
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.currentScript.closest('svg').querySelectorAll('animate').forEach(function (a) {
+            a.setAttribute('dur', '0.01s');
+            a.setAttribute('begin', '0s');
+          });
+        }
+      ]]></script>
+    </svg>
+    <figcaption>Everything main mode needed six messages for, encryption starting only after the DH exchange, identity and authentication protected, happens here in four, with a CHILD_SA (the equivalent of a Quick Mode negotiation) often piggybacked onto IKE_AUTH itself.</figcaption>
+  </figure>
+
+  <details class="wire-detail">
+    <summary>IKE_SA_INIT: messages 1 and 2 <span class="wire-tag">plaintext</span></summary>
+    <div class="wire-body">
+      <div class="wire-field"><span class="wire-field-name">SA proposal</span><span class="wire-field-value">Encryption, integrity, and Diffie-Hellman group choices, negotiated in a single round trip instead of main mode's two separate messages</span></div>
+      <div class="wire-field"><span class="wire-field-name">KE and nonce</span><span class="wire-field-value">Both sides' Diffie-Hellman public values and nonces, bundled into the same exchange that negotiated the algorithms</span></div>
+      <div class="wire-field"><span class="wire-field-name">Result</span><span class="wire-field-value">Both peers can now derive shared keys, exactly what took messages 1 through 4 in main mode, done here in one round trip</span></div>
+    </div>
+  </details>
+
+  <details class="wire-detail">
+    <summary>IKE_AUTH: messages 3 and 4 <span class="wire-tag">encrypted</span></summary>
+    <div class="wire-body">
+      <div class="wire-field"><span class="wire-field-name">ID payload</span><span class="wire-field-value">Each peer's identity, encrypted, never exposed before encryption exists (unlike aggressive mode)</span></div>
+      <div class="wire-field"><span class="wire-field-name">AUTH payload</span><span class="wire-field-value">IKEv2's equivalent of the HASH payload: proof each side derived the right keys and really controls the claimed identity</span></div>
+      <div class="wire-field"><span class="wire-field-name">SA, TS payloads</span><span class="wire-field-value">Often included right here too: the actual CHILD_SA (the traffic-protecting IPsec SA) and traffic selectors, so a fresh IKEv2 session can be fully ready after just these four messages, no separate Quick Mode round trip required</span></div>
+    </div>
+  </details>
 
   <table class="compare-table">
     <thead>
@@ -106,6 +244,7 @@
     </thead>
     <tbody>
       <tr><td>Initial exchange</td><td>6 messages (main) or 3 (aggressive)</td><td>4 messages, always</td></tr>
+      <tr><td>Identity exposed before encryption</td><td>No (main mode) or yes (aggressive mode)</td><td>Never</td></tr>
       <tr><td>NAT traversal</td><td>Added later, inconsistently</td><td>Built in</td></tr>
       <tr><td>Reliability (retransmission)</td><td>Not built in</td><td>Built in</td></tr>
       <tr><td>Mobility (MOBIKE)</td><td>No</td><td>Yes</td></tr>
