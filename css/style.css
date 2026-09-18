@@ -32,6 +32,23 @@
   /* Effects */
   --shadow: 0 18px 48px rgba(0, 0, 0, 0.2);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Layout */
+  --content-width: 1120px;
+  --reading-width: 720px;
 }
 
 * {
@@ -72,9 +89,9 @@ a {
 }
 
 .wrap {
-  max-width: 1040px;
+  max-width: var(--content-width);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 var(--space-6);
 }
 
 /* ---------- Header ---------- */
@@ -87,7 +104,7 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: var(--space-6);
   padding-top: 20px;
   padding-bottom: 20px;
 }
@@ -701,10 +718,6 @@ a {
   transform: translateY(0);
 }
 
-.wrap {
-  max-width: 1120px;
-}
-
 .site-header {
   position: sticky;
   top: 0;
@@ -790,7 +803,7 @@ a {
 }
 
 .hero .wrap {
-  gap: 64px;
+  gap: var(--space-16);
 }
 
 .hero h1 {
@@ -846,7 +859,7 @@ a {
   display: flex;
   align-items: end;
   justify-content: space-between;
-  gap: 32px;
+  gap: var(--space-8);
   margin-bottom: 26px;
 }
 
@@ -1031,16 +1044,16 @@ a.topic-row:hover {
 
 .topic-layout {
   display: grid;
-  grid-template-columns: minmax(0, 720px) minmax(180px, 220px);
+  grid-template-columns: minmax(0, var(--reading-width)) minmax(180px, 220px);
   justify-content: space-between;
-  gap: 48px;
+  gap: var(--space-12);
   align-items: start;
 }
 
 .topic-body {
   width: 100%;
   max-width: none;
-  padding: 48px 0 24px;
+  padding: var(--space-12) 0 var(--space-6);
 }
 
 .topic-body h2,
@@ -1050,7 +1063,7 @@ a.topic-row:hover {
 }
 
 .topic-body h2 {
-  margin-top: 48px;
+  margin-top: var(--space-12);
   font-size: 23px;
   letter-spacing: 0;
 }
@@ -1197,7 +1210,7 @@ a.topic-row:hover {
 
 .table-scroll {
   position: relative;
-  margin: 24px 0 32px;
+  margin: var(--space-6) 0 var(--space-8);
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -1278,7 +1291,7 @@ a.topic-row:hover {
 
 @media (max-width: 760px) {
   body {
-    background-size: 24px 24px;
+    background-size: var(--space-6) var(--space-6);
   }
 
   .site-header {
@@ -1299,7 +1312,7 @@ a.topic-row:hover {
   }
 
   .hero .wrap {
-    gap: 32px;
+    gap: var(--space-8);
   }
 
   .hero h1 {
@@ -1318,7 +1331,7 @@ a.topic-row:hover {
   }
 
   .modules {
-    padding: 40px 0 64px;
+    padding: var(--space-10) 0 var(--space-16);
   }
 
   .curriculum-intro {
@@ -1385,7 +1398,7 @@ a.topic-row:hover {
     position: static;
     order: -1;
     width: 100%;
-    margin-top: 24px;
+    margin-top: var(--space-6);
     padding: 0;
     border: 1px solid var(--border);
     border-radius: 4px;
@@ -1466,8 +1479,8 @@ a.topic-row:hover {
     display: grid;
     grid-template-columns: 1fr;
     gap: 4px;
-    padding-top: 24px;
-    padding-bottom: 48px;
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-12);
   }
 
   .topic-nav a {
