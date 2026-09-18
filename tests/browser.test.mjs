@@ -6,7 +6,19 @@ import { once } from "node:events";
 import test from "node:test";
 import { chromium } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
-import { root } from "../scripts/site-lib.mjs";
+import { root, loadCatalog, publishedTopics } from "../scripts/site-lib.mjs";
+
+const topicCount = publishedTopics(loadCatalog()).length;
+const expansionPages = [
+  "topics/copper-fiber-transceivers-poe.html",
+  "topics/bandwidth-throughput-latency.html",
+  "topics/wifi-bands-channels-airtime.html",
+  "topics/wifi-association-security-roaming.html",
+  "topics/campus-design-segmentation.html",
+  "topics/gateway-redundancy-vrrp-hsrp.html",
+  "topics/network-troubleshooting-tools.html",
+  "topics/packet-capture-wireshark-tcpdump.html",
+];
 
 test("reference browser workflows", async (suite) => {
   const server = createServer(async (request, response) => {
@@ -42,7 +54,7 @@ test("reference browser workflows", async (suite) => {
       assert.equal(await page.locator("#topic-search").inputValue(), "L2 ARP");
       assert.equal(await page.locator(".topic-row:visible").count(), 1);
       await page.locator("#topic-search").press("Escape");
-      assert.equal(await page.locator(".topic-row:visible").count(), 45);
+      assert.equal(await page.locator(".topic-row:visible").count(), topicCount);
       await page.locator("#topic-search").fill("layer 3 subnetting");
       assert.equal(await page.locator(".topic-row:visible").count(), 1);
       await page.locator("#topic-level").selectOption("intermediate");
@@ -55,6 +67,17 @@ test("reference browser workflows", async (suite) => {
       await page.locator("#reference-search input").press("Enter");
       await page.waitForURL("**/index.html?q=source+NAT");
       assert.equal(await page.locator(".topic-row:visible").count(), 1);
+      for (const [query, file] of [
+        ["FUND PoE", expansionPages[0]],
+        ["WLAN airtime", expansionPages[2]],
+        ["wireless SAE", expansionPages[3]],
+        ["ENT FHRP", expansionPages[5]],
+        ["OPS pcap", expansionPages[7]],
+      ]) {
+        await page.locator("#topic-search").fill(query);
+        assert.equal(await page.locator(".topic-row:visible").count(), 1, query);
+        assert.equal(await page.locator(".topic-row:visible").getAttribute("href"), file, query);
+      }
       assert.deepEqual(errors, []);
       await page.close();
     });
@@ -63,12 +86,20 @@ test("reference browser workflows", async (suite) => {
       const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
       const page = await context.newPage();
       await page.goto(base);
-      assert.equal(await page.locator(".topic-row:visible").count(), 45);
+      assert.equal(await page.locator(".topic-row:visible").count(), topicCount);
+      assert.equal(await page.locator("#module-jump a").count(), 9);
       assert.equal(await page.locator("#search-form").isVisible(), false);
       await page.locator('a[href="topics/ipv4-subnetting-cidr-vlsm.html"]').click();
       assert.equal(await page.locator("#worked-allocation").count(), 1);
       assert.equal(await page.locator(".topic-nav a").count(), 2);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+      for (const file of expansionPages) {
+        await page.goto(`${base}${file}`);
+        assert.equal(await page.locator("h1").count(), 1, file);
+        assert.equal(await page.locator("#sources").count(), 1, file);
+        assert.equal(await page.locator(".topic-nav a").count(), 2, file);
+        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), file);
+      }
       await context.close();
     });
 
@@ -77,6 +108,9 @@ test("reference browser workflows", async (suite) => {
       const page = await context.newPage();
       const errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
+      page.on("console", (message) => {
+        if (message.type() === "error" && message.location().url.startsWith(base)) errors.push(message.text());
+      });
       page.on("response", (response) => {
         if (response.url().startsWith(base) && response.status() >= 400) errors.push(`${response.status()} ${response.url()}`);
       });
@@ -89,6 +123,7 @@ test("reference browser workflows", async (suite) => {
         "topics/dns-resolution-flow.html",
         "topics/http-https-versions.html",
         "topics/tls-handshake.html",
+        ...expansionPages,
       ];
       for (const width of [360, 390, 768, 1280, 1440]) {
         await page.setViewportSize({ width, height: 900 });
@@ -106,11 +141,30 @@ test("reference browser workflows", async (suite) => {
             return diagram.width <= figure.clientWidth;
           })), `${width}: ${file} clipped diagram overview`);
           assert.equal(await page.locator("h1").count(), 1);
+          if (file === "index.html") {
+            assert.ok(await page.locator(".topic-list").evaluateAll((lists) => lists.every((list) => list.scrollWidth <= list.clientWidth + 1)), `${width}: catalog list clipped internally`);
+            assert.ok(await page.locator(".topic-info").evaluateAll((items) => items.every((item) => {
+              const bounds = item.getBoundingClientRect();
+              const row = item.closest(".topic-row").getBoundingClientRect();
+              return bounds.left >= row.left && bounds.right <= row.right && item.scrollWidth <= item.clientWidth + 1;
+            })), `${width}: catalog text clipped internally`);
+          }
+          if (expansionPages.includes(file)) {
+            assert.ok(await page.locator("figure svg text").evaluateAll((labels) => labels.every((label) => {
+              const bounds = label.getBBox();
+              const canvas = label.ownerSVGElement.viewBox.baseVal;
+              return bounds.x >= canvas.x && bounds.y >= canvas.y && bounds.x + bounds.width <= canvas.x + canvas.width && bounds.y + bounds.height <= canvas.y + canvas.height;
+            })), `${width}: ${file} SVG label outside canvas`);
+          }
           if ([390, 1280].includes(width)) {
             const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
             assert.deepEqual(result.violations.map((item) => `${item.id}: ${item.nodes.map((node) => node.target.join(" ")).join(", ")}`), [], `${width}: ${file}`);
           }
           if ([390, 1280].includes(width)) await page.screenshot({ path: path.join(root, "test-results", `${path.basename(file, ".html")}-${width}.png`), fullPage: true });
+          if ([390, 1280].includes(width) && expansionPages.includes(file)) {
+            await page.screenshot({ path: path.join(root, "test-results", `${path.basename(file, ".html")}-header-${width}.png`) });
+            await page.locator("figure").first().screenshot({ path: path.join(root, "test-results", `${path.basename(file, ".html")}-diagram-${width}.png`) });
+          }
         }
       }
       await page.setViewportSize({ width: 390, height: 844 });

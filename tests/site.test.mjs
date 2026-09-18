@@ -69,7 +69,9 @@ test("Escape and clear restore all topics; clear returns focus to search", () =>
 
 test("classic-script adapter loads all published topics and valid references", () => {
   const catalog = loadCatalog();
-  assert.equal(publishedTopics(catalog).length, 45);
+  assert.equal(publishedTopics(catalog).length, 53);
+  assert.equal(catalog.length, 9);
+  for (const module of catalog) assert.ok(read("css/style.css").includes(`--${module.color}:`), module.id);
   assert.deepEqual(catalogErrors(catalog), []);
   catalog[0].topics[0].related = ["networking:missing"];
   assert.match(catalogErrors(catalog).join("\n"), /Invalid reference/);
@@ -93,7 +95,7 @@ test("static catalog includes published topics only and encodes metadata safely"
   const html = renderCatalog(catalog);
   assert.match(html, /&lt;sample &amp; &quot;quoted&quot;&gt;/);
   assert.ok(!html.includes('href="topics/network-topologies.html"'));
-  assert.equal(document(html).filter((node) => attribute(node, "class") === "topic-row").length, 44);
+  assert.equal(document(html).filter((node) => attribute(node, "class") === "topic-row").length, 52);
   assert.equal(relativeLink("topics/arp.html", "index.html"), "../index.html");
 });
 
@@ -138,4 +140,69 @@ test("sync preserves Windows newlines and remains fresh after an editor save", (
   const output = syncHTML(source, "index.html", catalog, "https://netskillup.com");
   assert.ok(!/(?<!\r)\n/.test(output));
   assert.equal(syncHTML(output, "index.html", catalog, "https://netskillup.com"), output);
+});
+
+test("performance example converts bytes to bits and calculates transfer time", () => {
+  const allNodes = document(read("topics/bandwidth-throughput-latency.html"));
+  const table = allNodes.find((node) => attribute(node, "id") === "transfer-calculation");
+  const row = table.childNodes.find((node) => node.tagName === "tbody").childNodes.find((node) => node.tagName === "tr");
+  const [megabytes, goodput, megabits, seconds] = row.childNodes.filter((node) => node.tagName === "td").map((node) => Number(text(node)));
+  assert.equal(megabytes * 8, megabits);
+  assert.equal(megabits / goodput, seconds);
+  assert.equal(allNodes.filter((node) => node.tagName === "h1").length, 1);
+  assert.ok(allNodes.some((node) => node.tagName === "svg" && attribute(node, "aria-label")));
+});
+
+test("PoE example reserves power at the PSE and stays within its budget", () => {
+  const allNodes = document(read("topics/copper-fiber-transceivers-poe.html"));
+  const table = allNodes.find((node) => attribute(node, "id") === "poe-allocation");
+  const row = table.childNodes.find((node) => node.tagName === "tbody").childNodes.find((node) => node.tagName === "tr");
+  const [count, watts, reserved, budget, remaining] = row.childNodes.filter((node) => node.tagName === "td").map((node) => Number(text(node)));
+  assert.equal(count * watts, reserved);
+  assert.equal(budget - reserved, remaining);
+  assert.ok(remaining >= 0);
+});
+
+test("expansion articles have reference sections, unique anchors, and accessible diagrams", () => {
+  for (const slug of ["bandwidth-throughput-latency", "copper-fiber-transceivers-poe", "wifi-bands-channels-airtime", "wifi-association-security-roaming", "network-troubleshooting-tools", "packet-capture-wireshark-tcpdump", "campus-design-segmentation", "gateway-redundancy-vrrp-hsrp"]) {
+    const source = read(`topics/${slug}.html`);
+    const allNodes = document(source);
+    const ids = allNodes.map((node) => attribute(node, "id")).filter(Boolean);
+    assert.equal(new Set(ids).size, ids.length, slug);
+    assert.equal(allNodes.filter((node) => node.tagName === "h1").length, 1, slug);
+    for (const id of ["related-topics", "sources"]) assert.ok(ids.includes(id), `${slug}: ${id}`);
+    for (const className of ["topic-answer", "topic-prerequisites", "callout"]) {
+      assert.ok(allNodes.some((node) => (attribute(node, "class") || "").split(/\s+/).includes(className)), `${slug}: ${className}`);
+    }
+    const diagrams = allNodes.filter((node) => node.tagName === "svg");
+    assert.ok(diagrams.length, slug);
+    assert.ok(diagrams.every((node) => attribute(node, "role") === "img" && attribute(node, "aria-label")), slug);
+    for (const rectangle of allNodes.filter((node) => node.tagName === "rect")) {
+      for (const dimension of ["width", "height"]) assert.ok(Number(attribute(rectangle, dimension)) > 0, `${slug}: SVG ${dimension}`);
+    }
+    assert.ok(!source.includes("\u2014"), slug);
+  }
+});
+
+test("synthetic TCP trace repeats the SYN and acknowledges its sequence space", () => {
+  const diagramNodes = document(read("topics/packet-capture-wireshark-tcpdump.html"));
+  const exchanges = diagramNodes.find((node) => node.tagName === "g" && attribute(node, "marker-end") === "url(#capture-arrow)");
+  assert.equal(exchanges.childNodes.filter((node) => node.tagName === "path").length, 4);
+  const table = document(read("topics/packet-capture-wireshark-tcpdump.html")).find((node) => attribute(node, "id") === "synthetic-handshake");
+  const rows = table.childNodes.find((node) => node.tagName === "tbody").childNodes.filter((node) => node.tagName === "tr")
+    .map((row) => row.childNodes.filter((node) => node.tagName === "td").map(text));
+  assert.equal(rows.length, 4);
+  assert.equal(rows[0][3], rows[1][3]);
+  assert.equal(Number(rows[2][4]), Number(rows[0][3]) + 1);
+  assert.equal(Number(rows[3][4]), Number(rows[2][3]) + 1);
+  assert.equal(Number(rows[3][3]), Number(rows[0][3]) + 1);
+  assert.ok(rows.every((row, index) => index === 0 || Number(row[0]) > Number(rows[index - 1][0])));
+});
+
+test("VRRP timer example includes the backup priority skew", () => {
+  const table = document(read("topics/gateway-redundancy-vrrp-hsrp.html")).find((node) => attribute(node, "id") === "vrrp-timer");
+  const row = table.childNodes.find((node) => node.tagName === "tbody").childNodes.find((node) => node.tagName === "tr");
+  const [priority, interval, skew, activeDown] = row.childNodes.filter((node) => node.tagName === "td").map((node) => Number(text(node)));
+  assert.equal((256 - priority) / 256 * interval, skew);
+  assert.equal(3 * interval + skew, activeDown);
 });

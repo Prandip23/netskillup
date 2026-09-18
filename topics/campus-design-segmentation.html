@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campus Design &amp; Network Segmentation &middot; netskillup</title>
+<meta name="description" content="Understand access, distribution, and core roles; choose a collapsed-core design; and build enforceable user, guest, IoT, and management network boundaries.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css"><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/campus-design-segmentation.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Campus Design &amp; Network Segmentation · netskillup">
+<meta property="og:description" content="Understand access, distribution, and core roles; choose a collapsed-core design; and build enforceable user, guest, IoT, and management network boundaries.">
+<meta property="og:url" content="https://netskillup.com/topics/campus-design-segmentation.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Campus Design &amp; Network Segmentation · netskillup">
+<meta name="twitter:description" content="Understand access, distribution, and core roles; choose a collapsed-core design; and build enforceable user, guest, IoT, and management network boundaries.">
+<!-- site:metadata:end -->
+</head>
+<body>
+<header class="site-header"><div class="wrap"><a href="../index.html" class="site-mark"><span class="dot" aria-hidden="true"></span>netskillup</a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form></div></header>
+<div class="topic-header" style="--module-color: var(--enterprise);"><div class="wrap">
+  <a class="breadcrumb" href="../index.html#module-enterprise">&#8592; Module 08 &middot; Enterprise Networking</a>
+  <h1>Campus Design &amp; Network Segmentation</h1>
+  <p class="topic-dek">Build understandable paths, enforce the intended boundaries, and know what still works when one component fails.</p>
+</div></div>
+<article class="topic-body wrap">
+  <p class="topic-answer"><strong>Short answer:</strong> access, distribution, and core are network roles, not a requirement to buy three tiers of switches. Segmentation separates traffic domains; ACLs, firewalls, and endpoint controls enforce who can communicate. A resilient design accounts for shared dependencies, available capacity after failure, and operational simplicity.</p>
+  <p class="topic-prerequisites">Read <a href="vlans-trunking.html">VLANs and trunks</a>, <a href="inter-vlan-routing.html">inter-VLAN routing</a>, and <a href="firewalls-acls.html">firewalls and ACLs</a>.</p>
+  <h2 id="a-railway-interchange">A railway interchange with controlled routes</h2>
+  <p>At a railway interchange, platforms connect passengers to a local concourse, concourses connect to the wider station, and main lines connect stations. Staff-only doors and ticket gates decide who may enter particular areas. Access switches are the platforms, distribution is the local gathering point, and the core connects those gathering points. VLAN labels are area labels; a locked and monitored door is an enforcement rule. A sign saying "staff only" is not a lock.</p>
+  <h2 id="three-roles">Three roles, not always three physical tiers</h2>
+  <p>A <strong>campus network</strong> connects devices within a site, from one office to several nearby buildings. The term isn't limited to universities. The physical size and availability requirements determine how these roles are implemented.</p>
+  <table class="compare-table">
+    <thead><tr><th>Role</th><th>Work it owns</th><th>Concrete design questions</th></tr></thead>
+    <tbody>
+      <tr><td>Access</td><td>Connect endpoints, phones, APs, and local devices</td><td>Port count, 802.1X admission, PoE budget, VLAN assignment, uplink capacity</td></tr>
+      <tr><td>Distribution</td><td>Aggregate access blocks; often host routing and policy boundaries</td><td>SVI gateways, ACL placement, route summarization, gateway redundancy</td></tr>
+      <tr><td>Core</td><td>Provide dependable transit between distribution blocks and services</td><td>Routed links, OSPF/IS-IS convergence, capacity after failure, limited failure scope</td></tr>
+    </tbody>
+  </table>
+  <p>A smaller site may combine distribution and core in a <strong>collapsed core</strong>. A larger campus with multiple buildings may benefit from a separate core. At a small station, one concourse does both jobs. Select the design from port/fiber distances, traffic paths, recovery targets, and the team's ability to operate it, not a diagram that insists every site needs three layers.</p>
+  <figure class="diagram-block">
+    <svg viewBox="0 0 680 335" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A small campus has access switches connected to a collapsed distribution and core pair, which connects to shared services and an internet firewall. Guest traffic must follow an enforced boundary, not just a VLAN label.">
+      <g font-family="sans-serif" font-size="13" text-anchor="middle">
+        <rect x="25" y="25" width="195" height="55" rx="3" fill="none" stroke="#5b9df9" stroke-width="2"/><text x="122" y="57" fill="#e7ecf3">DNS / DHCP / NTP</text>
+        <rect x="445" y="25" width="210" height="55" rx="3" fill="none" stroke="#f1789c" stroke-width="2"/><text x="550" y="57" fill="#e7ecf3">Firewall / Internet edge</text>
+        <path d="M122 80 V110 H275 V135 M550 80 V110 H405 V135" fill="none" stroke="#344041" stroke-width="2"/>
+        <rect x="170" y="135" width="340" height="60" rx="3" fill="none" stroke="#f2a93b" stroke-width="2"/><text x="340" y="160" fill="#e7ecf3">Collapsed distribution / core pair</text><text x="340" y="181" fill="#b1bdba">Gateways + routing + explicit policy</text>
+        <path d="M270 195 V225 H170 V245 M410 195 V225 H510 V245" fill="none" stroke="#344041" stroke-width="2"/>
+        <rect x="55" y="245" width="230" height="55" rx="3" fill="none" stroke="#4fd1c5" stroke-width="2"/><text x="170" y="269" fill="#e7ecf3">Access block A</text><text x="170" y="289" fill="#b1bdba">Users + APs</text>
+        <rect x="395" y="245" width="230" height="55" rx="3" fill="none" stroke="#4fd1c5" stroke-width="2"/><text x="510" y="269" fill="#e7ecf3">Access block B</text><text x="510" y="289" fill="#b1bdba">Users + IoT</text>
+        <text x="340" y="326" fill="#b1bdba">Logical roles; physical dual links and failure domains are omitted</text>
+      </g>
+    </svg>
+    <figcaption>A role map, not a cabling plan. Guest traffic needs an enforced route to its permitted services and internet exit, with no unrestricted path to internal networks.</figcaption>
+  </figure>
+  <h2 id="where-layer-two-ends">Decide where Layer 2 ends</h2>
+  <p>With Layer 2 access, VLANs travel over <code>802.1Q</code> trunks toward distribution-layer SVIs. Redundant paths need a deliberate loop-prevention or supported multichassis design. <code>RSTP</code> can block a redundant path; <code>LACP</code> combines compatible links to one logical partner. Two independent switches aren't automatically one LACP partner just because both have an uplink cable.</p>
+  <p>With routed access, the access switch can host gateways and use routed uplinks, often with <code>OSPF</code> and equal-cost paths. This limits how far Layer 2 faults spread, but requires appropriate hardware, addressing, routing operations, and a plan for services that expect Layer 2 adjacency. Extending a VLAN across every building is not free, and routing everywhere is not automatically simpler for every team.</p>
+  <p>The railway equivalent is deciding which movements remain inside a local concourse and which cross a station boundary. Keep broadcast domains and failure domains intentional. Overlay fabrics and distributed anycast gateways add other options, but are not prerequisites for a sound small-campus design.</p>
+  <h2 id="segments-and-enforcement">Segments need explicit enforcement</h2>
+  <p>A VLAN is a Layer 2 broadcast domain. A subnet is a Layer 3 addressing boundary. A VRF provides a separate routing table. None of those labels alone defines the complete access policy. When a Layer 3 switch has routes between two VLANs, it may route freely unless an ACL, firewall, or equivalent policy prevents it. Two devices in the same VLAN may communicate without crossing the gateway at all.</p>
+  <p>At the station, passenger, staff, and maintenance areas need different entrances and authorization checks. In the network, write the required communications first, then place enforcement on every relevant path. Apply equivalent intent to IPv4 and IPv6. A policy that blocks internal IPv4 destinations but ignores IPv6 is incomplete.</p>
+  <h2 id="worked-policy">Worked policy: a modest office</h2>
+  <p>Consider users in VLAN 20 (<code>10.20.0.0/24</code>), guests in VLAN 30 (<code>10.30.0.0/24</code>), IoT in VLAN 40 (<code>10.40.0.0/24</code>), and management in VLAN 99 (<code>10.99.0.0/24</code>). These are illustrative assignments, not sizing recommendations. This matrix expresses policy intent, not deployable ACL syntax:</p>
+  <table class="compare-table">
+    <thead><tr><th>Source</th><th>Permitted destination/service</th><th>Boundary</th></tr></thead>
+    <tbody>
+      <tr><td>Users</td><td>Approved business services, DNS, time, and internet access</td><td>Application-specific policy; no blanket device-management access</td></tr>
+      <tr><td>Guests</td><td>Guest DHCP/DNS and authorized internet access</td><td>Deny internal destinations; isolate guests from one another where required</td></tr>
+      <tr><td>IoT</td><td>Named controllers, approved DNS/NTP, and documented update endpoints</td><td>Deny arbitrary user/management access and unnecessary peer traffic</td></tr>
+      <tr><td>Admin jump host</td><td>Selected management endpoints on SSH 22 or HTTPS 443</td><td>Identity controls, logging, and least privilege in addition to network policy</td></tr>
+    </tbody>
+  </table>
+  <p>A user at <code>10.20.0.42</code> accessing an IoT controller at <code>10.40.0.10:443</code> crosses a routing boundary where policy can allow that specific flow. A guest at <code>10.30.0.42</code> attempting the same destination should be denied. An IoT peer in the same VLAN may never cross that routed rule, so intra-segment isolation requires separate controls such as port/client isolation, host policy, or smaller segments.</p>
+  <p>Don't build an "internet-only" rule by merely permitting <code>0.0.0.0/0</code>: that prefix includes internal destinations too. Define internal address space, IPv6 policy, exception ordering, and routing context correctly. A stateful firewall tracks return traffic; a stateless ACL generally needs explicit consideration of both directions.</p>
+  <h2 id="service-dependencies">Keep the necessary services reachable</h2>
+  <p>A ticket gate that blocks staff from the signaling room can halt the station. Likewise, allow required infrastructure paths deliberately. A DHCPv4 relay forwards requests toward the server and identifies the client subnet using <code>giaddr</code>; the relay/server path is not the same as a direct client unicast. DNS commonly uses UDP and TCP 53, NTP commonly uses UDP 123, and enterprise admission may depend on EAP/RADIUS and certificate services.</p>
+  <p>Route and filter the return path too. Document where DHCP scopes, DNS resolvers, authentication services, firewalls, and management access live. Include safe out-of-band recovery where the availability target requires it. Segmentation is not a substitute for patching, authenticated administration, or application authorization, and it doesn't by itself implement zero trust.</p>
+  <h2 id="failure-domains">Redundancy is about independent failure paths</h2>
+  <table class="compare-table">
+    <thead><tr><th>Design claim</th><th>Failure to test in an approved window</th><th>Evidence to collect</th></tr></thead>
+    <tbody>
+      <tr><td>Two distribution switches</td><td>One switch or shared control-plane component fails</td><td>Gateway role, surviving routes, user transaction recovery</td></tr>
+      <tr><td>Two uplinks</td><td>One link fails, or both share a damaged conduit</td><td>Physical path diversity and remaining utilization/discards</td></tr>
+      <tr><td>Dual power supplies</td><td>One supply or power circuit fails</td><td>Remaining PoE budget and whether both supplies share the same circuit</td></tr>
+      <tr><td>Redundant network paths</td><td>DNS, DHCP, authentication, or firewall becomes unavailable</td><td>Fresh client joins and new application sessions, not only established flows</td></tr>
+    </tbody>
+  </table>
+  <p>Two train lines that pass through the same blocked tunnel are not independent escape routes. Similarly, a switch stack or multichassis pair can simplify operations but still share software, control links, or a maintenance event. Check the expected traffic against surviving capacity, not the sum of all healthy links.</p>
+  <div class="callout"><span class="callout-label">VERIFY DENIED PATHS TOO</span><p>A segmentation rollout is incomplete until required flows succeed and prohibited flows fail from representative endpoints. Record the enforcement point and counters/logs that explain each result. Test recovery with a change plan and rollback access.</p></div>
+  <h2 id="related-topics">Related topics</h2>
+  <p>Continue with <a href="gateway-redundancy-vrrp-hsrp.html">gateway redundancy</a>, <a href="rstp-mst.html">spanning-tree choices</a>, <a href="etherchannel.html">LACP</a>, and <a href="copper-fiber-transceivers-poe.html">physical and power constraints</a>.</p>
+  <h2 id="sources">Sources</h2>
+  <ul>
+    <li><a href="https://www.cisco.com/c/en/us/td/docs/solutions/CVD/Campus/cisco-campus-lan-wlan-design-guide.html">Cisco Campus LAN and Wireless LAN design guide</a>: vendor-specific architectures and tradeoffs.</li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc2131.html">RFC 2131: DHCP</a>, including relay behavior.</li>
+    <li><a href="https://csrc.nist.gov/pubs/sp/800/207/final">NIST SP 800-207: Zero Trust Architecture</a>: identity and resource access beyond network location.</li>
+  </ul>
+</article>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="wifi-association-security-roaming.html"><span class="nav-label">&#8592; PREVIOUS</span>Wi-Fi Association, Security &amp; Roaming</a>
+<a href="gateway-redundancy-vrrp-hsrp.html"><span class="nav-label">NEXT &#8594;</span>Default Gateway Redundancy: VRRP &amp; HSRP</a>
+</nav>
+<footer class="site-footer"><div class="wrap"><span>&copy; 2026 netskillup</span><a href="https://github.com/Prandip23/netskillup" target="_blank" rel="noopener">github.com/Prandip23/netskillup</a></div></footer>
+<script src="../js/topic-page.js?v=2"></script>
+</body>
+</html>

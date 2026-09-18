@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copper, Fiber, Transceivers &amp; PoE &middot; netskillup</title>
+<meta name="description" content="Choose Ethernet media, match optical transceivers, calculate a PoE budget, and troubleshoot physical links without confusing connector shape with compatibility.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/copper-fiber-transceivers-poe.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Copper, Fiber, Transceivers &amp; PoE · netskillup">
+<meta property="og:description" content="Choose Ethernet media, match optical transceivers, calculate a PoE budget, and troubleshoot physical links without confusing connector shape with compatibility.">
+<meta property="og:url" content="https://netskillup.com/topics/copper-fiber-transceivers-poe.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Copper, Fiber, Transceivers &amp; PoE · netskillup">
+<meta name="twitter:description" content="Choose Ethernet media, match optical transceivers, calculate a PoE budget, and troubleshoot physical links without confusing connector shape with compatibility.">
+<!-- site:metadata:end -->
+</head>
+<body>
+<header class="site-header"><div class="wrap"><a href="../index.html" class="site-mark"><span class="dot" aria-hidden="true"></span>netskillup</a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form></div></header>
+<div class="topic-header" style="--module-color: var(--fund);"><div class="wrap">
+  <a class="breadcrumb" href="../index.html#module-fundamentals">&#8592; Module 01 &middot; Networking Fundamentals</a>
+  <h1>Copper, Fiber, Transceivers &amp; PoE</h1>
+  <p class="topic-dek">The port, cable, optics, and power source form one system. A plug that fits is only the first compatibility check.</p>
+</div></div>
+<article class="topic-body wrap">
+  <p class="topic-answer"><strong>Short answer:</strong> twisted-pair copper carries electrical signals and can supply Power over Ethernet (PoE). Fiber carries light and suits longer links or electrical isolation. A transceiver must match both its host port and the link at the other end. PoE needs enough power per port and across the whole switch.</p>
+  <p class="topic-prerequisites">Start with <a href="osi-vs-tcpip.html">network layers</a> and <a href="duplex.html">full-duplex Ethernet</a>.</p>
+  <h2 id="one-stage-many-connections">A stage rig needs more than matching plugs</h2>
+  <p>Setting up a concert stage means checking signal cables, adapters, run length, and the electrical supply. A microphone connector doesn't tell you whether it belongs in a speaker output, and enough sockets don't guarantee enough power. Ethernet has the same separate questions: <code>1000BASE-T</code> describes a signaling technology; <code>Cat6A</code> describes cabling; <code>SFP+</code> describes a pluggable interface family; <code>802.3at</code> describes PoE capabilities.</p>
+  <h2 id="choose-media">Choose the medium for the entire run</h2>
+  <table class="compare-table">
+    <thead><tr><th>Link example</th><th>Typical medium and reach</th><th>What to verify</th></tr></thead>
+    <tbody>
+      <tr><td>1000BASE-T</td><td>Four-pair Cat5e or better, up to a 100 m compliant channel</td><td>All four pairs, terminations, and channel certification</td></tr>
+      <tr><td>10GBASE-T</td><td>Cat6A, up to a 100 m compliant channel</td><td>Some copper SFP+ modules have shorter limits; follow the module specification</td></tr>
+      <tr><td>10GBASE-SR</td><td>850 nm multimode fiber; 300 m on OM3 or 400 m on OM4 for the cited modules</td><td>Fiber grade, connector loss, polarity, and compatible SR optics</td></tr>
+      <tr><td>10GBASE-LR</td><td>1310 nm single-mode fiber; nominal reach up to 10 km</td><td>Optical power budget and receiver limits, not only distance</td></tr>
+      <tr><td>Direct-attach copper (DAC)</td><td>Short twinax assemblies between supported ports, often within a rack</td><td>Exact length, passive/active support, port speed, and vendor matrix</td></tr>
+    </tbody>
+  </table>
+  <p>A conventional structured-cabling channel includes patch cords, not just the cable inside the wall. A common design allows 90 m of permanent link plus 10 m of patching, subject to the applicable cabling rules. Cat6 can carry 10GBASE-T over shorter qualified runs; don't treat it as a blanket 100 m guarantee. Likewise, <code>2.5GBASE-T</code> and <code>5GBASE-T</code> depend on supported ports and a suitable installed channel.</p>
+  <p>On stage, a long signal run may need a different medium rather than another adapter. Fiber avoids electrical signal coupling between endpoints, but it still needs correctly rated optics and clean connectors. Fiber doesn't deliver ordinary PoE; a remote fiber-connected access point needs local power or a separate powered copper segment.</p>
+  <figure class="diagram-block">
+    <svg viewBox="0 0 680 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A core switch and an access switch use matching 10GBASE-SR optics over OM3 fiber. The access switch supplies data and PoE over copper to an access point.">
+      <g font-family="sans-serif" font-size="13" text-anchor="middle">
+        <rect x="20" y="80" width="145" height="70" rx="4" fill="none" stroke="#5b9df9" stroke-width="2"/>
+        <text x="92" y="106" fill="#e7ecf3">Core switch</text><text x="92" y="131" fill="#b1bdba">SFP+ / SR</text>
+        <rect x="305" y="80" width="150" height="70" rx="4" fill="none" stroke="#4fd1c5" stroke-width="2"/>
+        <text x="380" y="106" fill="#e7ecf3">Access switch</text><text x="380" y="131" fill="#b1bdba">SR + PoE PSE</text>
+        <rect x="560" y="80" width="100" height="70" rx="4" fill="none" stroke="#f2a93b" stroke-width="2"/>
+        <text x="610" y="106" fill="#e7ecf3">AP</text><text x="610" y="131" fill="#b1bdba">PoE PD</text>
+        <path d="M165 109 H305 M165 120 H305" stroke="#5b9df9" stroke-width="2"/>
+        <text x="235" y="55" fill="#b1bdba">OM3 / 200 m</text>
+        <path d="M455 115 H560" stroke="#4fd1c5" stroke-width="4"/>
+        <text x="508" y="55" fill="#b1bdba">Cat6A</text>
+        <text x="235" y="185" fill="#b1bdba">Light, no PoE</text>
+        <text x="508" y="185" fill="#f2a93b">Data + power</text>
+        <text x="340" y="230" fill="#8d9bb3">Each segment has its own medium, speed, and power requirements</text>
+      </g>
+    </svg>
+    <figcaption>A 200 m OM3 run is within the cited SR reach, but loss and host compatibility still need checking. The AP's PoE comes from the access switch, not through the fiber.</figcaption>
+  </figure>
+  <h2 id="match-optics">Match both ends of an optical link</h2>
+  <p>Small Form-factor Pluggable (SFP) modules commonly serve 1 Gbit/s links; SFP+ commonly serves 10 Gbit/s and SFP28 commonly serves 25 Gbit/s. These names don't promise that a port accepts every lower-speed module. Check the exact switch model, software, supported speed, and transceiver matrix, just as a stage adapter must suit the equipment behind its socket.</p>
+  <ol>
+    <li><strong>Match signaling and fiber:</strong> an SR optic and an LR optic aren't a compatible pair simply because both use LC connectors.</li>
+    <li><strong>Check transmit/receive paths:</strong> ordinary duplex fiber needs Tx at one end connected to Rx at the other. Single-fiber bidirectional optics require complementary wavelength pairs, not two identical ends.</li>
+    <li><strong>Check connector type and polish:</strong> LC and MPO describe different connectors. Don't mate APC and UPC ends or assume cable color proves the installed fiber grade.</li>
+    <li><strong>Check optical levels:</strong> digital optical monitoring (DOM) reports transmit/receive power, often in <code>dBm</code>. Compare it with the module's limits. Too little light and receiver overload are both problems.</li>
+  </ol>
+  <p>For a synthetic budget example, a transmitter minimum of -3 dBm and receiver sensitivity of -10 dBm leave 7 dB before margin. If connectors, splices, and fiber consume 4 dB, 3 dB remains. Also check maximum transmit power against receiver overload; this subtraction alone doesn't certify a link. Never look into a fiber end. Use approved inspection and cleaning equipment with the link made safe.</p>
+  <h2 id="poe-is-a-budget">PoE is a negotiated budget</h2>
+  <p>The <strong>PSE</strong> (power sourcing equipment) is a switch or injector; the <strong>PD</strong> (powered device) is an AP, phone, or camera. Standards-based PoE detects a compatible PD before applying operating power. Classification and, where supported, <code>LLDP</code> help determine the allocation. A passive injector may apply power without IEEE detection, so it isn't an interchangeable substitute.</p>
+  <table class="compare-table">
+    <thead><tr><th>IEEE PoE type</th><th>Maximum PSE output</th><th>PD power at highest class</th></tr></thead>
+    <tbody>
+      <tr><td>Type 1 (802.3af)</td><td>15.4 W</td><td>12.95 W</td></tr>
+      <tr><td>Type 2 (802.3at)</td><td>30 W</td><td>25.5 W</td></tr>
+      <tr><td>Type 3 (802.3bt)</td><td>60 W</td><td>51 W</td></tr>
+      <tr><td>Type 4 (802.3bt)</td><td>90 W</td><td>71.3 W</td></tr>
+    </tbody>
+  </table>
+  <p>These are type ceilings and highest-class PD figures, not a promise that every port or PD supports them. Cable losses explain the PSE/PD difference. Higher-power four-pair PoE also makes cable quality, bundle temperature, and installation limits important. Like the stage's electrical distribution, count the required allocations, not just the sockets.</p>
+  <h2 id="worked-power-budget">Worked example: eight access points</h2>
+  <p>Suppose a switch has a <strong>370 W available PoE budget</strong>, and each of eight AP ports reserves 30 W at the PSE. Each AP must also fit within the PD power available from that class. The switch reserves 240 W, leaving 130 W before other devices and your chosen reserve.</p>
+  <table class="compare-table" id="poe-allocation">
+    <thead><tr><th>AP count</th><th>PSE allocation per AP (W)</th><th>Reserved (W)</th><th>PoE budget (W)</th><th>Remaining (W)</th></tr></thead>
+    <tbody><tr><td>8</td><td>30</td><td>240</td><td>370</td><td>130</td></tr></tbody>
+  </table>
+  <p>Check the budget after a power-supply failure too. If the remaining supply supports only 185 W of PoE, it cannot maintain all eight 30 W reservations. A redundant supply isn't automatically enough for full-load redundancy. Vendor power-priority policy determines which ports remain powered.</p>
+  <h2 id="physical-checks">Find the failing part</h2>
+  <table class="compare-table">
+    <thead><tr><th>Symptom</th><th>Check</th><th>Interpretation</th></tr></thead>
+    <tbody>
+      <tr><td>Copper link falls to 100 Mbit/s</td><td>Negotiated speed at both ends; cable pair test; known-good patch cord</td><td>Pair faults are one possibility because 1000BASE-T uses all four pairs; configuration can also limit speed</td></tr>
+      <tr><td>Fiber link stays down</td><td>Host support, SR/LR match, polarity, DOM, connector cleanliness</td><td>Separate an unsupported module from an optical-path fault</td></tr>
+      <tr><td>CRC/FCS errors increase</td><td>Compare counter deltas and test the physical channel</td><td>Corrupted frames suggest a link problem, unlike ordinary queue discards</td></tr>
+      <tr><td>AP boots with radios disabled</td><td>PD-required power, granted class, LLDP negotiation, switch budget</td><td>Some APs reduce features under low power; behavior is model-specific</td></tr>
+    </tbody>
+  </table>
+  <div class="callout"><span class="callout-label">LABEL THE WHOLE LINK</span><p>Record both port IDs, both optic part numbers, fiber grade, patch path, and power allocation. A link light confirms a physical connection, not the correct VLAN, IP address, or application reachability.</p></div>
+  <h2 id="related-topics">Related topics</h2>
+  <p>Continue with <a href="ethernet-frame-mac.html">Ethernet's FCS</a>, <a href="bandwidth-throughput-latency.html">capacity versus goodput</a>, and <a href="etherchannel.html">link aggregation</a>.</p>
+  <h2 id="sources">Sources</h2>
+  <ul>
+    <li><a href="https://www.ieee802.org/3/">IEEE 802.3 Ethernet working group</a> and <a href="https://www.ieee802.org/3/bt/">802.3bt four-pair PoE project</a>.</li>
+    <li><a href="https://www.cisco.com/c/en/us/products/collateral/interfaces-modules/transceiver-modules/data_sheet_c78-455693.html">Cisco 10GBASE SFP+ data sheet</a>: specific reach, optical limits, and platform-compatibility caveats.</li>
+    <li><a href="https://ethernetalliance.org/poecert/poe-getting-started/">Ethernet Alliance: getting started with PoE certification</a>.</li>
+  </ul>
+</article>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="duplex.html"><span class="nav-label">&#8592; PREVIOUS</span>Duplex: Half vs Full</a>
+<a href="bandwidth-throughput-latency.html"><span class="nav-label">NEXT &#8594;</span>Bandwidth, Throughput, Latency, Jitter &amp; Loss</a>
+</nav>
+<footer class="site-footer"><div class="wrap"><span>&copy; 2026 netskillup</span><a href="https://github.com/Prandip23/netskillup" target="_blank" rel="noopener">github.com/Prandip23/netskillup</a></div></footer>
+<script src="../js/topic-page.js?v=2"></script>
+</body>
+</html>

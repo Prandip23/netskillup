@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Packet Capture: Wireshark &amp; tcpdump &middot; netskillup</title>
+<meta name="description" content="Choose a packet-capture vantage point, use bounded tcpdump captures and Wireshark filters, and interpret a TCP trace without mistaking capture artifacts for network faults.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css"><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/packet-capture-wireshark-tcpdump.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Packet Capture: Wireshark &amp; tcpdump · netskillup">
+<meta property="og:description" content="Choose a packet-capture vantage point, use bounded tcpdump captures and Wireshark filters, and interpret a TCP trace without mistaking capture artifacts for network faults.">
+<meta property="og:url" content="https://netskillup.com/topics/packet-capture-wireshark-tcpdump.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Packet Capture: Wireshark &amp; tcpdump · netskillup">
+<meta name="twitter:description" content="Choose a packet-capture vantage point, use bounded tcpdump captures and Wireshark filters, and interpret a TCP trace without mistaking capture artifacts for network faults.">
+<!-- site:metadata:end -->
+</head>
+<body>
+<header class="site-header"><div class="wrap"><a href="../index.html" class="site-mark"><span class="dot" aria-hidden="true"></span>netskillup</a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form></div></header>
+<div class="topic-header" style="--module-color: var(--ops);"><div class="wrap">
+  <a class="breadcrumb" href="../index.html#module-operations">&#8592; Module 09 &middot; Operations &amp; Troubleshooting</a>
+  <h1>Packet Capture: Wireshark &amp; tcpdump</h1>
+  <p class="topic-dek">A trace is evidence from one place and time. Learn to read what it shows without inventing what it cannot see.</p>
+</div></div>
+<article class="topic-body wrap">
+  <p class="topic-answer"><strong>Short answer:</strong> tcpdump records or prints packets selected by a capture filter; Wireshark decodes saved or live traffic and filters the view. Start with one question, choose a vantage point that can observe it, bound the collection, then correlate packet fields and timing with endpoint logs.</p>
+  <p class="topic-prerequisites">Read <a href="network-troubleshooting-tools.html">the troubleshooting workflow</a>, <a href="tcp-handshake-termination.html">TCP connection setup</a>, and <a href="tcp-header.html">sequence and acknowledgment numbers</a>.</p>
+  <h2 id="a-finish-line-camera">A finish-line camera has a limited view</h2>
+  <p>A race camera records who crosses one line. It cannot prove what happened around an unseen bend, and a dropped video frame can hide a runner who really passed. A packet capture has similar limits: the interface is the camera position, the capture filter selects what gets recorded, the display filter selects what you review, and timestamps put observations in order. A <code>pcap</code> or <code>pcapng</code> file is a recording, not an omniscient map of the network.</p>
+  <h2 id="choose-the-vantage">Choose the vantage point</h2>
+  <table class="compare-table">
+    <thead><tr><th>Capture location</th><th>Good question</th><th>Blind spot</th></tr></thead>
+    <tbody>
+      <tr><td>Affected client interface</td><td>Did this host attempt a SYN or DNS query, and did a reply reach this capture point?</td><td>Host capture hooks and offloads may differ from the actual wire</td></tr>
+      <tr><td>Server interface</td><td>Did the request arrive, and was a response observed leaving?</td><td>A load balancer may be the client's TCP peer; NAT changes tuples</td></tr>
+      <tr><td>Approved SPAN/mirror port or TAP</td><td>What crossed this switch port or physical link?</td><td>Mirror oversubscription, direction settings, and VLAN-tag handling can omit or alter observations</td></tr>
+      <tr><td>Supported Wi-Fi monitor interface</td><td>Were there management frames, retries, or channel-specific RF events?</td><td>Hardware, channel selection, encryption, and OS support limit visibility</td></tr>
+    </tbody>
+  </table>
+  <p>Promiscuous mode doesn't make a switch send your laptop all other ports' unicast traffic. A Wi-Fi capture in ordinary associated mode may show Ethernet-like traffic without the 802.11 management frames needed for roaming analysis. The finish-line camera must be aimed at the relevant lane.</p>
+  <h2 id="capture-and-display-filters">Capture filters and display filters are different languages</h2>
+  <table class="compare-table">
+    <thead><tr><th>Intent</th><th>Capture filter (libpcap)</th><th>Wireshark display filter</th></tr></thead>
+    <tbody>
+      <tr><td>One IPv4 peer on TCP 443</td><td><code>host 192.0.2.20 and tcp port 443</code></td><td><code>ip.addr == 192.0.2.20 &amp;&amp; tcp.port == 443</code></td></tr>
+      <tr><td>Classic DNS on port 53</td><td><code>port 53</code></td><td><code>dns</code></td></tr>
+      <tr><td>ARP</td><td><code>arp</code></td><td><code>arp</code></td></tr>
+      <tr><td>Initial SYN without ACK</td><td><code>ip and tcp[tcpflags] &amp; (tcp-syn|tcp-ack) == tcp-syn</code> (IPv4)</td><td><code>tcp.flags.syn == 1 &amp;&amp; tcp.flags.ack == 0</code></td></tr>
+    </tbody>
+  </table>
+  <p>The columns express similar questions, not universally identical packet sets. <code>dns</code> depends on dissection, whereas <code>port 53</code> selects transport ports and excludes encrypted DNS on other ports. Display filtering doesn't remove packets from the original recording. A capture filter does: you cannot recover a discarded SYN-ACK later by clearing the display filter.</p>
+  <h2 id="bounded-capture">A bounded Linux capture</h2>
+  <p>Use only an authorized interface and target, an approved local storage location, and your organization's capture permissions. In this Linux example, <code>eth0</code> and documentation address <code>192.0.2.20</code> must be replaced. GNU <code>timeout</code> stops after 30 seconds, or tcpdump stops after 1,000 matching packets, whichever happens first. This is not a command to run on an unrelated production interface.</p>
+  <pre tabindex="0" role="region" aria-label="Bounded Linux tcpdump capture and offline reading"><code>tcpdump -D
+sudo timeout 30s tcpdump -i eth0 -nn -s 128 -c 1000 -w handshake.pcap 'host 192.0.2.20 and tcp port 443'
+tcpdump -nn -tttt -r handshake.pcap</code></pre>
+  <p><code>-D</code> lists interfaces; <code>-nn</code> keeps addresses and ports numeric; <code>-s 128</code> retains at most 128 bytes per packet; <code>-c</code> limits packet count; <code>-w</code> writes raw packets; <code>-r</code> reads them later without live-capture privileges. A timeout exit status of 124 can mean the time limit was reached, not that the capture is unusable. GNU timeout isn't normally included with macOS.</p>
+  <p>A 128-byte snapshot is useful for a simple Ethernet/IPv4 TCP handshake, but can truncate tunneled headers or application data. Choose the snapshot length for the question. Even short snapshots can contain sensitive payload or names; they are not automatic anonymization. Wireshark on Windows typically uses Npcap, with interface, capture filter, and stop conditions selected in capture options. Don't run the whole GUI elevated when the supported capture-permission setup suffices.</p>
+  <h2 id="read-one-conversation">Read one conversation from start to finish</h2>
+  <p>Open the capture, identify the relevant source/destination address and ports, and isolate the conversation with a filter such as <code>tcp.stream == 0</code>. The stream number is assigned by Wireshark for that file, not a TCP header field. Inspect the packet list for order, the protocol tree for fields, and the bytes when a field's interpretation is in doubt.</p>
+  <p>The following <strong>synthetic client-side trace</strong> uses relative sequence numbers and contains no TCP payload. It is illustrative, not a measured benchmark or a complete tcpdump output.</p>
+  <table class="compare-table" id="synthetic-handshake">
+    <thead><tr><th>Time (s)</th><th>Direction</th><th>Flags</th><th>Relative Seq</th><th>Relative Ack</th></tr></thead>
+    <tbody>
+      <tr><td>0.000</td><td>Client:51514 to server:443</td><td>SYN</td><td>0</td><td>not set</td></tr>
+      <tr><td>1.000</td><td>Client:51514 to server:443</td><td>SYN (repeated)</td><td>0</td><td>not set</td></tr>
+      <tr><td>1.020</td><td>Server:443 to client:51514</td><td>SYN, ACK</td><td>0</td><td>1</td></tr>
+      <tr><td>1.021</td><td>Client:51514 to server:443</td><td>ACK</td><td>1</td><td>1</td></tr>
+    </tbody>
+  </table>
+  <figure class="diagram-block">
+    <svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A synthetic client capture shows an initial SYN with no reply observed, a repeated SYN one second later, then SYN ACK and ACK. The missing reply does not locate the fault.">
+      <defs><marker id="capture-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="#4fd1c5"/></marker></defs>
+      <g font-family="sans-serif" font-size="13" text-anchor="middle">
+        <text x="90" y="28" fill="#e7ecf3">Client capture</text><text x="580" y="28" fill="#e7ecf3">Server direction</text>
+        <path d="M90 45 V272 M580 45 V272" stroke="#344041" stroke-width="2"/>
+        <g stroke="#4fd1c5" stroke-width="2" marker-end="url(#capture-arrow)">
+          <path d="M90 80 H580"/><path d="M90 164 H580"/><path d="M580 212 H90"/><path d="M90 260 H580"/>
+        </g>
+        <text x="335" y="68" fill="#e7ecf3">0.000: SYN, Seq 0</text>
+        <text x="335" y="117" fill="#f2a93b">No reply observed here during this gap</text>
+        <text x="335" y="152" fill="#e7ecf3">1.000: SYN, same Seq 0</text>
+        <text x="335" y="200" fill="#e7ecf3">1.020: SYN, ACK, Seq 0, Ack 1</text>
+        <text x="335" y="248" fill="#e7ecf3">1.021: ACK, Seq 1, Ack 1</text>
+      </g>
+    </svg>
+    <figcaption>Time runs downward, not to scale. Arrows show directions inferred from the client trace, not independent proof of arrival at the server.</figcaption>
+  </figure>
+  <p>A SYN consumes one sequence number, which explains <code>Ack 1</code>. The repeated SYN and delayed completion suggest a connection-establishment interruption. They don't prove whether the initial SYN, a reply, or capture evidence was lost. You also cannot confidently call the 20 ms interval the path RTT: the observed reply could be delayed from the original attempt. Capture at the server, align the observations, and compare logs before locating the fault. The one-second gap is illustrative, not a universal retransmission timer.</p>
+  <h2 id="capture-artifacts">Check artifacts before blaming the wire</h2>
+  <table class="compare-table">
+    <thead><tr><th>Observation</th><th>Alternative explanation</th><th>Discriminating check</th></tr></thead>
+    <tbody>
+      <tr><td>Outgoing checksum marked invalid</td><td>NIC checksum offload fills it after the host capture point</td><td>Compare a receiving-side or wire capture; don't disable offloads casually</td></tr>
+      <tr><td>Packets larger than the interface MTU</td><td>Segmentation/coalescing offloads expose buffers unlike wire frames</td><td>Check capture placement and TSO/GSO/GRO behavior</td></tr>
+      <tr><td>Wireshark reports retransmission or unseen segment</td><td>Reordering, midstream capture, or dropped capture packets</td><td>Inspect sequence/ACK progression and capture-drop counters</td></tr>
+      <tr><td>Only one direction appears</td><td>Asymmetric routing, mirror settings, wrong interface, or an overly narrow filter</td><td>Verify both directions are observable at that point</td></tr>
+    </tbody>
+  </table>
+  <p>Two race cameras need comparable clocks before you subtract their timestamps. Likewise, synchronize capture hosts and account for clock offset and capture-hook timing. Nanosecond display precision doesn't imply nanosecond measurement accuracy. tcpdump's kernel-drop count concerns the capture mechanism, not end-to-end packet loss.</p>
+  <h2 id="encryption-and-handling">Encryption and responsible handling</h2>
+  <p>TLS application data is encrypted; QUIC also encrypts much of its transport information. HTTPS traffic on <code>UDP 443</code> won't appear in the TCP-only example. DNS over HTTPS won't appear in a port-53 capture. Packet timing, sizes, endpoints, and some handshake information remain useful, but visibility depends on protocol and encryption features. Use approved endpoint logs when payloads are unavailable.</p>
+  <div class="callout"><span class="callout-label">MINIMIZE THE RECORDING</span><p>Capture only authorized traffic for the shortest useful interval. Limit scope and file size, protect the recording, and follow retention rules. A display filter or a blurred screenshot does not sanitize the underlying capture. Don't upload raw traces or TLS session secrets to public services.</p></div>
+  <h2 id="related-topics">Related topics</h2>
+  <p>Read <a href="flow-congestion-control.html">TCP windows and loss recovery</a>, <a href="dns-resolution-flow.html">DNS request/reply interpretation</a>, and <a href="http-https-versions.html">HTTP over TCP and QUIC</a>.</p>
+  <h2 id="sources">Sources</h2>
+  <ul>
+    <li><a href="https://www.tcpdump.org/manpages/tcpdump.1-4.99.6.html">tcpdump 4.99.6 manual</a> and <a href="https://www.tcpdump.org/manpages/pcap-filter.7.html">libpcap filter syntax</a>. Match your installed version.</li>
+    <li><a href="https://www.wireshark.org/docs/wsug_html_chunked/ChapterWork.html">Wireshark User's Guide: working with captured packets</a>.</li>
+    <li><a href="https://wiki.wireshark.org/CaptureSetup/Offloading">Wireshark: offloading and capture artifacts</a>.</li>
+  </ul>
+</article>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="network-troubleshooting-tools.html"><span class="nav-label">&#8592; PREVIOUS</span>Network Troubleshooting &amp; Diagnostic Tools</a>
+<a href="../index.html"><span class="nav-label">NEXT &#8594;</span>All topics</a>
+</nav>
+<footer class="site-footer"><div class="wrap"><span>&copy; 2026 netskillup</span><a href="https://github.com/Prandip23/netskillup" target="_blank" rel="noopener">github.com/Prandip23/netskillup</a></div></footer>
+<script src="../js/topic-page.js?v=2"></script>
+</body>
+</html>

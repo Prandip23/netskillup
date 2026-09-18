@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bandwidth, Throughput, Latency, Jitter &amp; Loss &middot; netskillup</title>
+<meta name="description" content="Separate link capacity from application speed, calculate transfer time and bandwidth-delay product, and interpret latency, jitter, and loss.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/bandwidth-throughput-latency.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Bandwidth, Throughput, Latency, Jitter &amp; Loss · netskillup">
+<meta property="og:description" content="Separate link capacity from application speed, calculate transfer time and bandwidth-delay product, and interpret latency, jitter, and loss.">
+<meta property="og:url" content="https://netskillup.com/topics/bandwidth-throughput-latency.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Bandwidth, Throughput, Latency, Jitter &amp; Loss · netskillup">
+<meta name="twitter:description" content="Separate link capacity from application speed, calculate transfer time and bandwidth-delay product, and interpret latency, jitter, and loss.">
+<!-- site:metadata:end -->
+</head>
+<body>
+<header class="site-header"><div class="wrap"><a href="../index.html" class="site-mark"><span class="dot" aria-hidden="true"></span>netskillup</a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form></div></header>
+<div class="topic-header" style="--module-color: var(--fund);"><div class="wrap">
+  <a class="breadcrumb" href="../index.html#module-fundamentals">&#8592; Module 01 &middot; Networking Fundamentals</a>
+  <h1>Bandwidth, Throughput, Latency, Jitter &amp; Loss</h1>
+  <p class="topic-dek">A fast link can still deliver a slow application. Measure capacity, delivery rate, and waiting time separately before changing the network.</p>
+</div></div>
+<article class="topic-body wrap">
+  <p class="topic-answer"><strong>Short answer:</strong> bandwidth describes capacity, throughput describes an observed delivery rate, latency describes delay, jitter describes delay variation, and loss describes packets that don't arrive within the measurement's limit. None of these numbers replaces the others.</p>
+  <p class="topic-prerequisites">Start with <a href="osi-vs-tcpip.html">OSI and TCP/IP</a> and <a href="duplex.html">duplex</a>. The TCP example also uses <a href="flow-congestion-control.html">receive and congestion windows</a>.</p>
+
+  <h2 id="five-different-questions">Five different questions</h2>
+  <p>Picture an automated car wash. Its conveyor can admit a certain number of cars per hour, but today's actual completions depend on demand, stoppages, and the exit queue. One driver's time inside is a different measurement from cars completed per hour. The same distinction applies to a <code>1 Gbit/s</code> Ethernet port and a file download.</p>
+  <table class="compare-table">
+    <thead><tr><th>Measurement</th><th>Network meaning</th><th>Car-wash equivalent</th></tr></thead>
+    <tbody>
+      <tr><td>Bandwidth or capacity</td><td>A stated rate limit at a specified layer, such as a 1 Gbit/s Ethernet link</td><td>The conveyor's maximum admission rate</td></tr>
+      <tr><td>Throughput</td><td>Bits or bytes delivered per second, measured over a stated interval and layer</td><td>Cars actually completing the wash per hour</td></tr>
+      <tr><td>Goodput</td><td>Useful application data delivered per second, excluding protocol overhead and duplicate retransmissions</td><td>Completed washes, excluding time spent repeating a wash</td></tr>
+      <tr><td>Latency</td><td>One-way delay or round-trip time (RTT), explicitly labeled</td><td>One driver's elapsed time through the wash, including waiting</td></tr>
+      <tr><td>Jitter</td><td>Variation in packet delay; the statistic depends on the tool</td><td>How much that elapsed time differs from car to car</td></tr>
+      <tr><td>Loss</td><td>Sent packets not received within a defined time limit</td><td>Cars turned away rather than processed</td></tr>
+    </tbody>
+  </table>
+  <p>The analogy stops at recovery: TCP can retransmit missing bytes; an IP packet doesn't drive around for another attempt on its own. Also, radio engineers use <em>bandwidth</em> for spectrum width in hertz. Here, unless we say <code>MHz</code>, we're discussing data capacity in bits per second.</p>
+
+  <h2 id="the-slowest-stage">The slowest stage sets a ceiling</h2>
+  <p>A laptop's <code>1000BASE-T</code> link doesn't make every hop gigabit. If a remote service is reached through a 100 Mbit/s bottleneck, the file cannot cross that bottleneck faster than its available capacity. Other traffic, Ethernet/IP/TCP headers, retransmissions, storage, CPU, and application behavior can lower useful delivery further. At the car wash, a fast entrance doesn't make the slower dryer finish sooner.</p>
+  <figure class="diagram-block">
+    <svg viewBox="0 0 680 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A laptop has a 1 gigabit per second link, but a 100 megabit per second path limits delivery to a server. A queue before the bottleneck adds delay.">
+      <g font-family="sans-serif" font-size="13" text-anchor="middle">
+        <rect x="15" y="80" width="110" height="65" rx="4" fill="none" stroke="#5b9df9" stroke-width="2"/>
+        <text x="70" y="117" fill="#e7ecf3">Laptop</text>
+        <rect x="245" y="80" width="110" height="65" rx="4" fill="none" stroke="#4fd1c5" stroke-width="2"/>
+        <text x="300" y="117" fill="#e7ecf3">Gateway</text>
+        <rect x="555" y="80" width="110" height="65" rx="4" fill="none" stroke="#5b9df9" stroke-width="2"/>
+        <text x="610" y="117" fill="#e7ecf3">Server</text>
+        <path d="M125 112 H245" stroke="#5b9df9" stroke-width="7"/>
+        <path d="M355 112 H555" stroke="#f2a93b" stroke-width="3"/>
+        <text x="185" y="60" fill="#cbd4e3">1 Gbit/s</text>
+        <text x="455" y="60" fill="#f2a93b">100 Mbit/s bottleneck</text>
+        <g fill="#f2a93b"><rect x="368" y="96" width="12" height="12"/><rect x="386" y="96" width="12" height="12"/><rect x="404" y="96" width="12" height="12"/></g>
+        <text x="400" y="180" fill="#cbd4e3">Waiting packets add queueing delay</text>
+        <text x="340" y="215" fill="#8d9bb3">Link speed is not an application-speed promise</text>
+      </g>
+    </svg>
+    <figcaption>A simplified path, not a measured trace. Capacity limits the delivery rate; queues can increase delay before packets are dropped.</figcaption>
+  </figure>
+
+  <h2 id="transfer-time">Worked example: how long should a transfer take?</h2>
+  <p>Use consistent units. A decimal <code>MB</code> is 1,000,000 bytes; a <code>MiB</code> is 1,048,576 bytes. One byte is eight bits. If a 250 MB file achieves a steady <strong>80 Mbit/s of application goodput</strong>, the estimate is <code>250 &times; 8 / 80 = 25 seconds</code>.</p>
+  <table class="compare-table" id="transfer-calculation">
+    <thead><tr><th>File size (MB)</th><th>Goodput (Mbit/s)</th><th>File size (Mbit)</th><th>Transfer time (s)</th></tr></thead>
+    <tbody><tr><td>250</td><td>80</td><td>2000</td><td>25</td></tr></tbody>
+  </table>
+  <p>This is a calculation, not a benchmark. It excludes connection setup and assumes the rate remains steady. Don't subtract TCP headers again if your input is already application goodput. For a small HTTP request, DNS, TLS setup, server processing, and multiple dependent requests may matter much more than this bulk-transfer estimate.</p>
+
+  <h2 id="latency-and-windows">Latency can limit a single TCP flow</h2>
+  <p>For TCP planning, the bandwidth-delay product uses capacity and <strong>round-trip</strong> time. At 100 Mbit/s and 40 ms RTT, <code>100,000,000 &times; 0.040 / 8 = 500,000 bytes</code> would be in flight to sustain that rate in a simplified steady-state model. A flow limited to a 65,536-byte effective window has a window/RTT ceiling of about <code>13.1 Mbit/s</code>, before other constraints. In the car wash, a conveyor needs enough cars in progress to keep all stages occupied; a rule permitting just one car at a time wastes capacity.</p>
+  <p>Actual behavior depends on <code>cwnd</code>, advertised <code>rwnd</code>, pacing, congestion control, and application demand. Modern operating systems often autotune buffers. Measure before overriding them. Adding parallel flows can increase aggregate throughput while hiding why a single flow is slow.</p>
+
+  <h2 id="variation-and-loss">Variation and loss need context</h2>
+  <p>An ICMP echo measurement reports RTT, not one-way delay. Halving it assumes symmetry that may not exist. One-way timing needs appropriately synchronized clocks and a stated measurement method. Report percentiles and the observation window, not only an average that hides short stalls.</p>
+  <p>A voice receiver uses a playout buffer to smooth irregular arrivals. A larger buffer tolerates more variation but adds delay, like holding finished cars until they can leave regularly. Packets arriving after a playback deadline may be unusable even though the network eventually delivered them. RTP's jitter estimate and another tool's maximum-minus-minimum delay are different statistics; don't compare them as identical numbers.</p>
+  <p>If 20 of 1,000 test packets are missing by the chosen deadline, observed loss is 2%. That sample says nothing by itself about where loss occurred. TCP retransmission indications can also result from reordering, delayed acknowledgments, or a capture that missed packets. Correlate endpoint observations with interface errors and queue drops.</p>
+
+  <h2 id="choose-the-next-check">Choose the next check</h2>
+  <table class="compare-table">
+    <thead><tr><th>Symptom</th><th>Check</th><th>Interpretation</th></tr></thead>
+    <tbody>
+      <tr><td>Upload makes calls stutter</td><td>Compare RTT and call loss/jitter before and during the upload</td><td>A loaded upstream queue is plausible even if downstream capacity is high</td></tr>
+      <tr><td>Wi-Fi reports a high link rate, download is slow</td><td>Compare wired delivery, airtime use, retries, and AP uplink speed</td><td>Negotiated PHY rate excludes sharing and overhead; it isn't goodput</td></tr>
+      <tr><td>Only one application is slow</td><td>Separate DNS, connection, TLS, and response timings</td><td>Server work or an application dependency can dominate a healthy network path</td></tr>
+      <tr><td>One traceroute hop shows missing replies</td><td>Check the destination and subsequent hops across repeated samples</td><td>A router can rate-limit replies while forwarding traffic normally</td></tr>
+    </tbody>
+  </table>
+  <div class="callout"><span class="callout-label">MEASURE THE SAME THING TWICE</span><p>Keep endpoints, direction, protocol, duration, and load conditions in the record. Run load-generating tests only on an approved path and within an agreed rate and time window. A throughput test can create the congestion you're investigating.</p></div>
+  <h2 id="related-topics">Related topics</h2>
+  <p>Continue with <a href="flow-congestion-control.html">TCP flow and congestion control</a>, <a href="icmp.html">ICMP and traceroute</a>, and <a href="http-https-versions.html">HTTP transport behavior</a>.</p>
+  <h2 id="sources">Sources</h2>
+  <ul>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc5136.html">RFC 5136: defining network capacity</a>.</li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc6349.html">RFC 6349: TCP throughput testing</a>, especially the measurement method and bandwidth-delay product. Historical OS examples are not current tuning recommendations.</li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc3393.html">RFC 3393: IP packet delay variation</a>.</li>
+  </ul>
+</article>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="copper-fiber-transceivers-poe.html"><span class="nav-label">&#8592; PREVIOUS</span>Copper, Fiber, Transceivers &amp; PoE</a>
+<a href="ethernet-frame-mac.html"><span class="nav-label">NEXT &#8594;</span>Ethernet Frame &amp; MAC Addressing</a>
+</nav>
+<footer class="site-footer"><div class="wrap"><span>&copy; 2026 netskillup</span><a href="https://github.com/Prandip23/netskillup" target="_blank" rel="noopener">github.com/Prandip23/netskillup</a></div></footer>
+<script src="../js/topic-page.js?v=2"></script>
+</body>
+</html>

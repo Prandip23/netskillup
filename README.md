@@ -1,8 +1,9 @@
 # netskillup: on-prem networking reference
 
 A static, GitHub Pages-ready learning site covering on-prem networking:
-Layer 2 switching, Layer 3 routing, TCP/UDP, DNS, and security fundamentals.
-The current catalog has 45 published topics across six modules. Cloud
+cabling and PoE, switching, routing, TCP/UDP, DNS, security, Wi-Fi, campus
+design, and practical troubleshooting. The current catalog has 53 published
+topics across nine modules. Cloud
 networking is intentionally out of scope for this segment.
 
 The browser needs only HTML, CSS, and JavaScript. There is no application
@@ -108,9 +109,20 @@ heading IDs and does not reserialize article bodies or SVG. Preserve existing
 IDs when changing heading wording so old deep links keep working.
 
 The richer reference pattern is piloted on subnetting, ARP, DNS resolution,
-TCP flow/congestion control, and TLS. Wireless, enterprise, and operations
-articles are the next content batch. A separate AI reference is planned later;
-neither expansion is published yet.
+TCP flow/congestion control, and TLS, and used throughout the eight-topic
+networking expansion:
+
+- Fundamentals: copper/fiber/transceivers/PoE and performance measurements.
+- Wireless (07): bands/channels/airtime and association/security/roaming.
+- Enterprise (08): campus segmentation and VRRP/HSRP gateway redundancy.
+- Operations (09): diagnostic tools and Wireshark/tcpdump packet capture.
+
+These articles include worked examples, diagram descriptions, troubleshooting
+guidance, and standards/vendor references. Calculations and traces are synthetic,
+not hardware benchmarks. Command examples require the named OS, installed tools,
+and approved targets; automated site tests do not validate physical networks.
+Browser coverage includes all eight new articles at five viewport widths.
+A separate AI reference remains planned; no AI section is published yet.
 
 ## Publishing on GitHub Pages
 

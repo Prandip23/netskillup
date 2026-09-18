@@ -6,6 +6,8 @@
   <url><loc>https://netskillup.com/topics/broadcast-vs-collision-domain.html</loc></url>
   <url><loc>https://netskillup.com/topics/hubs-switches-routers.html</loc></url>
   <url><loc>https://netskillup.com/topics/duplex.html</loc></url>
+  <url><loc>https://netskillup.com/topics/copper-fiber-transceivers-poe.html</loc></url>
+  <url><loc>https://netskillup.com/topics/bandwidth-throughput-latency.html</loc></url>
   <url><loc>https://netskillup.com/topics/ethernet-frame-mac.html</loc></url>
   <url><loc>https://netskillup.com/topics/arp.html</loc></url>
   <url><loc>https://netskillup.com/topics/vlans-trunking.html</loc></url>
@@ -46,4 +48,10 @@
   <url><loc>https://netskillup.com/topics/vpn-types.html</loc></url>
   <url><loc>https://netskillup.com/topics/firewalls-acls.html</loc></url>
   <url><loc>https://netskillup.com/topics/common-attacks.html</loc></url>
+  <url><loc>https://netskillup.com/topics/wifi-bands-channels-airtime.html</loc></url>
+  <url><loc>https://netskillup.com/topics/wifi-association-security-roaming.html</loc></url>
+  <url><loc>https://netskillup.com/topics/campus-design-segmentation.html</loc></url>
+  <url><loc>https://netskillup.com/topics/gateway-redundancy-vrrp-hsrp.html</loc></url>
+  <url><loc>https://netskillup.com/topics/network-troubleshooting-tools.html</loc></url>
+  <url><loc>https://netskillup.com/topics/packet-capture-wireshark-tcpdump.html</loc></url>
 </urlset>

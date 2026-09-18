@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Default Gateway Redundancy: VRRP &amp; HSRP &middot; netskillup</title>
+<meta name="description" content="Learn how VRRP and HSRP preserve a default gateway, calculate VRRP failure detection, and distinguish gateway election from upstream reachability and session recovery.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css"><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/gateway-redundancy-vrrp-hsrp.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Default Gateway Redundancy: VRRP &amp; HSRP · netskillup">
+<meta property="og:description" content="Learn how VRRP and HSRP preserve a default gateway, calculate VRRP failure detection, and distinguish gateway election from upstream reachability and session recovery.">
+<meta property="og:url" content="https://netskillup.com/topics/gateway-redundancy-vrrp-hsrp.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Default Gateway Redundancy: VRRP &amp; HSRP · netskillup">
+<meta name="twitter:description" content="Learn how VRRP and HSRP preserve a default gateway, calculate VRRP failure detection, and distinguish gateway election from upstream reachability and session recovery.">
+<!-- site:metadata:end -->
+</head>
+<body>
+<header class="site-header"><div class="wrap"><a href="../index.html" class="site-mark"><span class="dot" aria-hidden="true"></span>netskillup</a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form></div></header>
+<div class="topic-header" style="--module-color: var(--enterprise);"><div class="wrap">
+  <a class="breadcrumb" href="../index.html#module-enterprise">&#8592; Module 08 &middot; Enterprise Networking</a>
+  <h1>Default Gateway Redundancy: VRRP &amp; HSRP</h1>
+  <p class="topic-dek">Keep the host's next hop stable while a different router takes responsibility for forwarding.</p>
+</div></div>
+<article class="topic-body wrap">
+  <p class="topic-answer"><strong>Short answer:</strong> a first-hop redundancy protocol (FHRP) lets multiple routers provide one virtual default gateway on a LAN. Virtual Router Redundancy Protocol (VRRP) is an IETF standard; Hot Standby Router Protocol (HSRP) is Cisco's protocol. They elect a forwarding router for a group, but do not automatically synchronize firewall sessions, NAT mappings, or the routers' routing tables.</p>
+  <p class="topic-prerequisites">Read <a href="arp.html">ARP and the next hop</a>, <a href="routing-tables-lpm.html">routing tables</a>, and <a href="campus-design-segmentation.html">campus design</a>.</p>
+  <h2 id="a-duty-desk">One duty desk, two operators</h2>
+  <p>A building's service desk has one published extension, but two operators can cover it. Callers use the same extension when a relief operator takes over. The virtual IP is that stable extension; the virtual MAC is the LAN delivery identity; the active router is the operator currently responsible. Advertisements are presence checks, priority selects the preferred operator, and preemption decides whether that operator takes the desk back after returning.</p>
+  <p>The limit matters: a relief operator needs access to the same procedures and working external lines. In the network, the backup needs valid routes, policy, and upstream connectivity. Taking over a virtual address doesn't copy those things into place.</p>
+  <h2 id="virtual-gateway">The virtual gateway is not a third router</h2>
+  <p>In this synthetic IPv4 LAN, router A has <code>10.20.0.2/24</code>, router B has <code>10.20.0.3/24</code>, and both participate in VRRP group <code>20</code>. Hosts use virtual IP <code>10.20.0.1</code> as their gateway. The IPv4 VRRP virtual MAC is <code>00:00:5e:00:01:14</code>: the final byte is VRID 20 expressed as hexadecimal <code>14</code>.</p>
+  <figure class="diagram-block">
+    <svg viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two routers on VLAN 20 provide virtual gateway 10.20.0.1. Router A is initially active with priority 120; router B is backup with priority 100. The client keeps the same gateway during takeover.">
+      <g font-family="sans-serif" font-size="13" text-anchor="middle">
+        <rect x="35" y="25" width="220" height="80" rx="3" fill="none" stroke="#4fd1c5" stroke-width="2"/><text x="145" y="49" fill="#e7ecf3">Router A: initially active</text><text x="145" y="71" fill="#b1bdba">10.20.0.2 / priority 120</text><text x="145" y="92" fill="#b1bdba">Independent upstream path</text>
+        <rect x="425" y="25" width="220" height="80" rx="3" fill="none" stroke="#5b9df9" stroke-width="2"/><text x="535" y="49" fill="#e7ecf3">Router B: initially backup</text><text x="535" y="71" fill="#b1bdba">10.20.0.3 / priority 100</text><text x="535" y="92" fill="#b1bdba">Independent upstream path</text>
+        <path d="M145 105 V150 H535 V105 M340 150 V235" fill="none" stroke="#344041" stroke-width="3"/>
+        <text x="340" y="178" fill="#f2a93b">VLAN 20: virtual IP 10.20.0.1</text><text x="340" y="199" fill="#b1bdba">Virtual MAC 00:00:5e:00:01:14</text>
+        <rect x="205" y="235" width="270" height="60" rx="3" fill="none" stroke="#f2a93b" stroke-width="2"/><text x="340" y="260" fill="#e7ecf3">Client: 10.20.0.42/24</text><text x="340" y="282" fill="#b1bdba">Default route via 10.20.0.1</text>
+      </g>
+    </svg>
+    <figcaption>One virtual router, not a third physical device. Both routers share the client LAN; their upstream routing and policy must be ready independently.</figcaption>
+  </figure>
+  <p>The active router answers ARP for the virtual IP with the virtual MAC. When B takes over, the host's gateway IP and its virtual-MAC mapping can remain unchanged. Gratuitous ARP and frames sourced from the virtual MAC help the switches learn its new location. The switch's MAC-to-port entry changes even though the host's intended next hop doesn't.</p>
+  <p>VRRPv3 also supports IPv6, using separate IPv6 instances, Neighbor Discovery, and an IPv6-specific virtual MAC. Hosts normally learn their IPv6 default routers from <strong>Router Advertisements</strong>, not a DHCPv6 default-gateway option. The worked addresses and MAC above are IPv4 examples.</p>
+  <h2 id="protocol-comparison">VRRP and HSRP are alternatives, not peers</h2>
+  <table class="compare-table">
+    <thead><tr><th>Property</th><th>VRRPv3</th><th>HSRP</th></tr></thead>
+    <tbody>
+      <tr><td>Specification</td><td>RFC 9568, replacing RFC 5798; IPv4 and IPv6 instances</td><td>Cisco-specific; version and platform matter</td></tr>
+      <tr><td>Forwarding roles</td><td>Active and Backup; older material/CLI may say Master</td><td>Active and Standby, with other election states</td></tr>
+      <tr><td>Control packets</td><td>IP protocol 112, not a TCP/UDP port</td><td>IPv4 HSRP uses UDP 1985</td></tr>
+      <tr><td>Multicast destination</td><td>224.0.0.18 for IPv4; ff02::12 for IPv6</td><td>IPv4 v1: 224.0.0.2; v2: 224.0.0.102</td></tr>
+      <tr><td>Typical default timers</td><td>1 s advertisements; failure interval includes three intervals plus skew</td><td>Common Cisco IOS defaults: 3 s hello, 10 s hold</td></tr>
+      <tr><td>Preemption</td><td>Enabled by default in the standard; address owner is a special case</td><td>Normally requires explicit configuration on Cisco IOS</td></tr>
+    </tbody>
+  </table>
+  <p>Peers must use compatible protocol/version, group identifier, address family, virtual addresses, and LAN placement. HSRP v1 and v2 aren't interchangeable group members. VRRP IPv4 advertisements have TTL 255, checked on receipt; IPv6 uses Hop Limit 255. VRRPv3 provides no built-in authentication, so protect the local control-plane path and untrusted access ports rather than treating the protocol as a security boundary.</p>
+  <p>Only the active router sends periodic VRRP advertisements for an established group; backups listen. In established HSRP operation, both the active and standby routers send periodic hellos. Don't expect identical packet patterns from the two protocols.</p>
+  <h2 id="priority-and-preemption">Priority and preemption solve different problems</h2>
+  <p>Higher VRRP priority is preferred. Ordinary backup-capable routers use 1 through 254, with default 100. Priority 255 belongs to the IP address owner; priority 0 signals that the active router is relinquishing responsibility. In the example, neither physical interface owns <code>10.20.0.1</code>, so A uses 120 and B uses 100.</p>
+  <p><strong>Failover</strong> lets B take over when A becomes unavailable. <strong>Preemption</strong> lets a higher-priority A replace a still-running B after A returns. Disabling preemption doesn't prevent takeover when the active router actually fails. For VRRP, the address owner still preempts regardless of that setting. Where supported, a recovery delay can allow routes and services to stabilize before resuming the duty desk.</p>
+  <h2 id="worked-timer">Worked timer: not simply three missed seconds</h2>
+  <p>For B at priority 100 with a learned advertisement interval of 1 second, RFC 9568 defines <code>Skew_Time = (256 - Priority) / 256 * interval</code>. Its <code>Active_Down_Interval</code> is <code>3 * interval + skew</code>, measured from the last qualifying advertisement.</p>
+  <table class="compare-table" id="vrrp-timer">
+    <thead><tr><th>Backup priority</th><th>Interval (s)</th><th>Skew (s)</th><th>Active-down interval (s)</th></tr></thead>
+    <tbody><tr><td>100</td><td>1</td><td>0.609375</td><td>3.609375</td></tr></tbody>
+  </table>
+  <p>The elapsed time from a physical failure depends on where it occurs between advertisements. Graceful shutdown, interface state, vendor tracking, and accelerated detection can change behavior. Application recovery also includes forwarding updates and transport retries, so 3.609375 seconds is a timer calculation, not an outage guarantee. Aggressive timers can produce false transitions under load; validate them on the actual platform.</p>
+  <h2 id="upstream-tracking">An alive gateway can still be the wrong gateway</h2>
+  <p>If A's client-facing interface stays up but its upstream fails, A may continue sending VRRP advertisements and remain active. The duty-desk operator is present, but their outside line is broken. Routing reconvergence may restore a path through another link, or a supported tracking mechanism may lower A's priority or disable its group.</p>
+  <table class="compare-table">
+    <thead><tr><th>Scenario</th><th>A's effective priority</th><th>B's priority</th><th>Expected result with compatible preemption/tracking</th></tr></thead>
+    <tbody>
+      <tr><td>Both paths healthy</td><td>120</td><td>100</td><td>A is preferred</td></tr>
+      <tr><td>A's tracked path fails; decrement 30</td><td>90</td><td>100</td><td>B becomes preferred after detection and protocol transition</td></tr>
+      <tr><td>A recovers</td><td>120</td><td>100</td><td>A may reclaim the group after the configured recovery/preemption behavior</td></tr>
+    </tbody>
+  </table>
+  <p>This is policy arithmetic, not portable configuration syntax. Track something meaningful: an interface-only check won't detect every upstream routing failure; a probe target can fail even when the rest of the network is healthy. Use stable targets, hysteresis/delays where supported, and a plan for asymmetric paths.</p>
+  <h2 id="verify-the-whole-path">Verify the whole path</h2>
+  <ul>
+    <li><strong>Before a test:</strong> record both group states, priorities, timers, tracked objects, routes, virtual MAC location, and a real application transaction. On supported Cisco IOS platforms, <code>show standby brief</code>, <code>show vrrp brief</code>, and <code>show track</code> are useful read-only starting points; syntax varies.</li>
+    <li><strong>During an approved failure test:</strong> observe the role change and the duration of lost application delivery. Test upstream loss separately from complete router loss.</li>
+    <li><strong>After takeover:</strong> check new and existing sessions. NAT, firewall, VPN, and load-balancer state require their own supported synchronization or recovery design.</li>
+    <li><strong>After recovery:</strong> confirm whether preemption is intended, whether routes are ready, and whether the group flaps. Restore the planned topology and test the return path.</li>
+  </ul>
+  <p>Two routers both claiming active can indicate lost control traffic, incompatible settings, or an unintended LAN partition. A successful role election with failed traffic points toward forwarding, policy, or upstream dependencies. Pinging the virtual IP alone is insufficient; VRRP's accept-mode/address-owner behavior can affect replies addressed to the router itself while transit forwarding works.</p>
+  <div class="callout"><span class="callout-label">ONE GROUP IS NOT A LOAD BALANCER</span><p>Ordinary VRRP/HSRP elects one forwarding router per virtual group. Separate groups or VLANs can prefer different routers, but one group's throughput is not automatically the sum of both boxes. Routing protocols and distributed anycast gateways solve different parts of the design.</p></div>
+  <h2 id="related-topics">Related topics</h2>
+  <p>Connect this to <a href="link-state-ospf-isis.html">routing convergence</a>, <a href="nat-pat.html">NAT state</a>, <a href="firewalls-acls.html">stateful inspection</a>, and <a href="network-troubleshooting-tools.html">failure verification</a>.</p>
+  <h2 id="sources">Sources</h2>
+  <ul>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc9568.html">RFC 9568: VRRPv3</a>: current terminology, timers, virtual MACs, and protocol behavior.</li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc2281.html">RFC 2281: Cisco HSRP</a>: historical informational description, not a current HSRPv2 configuration guide.</li>
+    <li><a href="https://www.cisco.com/c/en/us/support/docs/ip/hot-standby-router-protocol-hsrp/9234-hsrpguidetoc.html">Cisco HSRP features and functionality</a>. Verify commands and defaults against the software release in use.</li>
+  </ul>
+</article>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="campus-design-segmentation.html"><span class="nav-label">&#8592; PREVIOUS</span>Campus Design &amp; Network Segmentation</a>
+<a href="network-troubleshooting-tools.html"><span class="nav-label">NEXT &#8594;</span>Network Troubleshooting &amp; Diagnostic Tools</a>
+</nav>
+<footer class="site-footer"><div class="wrap"><span>&copy; 2026 netskillup</span><a href="https://github.com/Prandip23/netskillup" target="_blank" rel="noopener">github.com/Prandip23/netskillup</a></div></footer>
+<script src="../js/topic-page.js?v=2"></script>
+</body>
+</html>

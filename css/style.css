@@ -25,6 +25,9 @@
   --l4: #b18cf0;
   --app: #f1789c;
   --sec: #5b9df9;
+  --wifi: #a8d477;
+  --enterprise: #e2bb71;
+  --ops: #7bc7d6;
 
   /* Shape */
   --radius: 3px;
@@ -1467,6 +1470,7 @@ html:not(.has-js) .compare-table { display: block; overflow-x: auto; }
   }
 
   .module {
+    grid-template-columns: minmax(0, 1fr);
     gap: 18px;
     padding: 28px 0;
   }

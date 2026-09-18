@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Network Troubleshooting &amp; Diagnostic Tools &middot; netskillup</title>
+<meta name="description" content="A practical network troubleshooting workflow with Windows and Linux commands, a worked DNS case, and clear limits for ping, traceroute, TCP, and HTTP tests.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css"><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/network-troubleshooting-tools.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Network Troubleshooting &amp; Diagnostic Tools · netskillup">
+<meta property="og:description" content="A practical network troubleshooting workflow with Windows and Linux commands, a worked DNS case, and clear limits for ping, traceroute, TCP, and HTTP tests.">
+<meta property="og:url" content="https://netskillup.com/topics/network-troubleshooting-tools.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Network Troubleshooting &amp; Diagnostic Tools · netskillup">
+<meta name="twitter:description" content="A practical network troubleshooting workflow with Windows and Linux commands, a worked DNS case, and clear limits for ping, traceroute, TCP, and HTTP tests.">
+<!-- site:metadata:end -->
+</head>
+<body>
+<header class="site-header"><div class="wrap"><a href="../index.html" class="site-mark"><span class="dot" aria-hidden="true"></span>netskillup</a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form></div></header>
+<div class="topic-header" style="--module-color: var(--ops);"><div class="wrap">
+  <a class="breadcrumb" href="../index.html#module-operations">&#8592; Module 09 &middot; Operations &amp; Troubleshooting</a>
+  <h1>Network Troubleshooting &amp; Diagnostic Tools</h1>
+  <p class="topic-dek">Make the next test answer a question. A long command history is not the same thing as an explanation.</p>
+</div></div>
+<article class="topic-body wrap">
+  <p class="topic-answer"><strong>Short answer:</strong> define the failure precisely, find its scope, form a testable hypothesis, and collect evidence that can rule it out. Change one relevant thing with a rollback plan, then repeat the original failing operation. Connectivity tests only prove the protocol, destination, and conditions they actually exercised.</p>
+  <p class="topic-prerequisites">Useful foundations: <a href="routing-tables-lpm.html">route selection</a>, <a href="arp.html">neighbor resolution</a>, and <a href="dns-resolution-flow.html">DNS resolution</a>.</p>
+  <h2 id="a-bicycle-workshop">Think like a bicycle mechanic</h2>
+  <p>A rider reports that a bicycle makes a clicking sound. A mechanic asks whether it happens while pedaling, braking, or coasting, then reproduces it and isolates a component. Replacing the wheel, chain, and pedals together might silence it without explaining why. A network report such as "the internet is down" needs the same refinement: which application, client, network, destination, and time? A <code>DNS</code> error is different from a TCP timeout or an HTTP <code>403</code>.</p>
+  <h2 id="a-repeatable-workflow">A repeatable workflow</h2>
+  <ol>
+    <li><strong>Define:</strong> record the exact operation, error, timestamp/time zone, source interface, and destination name/IP/port. Note VPN and proxy use.</li>
+    <li><strong>Scope:</strong> compare one affected and one unaffected client, or the same client on two approved paths. Keep other conditions comparable.</li>
+    <li><strong>Hypothesize:</strong> "The client received the wrong DNS server" predicts a resolver mismatch. "The network is broken" predicts nothing specific.</li>
+    <li><strong>Test:</strong> inspect the configured resolver and query the intended one. Decide in advance what result would contradict your hypothesis.</li>
+    <li><strong>Change and verify:</strong> apply an authorized, reversible correction. Repeat the original test and check related services, not just a convenient ping.</li>
+  </ol>
+  <p>Checking the bicycle's chain while coasting tells you little about a noise that happens only under pedal load. Likewise, a successful TCP connection from your admin laptop doesn't reproduce a user's Wi-Fi path, identity, proxy, or application request.</p>
+  <figure class="diagram-block">
+    <svg viewBox="0 0 680 245" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="For an HTTPS failure, inspect local link and addressing, route and next hop, DNS, TCP connectivity, TLS identity, and the HTTP application response. Choose checks based on the observed failure.">
+      <g font-family="sans-serif" font-size="14" text-anchor="middle">
+        <text x="340" y="25" fill="#b1bdba">HTTPS DEPENDENCIES: CHOOSE THE RELEVANT BOUNDARY</text>
+        <g fill="none" stroke="#4fd1c5" stroke-width="2"><rect x="25" y="55" width="190" height="55" rx="3"/><rect x="245" y="55" width="190" height="55" rx="3"/><rect x="465" y="55" width="190" height="55" rx="3"/></g>
+        <g fill="#e7ecf3"><text x="120" y="88">Link + IP config</text><text x="340" y="88">Route + neighbor</text><text x="560" y="88">DNS answer</text></g>
+        <g fill="none" stroke="#f2a93b" stroke-width="2"><rect x="25" y="145" width="190" height="55" rx="3"/><rect x="245" y="145" width="190" height="55" rx="3"/><rect x="465" y="145" width="190" height="55" rx="3"/></g>
+        <g fill="#e7ecf3"><text x="120" y="178">TCP connection</text><text x="340" y="178">TLS handshake</text><text x="560" y="178">HTTP response</text></g>
+        <text x="340" y="232" fill="#b1bdba">A successful lower-level test does not certify the levels above it</text>
+      </g>
+    </svg>
+    <figcaption>A dependency checklist, not a mandatory command order. HTTP/3 uses QUIC over UDP, and an explicit proxy changes which endpoint the client contacts.</figcaption>
+  </figure>
+  <h2 id="inspect-before-changing">Inspect before changing</h2>
+  <p>The following are read-only inspection commands. Linux examples assume <code>iproute2</code>; tools and output vary by distribution. Record only the relevant fields and protect internal names, addresses, and identifiers before sharing output.</p>
+  <table class="compare-table">
+    <thead><tr><th>Question</th><th>Windows PowerShell</th><th>Linux shell</th></tr></thead>
+    <tbody>
+      <tr><td>Address, gateway, DNS?</td><td><code>Get-NetIPConfiguration</code></td><td><code>ip address show</code>; <code>resolvectl status</code> on systemd-resolved hosts</td></tr>
+      <tr><td>Installed IPv4 routes?</td><td><code>Get-NetRoute -AddressFamily IPv4</code></td><td><code>ip -4 route show</code></td></tr>
+      <tr><td>Selected route to the target?</td><td><code>Find-NetRoute -RemoteIPAddress 192.0.2.20</code></td><td><code>ip route get 192.0.2.20</code></td></tr>
+      <tr><td>Neighbor state?</td><td><code>Get-NetNeighbor -AddressFamily IPv4</code></td><td><code>ip neigh show</code></td></tr>
+      <tr><td>Local TCP listeners?</td><td><code>Get-NetTCPConnection -State Listen</code></td><td><code>ss -lnt</code></td></tr>
+    </tbody>
+  </table>
+  <p><code>192.0.2.20</code> is a documentation address, not a real test service. Substitute an approved target. An IPv4 <code>169.254.x.x</code> address on a DHCP-configured client may indicate that no usable DHCP lease was obtained; it doesn't by itself identify why. A missing ARP entry can simply mean the client hasn't tried that neighbor recently. For IPv6, inspect IPv6 routes and NDP instead of assuming the IPv4 result covers both families.</p>
+  <h2 id="active-tests">Active tests and their limits</h2>
+  <table class="compare-table">
+    <thead><tr><th>Test</th><th>Windows / Linux example</th><th>What it does not prove</th></tr></thead>
+    <tbody>
+      <tr><td>Four ICMP echo requests</td><td><code>ping -n 4 192.0.2.20</code> / <code>ping -c 4 192.0.2.20</code></td><td>No reply doesn't prove the host is down; ICMP may be filtered or rate-limited</td></tr>
+      <tr><td>Observed hops</td><td><code>tracert -d 192.0.2.20</code> / <code>traceroute -n 192.0.2.20</code></td><td>Missing intermediate replies don't prove forwarding loss; probe protocols and return paths differ</td></tr>
+      <tr><td>DNS A record</td><td><code>Resolve-DnsName app.example -Type A</code> / <code>dig app.example A</code></td><td>A response doesn't prove it is the intended answer or the resolver path used by the application</td></tr>
+      <tr><td>TCP port</td><td><code>Test-NetConnection 192.0.2.20 -Port 443</code> / <code>nc -vz -w 3 192.0.2.20 443</code> (OpenBSD-style netcat)</td><td>A completed handshake doesn't prove TLS, HTTP, authentication, or UDP/QUIC works</td></tr>
+      <tr><td>HTTPS request</td><td><code>curl.exe --connect-timeout 3 --max-time 10 -I https://app.example/</code> / use <code>curl</code> on Linux</td><td>HEAD may behave differently from GET; curl may use different proxy/trust settings than the browser</td></tr>
+    </tbody>
+  </table>
+  <p><code>app.example</code> is reserved for documentation. Replace it with your approved service name. In Windows PowerShell, use <code>curl.exe</code> to avoid the older <code>curl</code> alias for Invoke-WebRequest. Do not use <code>-k</code> to hide a certificate failure. A trust error is evidence to investigate, not a successful health check with an inconvenient warning.</p>
+  <h2 id="worked-dns-case">Worked case: name resolution fails, the service responds</h2>
+  <p>In a synthetic lab, a client has <code>10.20.0.42/24</code>, gateway <code>10.20.0.1</code>, and a configured resolver at <code>10.20.0.53</code>. An approved HTTPS endpoint is <code>192.0.2.20</code>. The application name fails to resolve. Start by recording the failing query and resolver, then run these separate, bounded Windows checks after substituting real lab values:</p>
+  <pre tabindex="0" role="region" aria-label="Windows lab checks for DNS versus HTTPS"><code>Resolve-DnsName app.example -Server 10.20.0.53 -Type A
+Test-NetConnection 192.0.2.20 -Port 443
+curl.exe --connect-timeout 3 --max-time 10 --resolve app.example:443:192.0.2.20 -I https://app.example/</code></pre>
+  <p><code>--resolve</code> supplies an address while retaining the URL hostname for TLS SNI, certificate verification, and HTTP host selection. Using <code>https://192.0.2.20/</code> instead would change those conditions. The bypass comparison assumes a direct connection; an HTTPS proxy may resolve/connect to the origin itself. Inspect approved proxy settings rather than bypassing organizational controls.</p>
+  <table class="compare-table">
+    <thead><tr><th>Synthetic observation</th><th>Supported conclusion</th><th>Next check</th></tr></thead>
+    <tbody>
+      <tr><td>DNS query times out</td><td>No usable reply from that resolver during the test</td><td>Resolver health and the DNS path; timeout is not NXDOMAIN</td></tr>
+      <tr><td>TCP 443 succeeds</td><td>A TCP connection to that address/port completed</td><td>Keep testing the intended TLS name and HTTP operation</td></tr>
+      <tr><td>Named curl bypass validates TLS and receives HTTP 200</td><td>That direct endpoint answered the test request without DNS lookup</td><td>Investigate the resolution path; this is not proof that every application dependency is healthy</td></tr>
+    </tbody>
+  </table>
+  <p>The mechanic now has a repeatable test under load, not a guess. Compare the configured DNS server with the intended DHCP option or managed configuration, then investigate that discrepancy. Don't replace corporate DNS with a public resolver as a blanket fix: private names and split DNS may require the original infrastructure.</p>
+  <h2 id="common-misreadings">Common misreadings</h2>
+  <ul>
+    <li><strong>"Traceroute hop 4 loses 80%, so hop 4 is broken":</strong> if later hops and the endpoint respond normally, that router may only be limiting control-plane replies. Compare end-to-end loss for the actual flow.</li>
+    <li><strong>"The gateway responds, so routing is fine":</strong> the next-hop interface can answer ICMP while its upstream route, policy, NAT state, or return path is wrong.</li>
+    <li><strong>"Only large transfers stall, but ping works":</strong> investigate path MTU discovery, filtering, retransmissions, and application behavior. A tiny echo request doesn't exercise the same packet sizes.</li>
+    <li><strong>"Restarting fixed it":</strong> it restored service, but may have removed the cache, counters, or logs needed to explain the cause. Record before/after evidence when operationally possible.</li>
+  </ul>
+  <div class="callout"><span class="callout-label">LEAVE A REPRODUCIBLE HANDOFF</span><p>Record the symptom, scope, timestamp/time zone, tested source/destination/protocol, exact command, result, hypothesis, change, and verification. Keep captures and sensitive output in approved storage. Recovery and root-cause confirmation are separate outcomes.</p></div>
+  <h2 id="related-topics">Related topics</h2>
+  <p>Go deeper with <a href="packet-capture-wireshark-tcpdump.html">packet capture</a>, <a href="icmp.html">ICMP</a>, <a href="ipv4-fragmentation.html">MTU and fragmentation</a>, and <a href="url-to-page-capstone.html">the full request path</a>.</p>
+  <h2 id="sources">Sources</h2>
+  <ul>
+    <li><a href="https://learn.microsoft.com/en-us/powershell/module/nettcpip/test-netconnection">Microsoft: Test-NetConnection</a> and <a href="https://learn.microsoft.com/en-us/powershell/module/dnsclient/resolve-dnsname">Resolve-DnsName</a>.</li>
+    <li><a href="https://man7.org/linux/man-pages/man8/ip.8.html">iproute2: ip manual</a>.</li>
+    <li><a href="https://curl.se/docs/manpage.html">curl manual</a>: timeouts, HEAD, certificate verification, and --resolve.</li>
+  </ul>
+</article>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="gateway-redundancy-vrrp-hsrp.html"><span class="nav-label">&#8592; PREVIOUS</span>Default Gateway Redundancy: VRRP &amp; HSRP</a>
+<a href="packet-capture-wireshark-tcpdump.html"><span class="nav-label">NEXT &#8594;</span>Packet Capture: Wireshark &amp; tcpdump</a>
+</nav>
+<footer class="site-footer"><div class="wrap"><span>&copy; 2026 netskillup</span><a href="https://github.com/Prandip23/netskillup" target="_blank" rel="noopener">github.com/Prandip23/netskillup</a></div></footer>
+<script src="../js/topic-page.js?v=2"></script>
+</body>
+</html>

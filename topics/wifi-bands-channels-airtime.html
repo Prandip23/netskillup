@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wi-Fi Bands, Channels &amp; Airtime &middot; netskillup</title>
+<meta name="description" content="Understand Wi-Fi bands, channel width, airtime contention, RSSI and SNR, with practical Wi-Fi 6, 6E, and 7 context and troubleshooting checks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css"><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/wifi-bands-channels-airtime.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Wi-Fi Bands, Channels &amp; Airtime · netskillup">
+<meta property="og:description" content="Understand Wi-Fi bands, channel width, airtime contention, RSSI and SNR, with practical Wi-Fi 6, 6E, and 7 context and troubleshooting checks.">
+<meta property="og:url" content="https://netskillup.com/topics/wifi-bands-channels-airtime.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Wi-Fi Bands, Channels &amp; Airtime · netskillup">
+<meta name="twitter:description" content="Understand Wi-Fi bands, channel width, airtime contention, RSSI and SNR, with practical Wi-Fi 6, 6E, and 7 context and troubleshooting checks.">
+<!-- site:metadata:end -->
+</head>
+<body>
+<header class="site-header"><div class="wrap"><a href="../index.html" class="site-mark"><span class="dot" aria-hidden="true"></span>netskillup</a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form></div></header>
+<div class="topic-header" style="--module-color: var(--wifi);"><div class="wrap">
+  <a class="breadcrumb" href="../index.html#module-wireless">&#8592; Module 07 &middot; Wireless Networking</a>
+  <h1>Wi-Fi Bands, Channels &amp; Airtime</h1>
+  <p class="topic-dek">Signal strength tells you whether a voice is loud enough. Airtime tells you whether anyone gets a chance to speak.</p>
+</div></div>
+<article class="topic-body wrap">
+  <p class="topic-answer"><strong>Short answer:</strong> Wi-Fi shares radio spectrum. A band contains channels, a channel occupies a chosen width, and nearby transmitters compete for time to use it. More signal bars, wider channels, or more access points don't automatically create more usable capacity.</p>
+  <p class="topic-prerequisites">Start with <a href="duplex.html">half versus full duplex</a> and <a href="bandwidth-throughput-latency.html">throughput and delay</a>.</p>
+  <h2 id="a-shared-rehearsal-space">A shared rehearsal space</h2>
+  <p>Picture several rehearsal rooms in a music school. A band is a floor of rooms; channels are the rooms, and channel width is how much room a group occupies. Musicians using the same room must take turns. Opening a dividing wall gives one group more space, but leaves fewer separate rooms for everyone else. Loud playing from next door can also disrupt a rehearsal. These map to co-channel contention, wider channels, and overlapping-channel interference.</p>
+  <p>An access point (AP) connects wireless stations to a network, usually through Ethernet. A radio's <code>BSSID</code> identifies a basic service set; an <code>SSID</code> is the advertised network name. Several BSSIDs can advertise the same SSID. Renaming the rehearsal doesn't create another room: adding SSIDs to one radio still shares that radio's airtime.</p>
+  <h2 id="bands-and-generations">Bands and generations are different labels</h2>
+  <table class="compare-table">
+    <thead><tr><th>Band</th><th>Useful properties</th><th>Constraints to check</th></tr></thead>
+    <tbody>
+      <tr><td>2.4 GHz</td><td>Broad legacy/IoT support; often reaches farther through a building under comparable conditions</td><td>Limited channel reuse, Bluetooth and other interference; 20 MHz is usually the practical enterprise starting point</td></tr>
+      <tr><td>5 GHz</td><td>More channel choices and broad modern client support</td><td>Some channels require DFS radar detection and evacuation; rules depend on country</td></tr>
+      <tr><td>6 GHz</td><td>Additional spectrum for compatible Wi-Fi 6E and Wi-Fi 7 devices</td><td>Country, indoor/outdoor use, power class, and sometimes AFC coordination constrain operation</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Wi-Fi 6</strong> uses <code>802.11ax</code>; <strong>Wi-Fi 6E</strong> extends that generation into 6 GHz. <strong>Wi-Fi 7</strong> uses <code>802.11be</code> and includes capabilities such as multi-link operation (MLO), higher-order modulation, and up to 320 MHz channels in permitted 6 GHz deployments. Support varies by device and mode. A Wi-Fi 7 label doesn't mean every client can use 320 MHz or transmit simultaneously on every band.</p>
+  <p>In the music school, a newer rehearsal technique improves how participants share the room; moving to another floor changes the available rooms. Likewise, a generation is not a frequency band. Keep the configured country correct, and consult the local regulator and AP/client compatibility information before planning channels.</p>
+  <h2 id="channel-width-and-reuse">Channel width trades peak rate for reuse</h2>
+  <p>Bonding four 20 MHz channels produces an 80 MHz channel. With appropriate signal and client support, that can carry more data per transmission, but it consumes more spectrum. In a dense office, narrower channels can allow more nearby APs to operate independently. The goal is usable capacity across the site, not the largest number on one laptop.</p>
+  <figure class="diagram-block">
+    <svg viewBox="0 0 680 225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Four nonoverlapping 20 MHz channels can be used separately or bonded into one 80 MHz channel, reducing the number of independent channel choices in that spectrum block.">
+      <g font-family="sans-serif" font-size="14" text-anchor="middle">
+        <text x="340" y="25" fill="#b1bdba">Same 80 MHz of spectrum, two planning choices</text>
+        <g fill="none" stroke="#4fd1c5" stroke-width="2"><rect x="30" y="55" width="145" height="48" rx="3"/><rect x="185" y="55" width="145" height="48" rx="3"/><rect x="340" y="55" width="145" height="48" rx="3"/><rect x="495" y="55" width="145" height="48" rx="3"/></g>
+        <g fill="#e7ecf3"><text x="102" y="84">20 MHz</text><text x="257" y="84">20 MHz</text><text x="412" y="84">20 MHz</text><text x="567" y="84">20 MHz</text></g>
+        <rect x="30" y="133" width="610" height="48" rx="3" fill="none" stroke="#f2a93b" stroke-width="2"/>
+        <text x="335" y="162" fill="#e7ecf3">One bonded 80 MHz channel</text>
+        <text x="340" y="211" fill="#b1bdba">Wider transmissions occupy more of the shared spectrum</text>
+      </g>
+    </svg>
+    <figcaption>A conceptual width comparison, not a country-specific channel plan. Channel availability and permitted combinations depend on the band and regulatory domain.</figcaption>
+  </figure>
+  <p>For a common US 2.4 GHz deployment using 20 MHz channels, <code>1, 6, 11</code> is a familiar nonoverlapping reuse plan. It is not a universal plan for every country or channel width. Nearby APs on the same channel can coordinate by deferring when they hear each other; partially overlapping channels can disrupt reception without equivalent coordination. A spectrum survey matters more than simply counting SSIDs.</p>
+  <h2 id="what-consumes-airtime">What consumes airtime?</h2>
+  <p>Ordinary Wi-Fi contention uses <strong>CSMA/CA</strong>: listen, defer when busy, wait a randomized backoff, then transmit. Unicast data normally gets a link-layer acknowledgment; a missing acknowledgment may trigger a retry. Two stations can still transmit together, especially when they cannot hear each other (the hidden-node problem). Collision avoidance isn't a guarantee that collisions never happen.</p>
+  <p>Wi-Fi 6's <code>OFDMA</code> lets an AP schedule multiple users into resource units within a transmission. It improves sharing, but doesn't turn an ordinary channel into dedicated full-duplex Ethernet for every station. The school can coordinate a group rehearsal; it still occupies a room for a period of time.</p>
+  <p>For a deliberately simplified example, 12,000 payload bits take 2 ms at 6 Mbit/s and 0.2 ms at 60 Mbit/s. The slower transmission uses ten times the payload airtime. Preambles, contention, acknowledgments, and retries add more. A slow station doesn't force all others to use its rate, but its transmissions consume time they cannot use. More SSIDs also add management traffic such as beacons.</p>
+  <h2 id="rssi-and-snr">RSSI and SNR answer different questions</h2>
+  <p><strong>RSSI</strong> is a received-signal indication, often reported in dBm. A reading of -55 dBm is stronger than -75 dBm. <strong>SNR</strong> compares signal to noise: a -62 dBm signal and -92 dBm noise floor give an illustrative 30 dB SNR. A loud instrument in a loud room is still hard to distinguish; strong RSSI with high noise or heavy contention doesn't ensure reliable delivery.</p>
+  <p>There is no universal acceptable RSSI, SNR, or roaming trigger for every device and application. Client antenna design, modulation, channel width, interference, and the required service matter. Increasing AP transmit power may improve what a laptop hears without improving what the AP hears from the lower-power laptop.</p>
+  <h2 id="wireless-diagnostics">Start with the symptom</h2>
+  <table class="compare-table">
+    <thead><tr><th>Symptom</th><th>Check</th><th>What it suggests</th></tr></thead>
+    <tbody>
+      <tr><td>Strong signal, slow transfers</td><td>Channel utilization, retries, client rate, wired AP uplink, and an approved wired comparison</td><td>Airtime congestion or an upstream bottleneck can coexist with good RSSI</td></tr>
+      <tr><td>Problems mainly in one room</td><td>Measure with the affected client at the affected time; inspect interference and coverage</td><td>A survey from another device or an empty building may not reproduce the problem</td></tr>
+      <tr><td>Several clients disconnect together</td><td>AP power/reboot logs, DFS events, channel changes, uplink state</td><td>A shared AP event is more plausible than identical independent client faults</td></tr>
+      <tr><td>More APs made performance worse</td><td>Reuse plan, power levels, overlapping cells, and SSID count</td><td>Added radios may have increased contention rather than independent capacity</td></tr>
+    </tbody>
+  </table>
+  <div class="callout"><span class="callout-label">COVERAGE IS NOT CAPACITY</span><p>Validate the real client mix and workload: calls, scanners, and bulk downloads stress a WLAN differently. Record band, BSSID, channel width, retries, and airtime alongside signal strength.</p></div>
+  <h2 id="related-topics">Related topics</h2>
+  <p>Continue with <a href="wifi-association-security-roaming.html">joining, security, and roaming</a>, <a href="copper-fiber-transceivers-poe.html">AP power and uplinks</a>, and <a href="bandwidth-throughput-latency.html">performance measurements</a>.</p>
+  <h2 id="sources">Sources</h2>
+  <ul>
+    <li><a href="https://www.ieee802.org/11/">IEEE 802.11 working group</a>: wireless LAN standards and amendments.</li>
+    <li><a href="https://www.wi-fi.org/wi-fi-macphy">Wi-Fi Alliance: Wi-Fi generations and capabilities</a>.</li>
+    <li><a href="https://www.fcc.gov/wireless/bureau-divisions/office-engineering-technology/unlicensed-operations-6-ghz-band">FCC: unlicensed operation in the 6 GHz band</a>. US rules are not worldwide rules.</li>
+  </ul>
+</article>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="common-attacks.html"><span class="nav-label">&#8592; PREVIOUS</span>Common Attacks: ARP Spoofing, MITM, DDoS</a>
+<a href="wifi-association-security-roaming.html"><span class="nav-label">NEXT &#8594;</span>Wi-Fi Association, Security &amp; Roaming</a>
+</nav>
+<footer class="site-footer"><div class="wrap"><span>&copy; 2026 netskillup</span><a href="https://github.com/Prandip23/netskillup" target="_blank" rel="noopener">github.com/Prandip23/netskillup</a></div></footer>
+<script src="../js/topic-page.js?v=2"></script>
+</body>
+</html>
