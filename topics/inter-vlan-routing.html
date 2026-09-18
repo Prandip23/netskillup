@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/inter-vlan-routing.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Inter-VLAN Routing · netskillup">
+<meta property="og:description" content="VLANs isolate broadcast domains on purpose. Inter-VLAN routing is how you deliberately let them talk again, via router-on-a-stick or a Layer 3 switch&#39;s SVIs.">
+<meta property="og:url" content="https://netskillup.com/topics/inter-vlan-routing.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Inter-VLAN Routing · netskillup">
+<meta name="twitter:description" content="VLANs isolate broadcast domains on purpose. Inter-VLAN routing is how you deliberately let them talk again, via router-on-a-stick or a Layer 3 switch&#39;s SVIs.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
+    <a class="breadcrumb" href="../index.html#module-layer3">&#8592; Module 03 &middot; Layer 3: Network</a>
     <h1>Inter-VLAN Routing</h1>
     <p class="topic-dek">A switch will never forward traffic between two VLANs (Virtual Local Area Networks), on purpose. That's the whole point of a VLAN. Something at Layer 3 has to do it deliberately.</p>
   </div>
@@ -32,13 +44,13 @@
 
 <article class="topic-body wrap">
 
-  <h2>Recall why this is even necessary</h2>
+  <h2 id="recall-why-this-is-even-necessary">Recall why this is even necessary</h2>
   <p>Back in <a href="broadcast-vs-collision-domain.html">Collision Domain vs Broadcast Domain</a>: a router (or something doing Layer 3 work) is what breaks up broadcast domains, and VLANs exist specifically to create multiple broadcast domains on one switch. So naturally, getting traffic <em>between</em> two VLANs requires exactly the kind of device that breaks broadcast domains apart in the first place. A switch alone will never do it.</p>
 
-  <h2>Option 1: Router-on-a-stick</h2>
+  <h2 id="option-1-router-on-a-stick">Option 1: Router-on-a-stick</h2>
   <p>A single physical link runs from the switch to a router as an 802.1Q trunk, and the router carries a separate <strong>subinterface</strong> for each VLAN, each one acting as that VLAN's gateway. One physical interface, logically sliced into as many virtual ones as there are VLANs.</p>
 
-  <h2>Option 2: Layer 3 switch with SVIs</h2>
+  <h2 id="option-2-layer-3-switch-with-svis">Option 2: Layer 3 switch with SVIs</h2>
   <p>A Layer 3 switch can do the routing itself, with no separate router at all. Each VLAN gets a <strong>Switched Virtual Interface (SVI)</strong>, a virtual interface configured directly on the switch that acts as that VLAN's gateway. Since the switch is already routing in hardware at wire speed, this scales far better than funneling all inter-VLAN traffic through one router link.</p>
 
   <figure class="diagram-block">
@@ -83,15 +95,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="nat-pat.html">
-    <span class="nav-label">← PREVIOUS</span>
-    NAT & PAT
-  </a>
-  <a href="packet-flow.html">
-    <span class="nav-label">NEXT →</span>
-    Packet Flow Across Networks
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="nat-pat.html"><span class="nav-label">&#8592; PREVIOUS</span>NAT &amp; PAT</a>
+<a href="packet-flow.html"><span class="nav-label">NEXT &#8594;</span>Packet Flow Across Networks</a>
 </nav>
 
 <footer class="site-footer">

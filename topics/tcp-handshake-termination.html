@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/tcp-handshake-termination.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="TCP 3-Way Handshake &amp; Termination · netskillup">
+<meta property="og:description" content="How two hosts open a TCP connection with a three-way handshake, and the four-step process (usually) required to close one cleanly.">
+<meta property="og:url" content="https://netskillup.com/topics/tcp-handshake-termination.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TCP 3-Way Handshake &amp; Termination · netskillup">
+<meta name="twitter:description" content="How two hosts open a TCP connection with a three-way handshake, and the four-step process (usually) required to close one cleanly.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l4);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 04 · Layer 4: Transport</a>
+    <a class="breadcrumb" href="../index.html#module-layer4">&#8592; Module 04 &middot; Layer 4: Transport</a>
     <h1>TCP 3-Way Handshake & Termination</h1>
     <p class="topic-dek">How two hosts agree to start a reliable conversation, built entirely out of the SYN, ACK, and FIN flags from the last topic, and the more careful dance required to end one cleanly.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>Opening a connection: The three-way handshake</h2>
+  <h2 id="opening-a-connection-the-three-way-handshake">Opening a connection: The three-way handshake</h2>
   <p>It's exactly like the ritual that opens a phone call. "Hello, can you hear me?" "Yes, and can you hear me?" "Yes." Three exchanges, not two, because the call needs to be confirmed working in <strong>both</strong> directions before either side starts talking business. TCP needs the same thing: it's full-duplex, so each side has to pick its own starting sequence number and have the other side confirm it received that number.</p>
 
   <figure class="diagram-block">
@@ -113,7 +125,7 @@
     <p>Two segments aren't enough: if the client only sent SYN and the server replied SYN ACK, the client would know the server's number, but the server would have no confirmation the client actually received it. A fourth segment isn't needed either, since the third segment's ACK can piggyback directly on top of it without adding a separate step. Three is the minimum that confirms both directions.</p>
   </div>
 
-  <h2>Closing a connection: Four-way termination</h2>
+  <h2 id="closing-a-connection-four-way-termination">Closing a connection: Four-way termination</h2>
   <p>Because TCP is full-duplex, either side can still have data left to send even after the other side is done. Closing a connection means each direction has to be shut down on its own, which is normally four segments instead of two. The side that closes first sends FIN and enters <strong>FIN_WAIT</strong>; the other side, now in <strong>CLOSE_WAIT</strong>, can keep sending data on its still-open half of the connection until it's ready to send its own FIN.</p>
 
   <figure class="diagram-block">
@@ -215,15 +227,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="tcp-header.html">
-    <span class="nav-label">← PREVIOUS</span>
-    TCP Header Structure
-  </a>
-  <a href="flow-congestion-control.html">
-    <span class="nav-label">NEXT →</span>
-    Flow Control & Congestion Control
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="tcp-header.html"><span class="nav-label">&#8592; PREVIOUS</span>TCP Header Structure</a>
+<a href="flow-congestion-control.html"><span class="nav-label">NEXT &#8594;</span>Flow Control &amp; Congestion Control</a>
 </nav>
 
 <footer class="site-footer">

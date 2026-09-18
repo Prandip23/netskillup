@@ -1,179 +1,94 @@
 (function () {
-  const listEl = document.getElementById("module-list");
   const searchEl = document.getElementById("topic-search");
   const clearSearchEl = document.getElementById("clear-search");
-  const moduleJumpEl = document.getElementById("module-jump");
-  const curriculumSummaryEl = document.getElementById("curriculum-summary");
+  const levelEl = document.getElementById("topic-level");
   const searchResultsEl = document.getElementById("search-results");
   const noResultsEl = document.getElementById("no-results");
+  if (!searchEl) return;
 
-  const moduleColorVar = {
-    fundamentals: "var(--fund)",
-    layer2: "var(--l2)",
-    layer3: "var(--l3)",
-    layer4: "var(--l4)",
-    "app-naming": "var(--app)",
-    security: "var(--sec)",
-  };
+  const modules = Array.from(document.querySelectorAll(".module"), (element) => ({
+    element,
+    rows: Array.from(element.querySelectorAll(".topic-row")),
+    count: element.querySelector(".module-count"),
+    list: element.querySelector(".topic-list"),
+    jump: document.querySelector(`.module-jump a[href="#${element.id}"]`),
+  }));
 
   function topicCountLabel(count) {
     return `${count} ${count === 1 ? "topic" : "topics"}`;
   }
 
-  function renderModuleJump() {
-    if (!moduleJumpEl) return;
-
-    const fragment = document.createDocumentFragment();
-
-    SITE_DATA.forEach((module) => {
-      const link = document.createElement("a");
-      link.href = `#module-${module.id}`;
-      link.style.setProperty("--module-color", moduleColorVar[module.id] || "var(--l2)");
-
-      const number = document.createElement("span");
-      number.className = "module-jump-number";
-      number.textContent = module.number;
-
-      const title = document.createElement("span");
-      title.textContent = module.title;
-
-      link.append(number, title);
-      fragment.appendChild(link);
-    });
-
-    moduleJumpEl.appendChild(fragment);
-  }
-
-  function render() {
-    const frag = document.createDocumentFragment();
-
-    SITE_DATA.forEach((mod) => {
-      const section = document.createElement("section");
-      section.className = "module";
-      section.dataset.moduleId = mod.id;
-      section.id = `module-${mod.id}`;
-      section.style.setProperty("--module-color", moduleColorVar[mod.id] || "var(--l2)");
-
-      const head = document.createElement("div");
-      head.className = "module-head";
-      const moduleLabel = document.createElement("p");
-      moduleLabel.className = "module-label";
-      moduleLabel.textContent = `MODULE ${mod.number}`;
-      const heading = document.createElement("h2");
-      heading.id = `module-${mod.id}-heading`;
-      heading.textContent = mod.title;
-      const blurb = document.createElement("p");
-      blurb.textContent = mod.blurb;
-      const count = document.createElement("span");
-      count.className = "module-count";
-      count.textContent = topicCountLabel(mod.topics.length);
-      head.append(moduleLabel, heading, blurb, count);
-      section.setAttribute("aria-labelledby", heading.id);
-
-      const list = document.createElement("ul");
-      list.className = "topic-list";
-
-      mod.topics.forEach((topic, index) => {
-        const li = document.createElement("li");
-        const isPublished = topic.status === "published";
-        const tag = isPublished ? "a" : "div";
-        const row = document.createElement(tag);
-        row.className = "topic-row" + (isPublished ? "" : " is-planned");
-        row.dataset.topic = topic.title.toLowerCase();
-        row.dataset.module = `${mod.number} ${mod.tag} ${mod.title}`.toLowerCase();
-        if (isPublished) {
-          row.href = `topics/${topic.slug}.html`;
-        }
-
-        const order = document.createElement("span");
-        order.className = "topic-order";
-        order.textContent = String(index + 1).padStart(2, "0");
-
-        const title = document.createElement("span");
-        title.className = "t-title";
-        title.textContent = topic.title;
-
-        const tail = document.createElement("span");
-        tail.className = "topic-tail";
-        if (isPublished) {
-          tail.setAttribute("aria-hidden", "true");
-          tail.textContent = "→";
-        } else {
-          tail.classList.add("status-chip", topic.status);
-          tail.textContent = "planned";
-        }
-
-        row.append(order, title, tail);
-        li.appendChild(row);
-        list.appendChild(li);
-      });
-
-      section.appendChild(head);
-      section.appendChild(list);
-      frag.appendChild(section);
-    });
-
-    listEl.appendChild(frag);
-  }
-
-  function filter(query) {
-    const normalizedQuery = query.trim().toLowerCase();
-    const queryTerms = normalizedQuery.split(/\s+/).filter(Boolean);
+  function filter(updateURL = true) {
+    const query = searchEl.value.trim();
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    const level = levelEl?.value || "";
     let visibleTopicCount = 0;
+    let visibleModuleCount = 0;
 
-    document.querySelectorAll(".module").forEach((mod) => {
-      let moduleHasMatch = false;
-      mod.querySelectorAll(".topic-row").forEach((row) => {
-        const match = !queryTerms.length || [row.dataset.topic, row.dataset.module].some((searchText) =>
-          queryTerms.every((term) => searchText.includes(term))
-        );
+    modules.forEach(({ element, rows, count, list, jump }) => {
+      let moduleCount = 0;
+      const ranked = rows.map((row, index) => {
+        const match = (!level || row.dataset.level === level) && terms.every((term) => row.dataset.search.includes(term));
         row.closest("li").hidden = !match;
-        if (match) {
-          moduleHasMatch = true;
-          visibleTopicCount += 1;
-        }
+        if (match) moduleCount += 1;
+        const score = terms.filter((term) => row.dataset.topic.includes(term)).length;
+        return { row, index, score };
       });
-      mod.hidden = !moduleHasMatch;
+      ranked.sort((left, right) => right.score - left.score || left.index - right.index);
+      ranked.forEach(({ row }) => list.appendChild(row.closest("li")));
+      element.hidden = moduleCount === 0;
+      if (jump) jump.hidden = element.hidden;
+      count.textContent = moduleCount === rows.length ? topicCountLabel(moduleCount) : `${moduleCount} of ${topicCountLabel(rows.length)}`;
+      visibleTopicCount += moduleCount;
+      if (moduleCount) visibleModuleCount += 1;
     });
 
-    if (noResultsEl) {
-      noResultsEl.hidden = visibleTopicCount !== 0;
-    }
-    if (searchResultsEl) {
-      searchResultsEl.textContent = normalizedQuery
-        ? `${topicCountLabel(visibleTopicCount)} found for “${query.trim()}”.`
-        : `${topicCountLabel(visibleTopicCount)} across ${SITE_DATA.length} modules.`;
-    }
-    if (clearSearchEl) {
-      clearSearchEl.hidden = !normalizedQuery;
+    noResultsEl.hidden = visibleTopicCount !== 0;
+    searchResultsEl.textContent = query
+      ? `${topicCountLabel(visibleTopicCount)} found for "${query}"${level ? ` (${level})` : ""}.`
+      : `${topicCountLabel(visibleTopicCount)} across ${visibleModuleCount} modules${level ? ` (${level})` : ""}.`;
+    clearSearchEl.hidden = !searchEl.value;
+
+    if (updateURL) {
+      const url = new URL(window.location.href);
+      if (query) url.searchParams.set("q", query);
+      else url.searchParams.delete("q");
+      if (level) url.searchParams.set("level", level);
+      else url.searchParams.delete("level");
+      window.history.replaceState(null, "", url);
     }
   }
 
-  render();
-  renderModuleJump();
-
-  const totalTopics = SITE_DATA.reduce((sum, module) => sum + module.topics.length, 0);
-  if (curriculumSummaryEl) {
-    curriculumSummaryEl.textContent = `${topicCountLabel(totalTopics)} across ${SITE_DATA.length} modules, from Ethernet frames to encrypted tunnels.`;
+  function restoreQuery() {
+    const params = new URL(window.location.href).searchParams;
+    searchEl.value = params.get("q") || "";
+    const level = params.get("level");
+    if (levelEl) levelEl.value = ["beginner", "intermediate"].includes(level) ? level : "";
+    filter(false);
   }
 
-  filter("");
-
-  if (searchEl) {
-    searchEl.addEventListener("input", (e) => filter(e.target.value));
-    searchEl.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && searchEl.value) {
-        searchEl.value = "";
-        filter("");
-      }
-    });
-  }
-
-  if (clearSearchEl && searchEl) {
-    clearSearchEl.addEventListener("click", () => {
+  document.documentElement.classList.add("has-js");
+  document.getElementById("search-form").hidden = false;
+  document.getElementById("catalog-tools").hidden = false;
+  restoreQuery();
+  window.addEventListener("popstate", restoreQuery);
+  window.addEventListener("pageshow", restoreQuery);
+  searchEl.addEventListener("input", () => filter());
+  levelEl?.addEventListener("change", () => filter());
+  document.getElementById("search-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    filter();
+    document.getElementById("main-content").scrollIntoView();
+  });
+  searchEl.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && searchEl.value) {
       searchEl.value = "";
-      filter("");
-      searchEl.focus();
-    });
-  }
+      filter();
+    }
+  });
+  clearSearchEl.addEventListener("click", () => {
+    searchEl.value = "";
+    filter();
+    searchEl.focus();
+  });
 })();

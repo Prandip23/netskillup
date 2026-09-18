@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://netskillup.com/sitemap.xml

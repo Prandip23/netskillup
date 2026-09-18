@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/ipv6-basics.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="IPv6 Addressing &amp; Header Basics · netskillup">
+<meta property="og:description" content="Why IPv6 exists, how its 128-bit addresses are written and compressed, and how its simplified header and multicast-based design replace ARP and broadcast entirely.">
+<meta property="og:url" content="https://netskillup.com/topics/ipv6-basics.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="IPv6 Addressing &amp; Header Basics · netskillup">
+<meta name="twitter:description" content="Why IPv6 exists, how its 128-bit addresses are written and compressed, and how its simplified header and multicast-based design replace ARP and broadcast entirely.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
+    <a class="breadcrumb" href="../index.html#module-layer3">&#8592; Module 03 &middot; Layer 3: Network</a>
     <h1>IPv6 Addressing & Header Basics</h1>
     <p class="topic-dek">IPv4 has roughly 4 billion addresses, and the internet ran out of the easy ones years ago. IPv6 isn't a patch, it's a wholly bigger address space with a cleaner header to match.</p>
   </div>
@@ -32,10 +44,10 @@
 
 <article class="topic-body wrap">
 
-  <h2>Why 128 bits instead of 32</h2>
+  <h2 id="why-128-bits-instead-of-32">Why 128 bits instead of 32</h2>
   <p>IPv4's 32 bits cap out at about 4.3 billion possible addresses, and between phones, laptops, IoT (Internet of Things) devices, and servers, that ran out long ago (NAT, or Network Address Translation, the topic later in this module, is largely the industry's workaround for that shortage). IPv6 uses 128 bits: roughly 340 undecillion addresses, enough that every device anyone will ever build can have its own globally unique address with room to spare.</p>
 
-  <h2>How an IPv6 address is written</h2>
+  <h2 id="how-an-ipv6-address-is-written">How an IPv6 address is written</h2>
   <p>An address is written as eight groups of four hex digits separated by colons, like <code>2001:0db8:0000:0000:0000:ff00:0042:8329</code>. Two shorthand rules make that readable:</p>
   <ul>
     <li>Leading zeros in each group can be dropped: <code>0db8</code> becomes <code>db8</code>.</li>
@@ -43,7 +55,7 @@
   </ul>
   <p>Compressed, that same address becomes <code>2001:db8::ff00:42:8329</code>.</p>
 
-  <h2>No more broadcast: Multicast does that job now</h2>
+  <h2 id="no-more-broadcast-multicast-does-that-job-now">No more broadcast: Multicast does that job now</h2>
   <p>IPv6 has no broadcast address at all. Anything that used to rely on a broadcast in IPv4 (including ARP, or Address Resolution Protocol) is handled by <strong>multicast</strong> instead, sent to a specific group of interested listeners rather than flooded to everyone. Address resolution, the IPv6 equivalent of ARP, is a multicast-based protocol called <strong>NDP</strong> (Neighbor Discovery Protocol).</p>
 
   <table class="compare-table">
@@ -79,15 +91,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="ipv4-header.html">
-    <span class="nav-label">← PREVIOUS</span>
-    IPv4 Header Structure
-  </a>
-  <a href="ipv4-fragmentation.html">
-    <span class="nav-label">NEXT →</span>
-    IPv4 Fragmentation
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="ipv4-header.html"><span class="nav-label">&#8592; PREVIOUS</span>IPv4 Header Structure</a>
+<a href="ipv4-fragmentation.html"><span class="nav-label">NEXT &#8594;</span>IPv4 Fragmentation</a>
 </nav>
 
 <footer class="site-footer">

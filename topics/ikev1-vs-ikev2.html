@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/ikev1-vs-ikev2.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="IKEv1 vs IKEv2 · netskillup">
+<meta property="og:description" content="How two IPsec peers negotiate confidentiality, integrity, and authentication before a single packet is protected, message by message, in both IKE versions.">
+<meta property="og:url" content="https://netskillup.com/topics/ikev1-vs-ikev2.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="IKEv1 vs IKEv2 · netskillup">
+<meta name="twitter:description" content="How two IPsec peers negotiate confidentiality, integrity, and authentication before a single packet is protected, message by message, in both IKE versions.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--sec);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
+    <a class="breadcrumb" href="../index.html#module-security">&#8592; Module 06 &middot; Security &amp; Encryption</a>
     <h1>IKEv1 vs IKEv2</h1>
     <p class="topic-dek">IKE (Internet Key Exchange) is how two IPsec peers actually agree on and exchange keys before AH or ESP can protect a single packet, negotiating confidentiality, integrity, and authentication along the way.</p>
   </div>
@@ -32,14 +44,14 @@
 
 <article class="topic-body wrap">
 
-  <h2>Two phases, in both versions</h2>
+  <h2 id="two-phases-in-both-versions">Two phases, in both versions</h2>
   <p><a href="ipsec-fundamentals.html">AH and ESP</a> both need shared keys to work with, and IKE is the negotiation that produces them, in two phases:</p>
   <ul>
     <li><strong>Phase 1:</strong> establish a protected channel between the two peers, called the IKE SA (Security Association), that the rest of the negotiation can safely happen over.</li>
     <li><strong>Phase 2:</strong> use that protected channel to negotiate the actual keys AH/ESP will use to protect real traffic.</li>
   </ul>
 
-  <h2>How IKE actually delivers confidentiality, integrity, and authentication</h2>
+  <h2 id="how-ike-actually-delivers-confidentiality-integrity-and-authentication">How IKE actually delivers confidentiality, integrity, and authentication</h2>
   <p>Every message below is doing one of three jobs, the same three that show up across this entire security module. IKE's whole Phase 1 negotiation exists to set these three properties up before anything sensitive gets sent.</p>
 
   <table class="compare-table">
@@ -54,7 +66,7 @@
   </table>
   <p>That last row is worth sitting with. The Diffie-Hellman exchange earlier in Phase 1 gives both sides a shared secret, but math alone doesn't prove who's on the other end, an attacker could run the same math. Authentication is the separate, explicit step that turns "we agree on a number" into "I know it's actually you."</p>
 
-  <h2>Phase 1: Main mode's six messages</h2>
+  <h2 id="phase-1-main-mode-s-six-messages">Phase 1: Main mode's six messages</h2>
   <p>Main mode is the default, careful version of Phase 1: six messages, three round trips, and it never exposes either peer's identity before encryption has already started.</p>
 
   <figure class="diagram-block">
@@ -126,7 +138,7 @@
     </div>
   </details>
 
-  <h2>Phase 1: Aggressive mode's three messages</h2>
+  <h2 id="phase-1-aggressive-mode-s-three-messages">Phase 1: Aggressive mode's three messages</h2>
   <p>Aggressive mode collapses the same negotiation into three messages by combining what main mode spread across six, trading away main mode's one real protection: it sends identity and authentication data before encryption has started.</p>
 
   <figure class="diagram-block">
@@ -169,7 +181,7 @@
     </div>
   </details>
 
-  <h2>Phase 2: Quick mode</h2>
+  <h2 id="phase-2-quick-mode">Phase 2: Quick mode</h2>
   <p>Once Phase 1 finishes, either mode, both peers have one protected channel (the IKE SA) they can now use as many times as needed. Quick mode is what actually runs inside that channel to negotiate the real IPsec SAs that AH or ESP will use.</p>
 
   <details class="wire-detail">
@@ -182,7 +194,7 @@
     </div>
   </details>
 
-  <h2>IKEv2: One fixed exchange</h2>
+  <h2 id="ikev2-one-fixed-exchange">IKEv2: One fixed exchange</h2>
   <p>IKEv2 replaced the whole main/aggressive split with a single design: four messages, two named exchanges, no mode to accidentally pick wrong.</p>
 
   <figure class="diagram-block">
@@ -259,15 +271,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="ipsec-fundamentals.html">
-    <span class="nav-label">← PREVIOUS</span>
-    IPsec Fundamentals (AH vs ESP)
-  </a>
-  <a href="vpn-types.html">
-    <span class="nav-label">NEXT →</span>
-    VPN Types
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="ipsec-fundamentals.html"><span class="nav-label">&#8592; PREVIOUS</span>IPsec Fundamentals (AH vs ESP)</a>
+<a href="vpn-types.html"><span class="nav-label">NEXT &#8594;</span>VPN Types</a>
 </nav>
 
 <footer class="site-footer">

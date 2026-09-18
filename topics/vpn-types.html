@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/vpn-types.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="VPN Types · netskillup">
+<meta property="og:description" content="The same core idea, a private encrypted path across a public network, implemented two very different ways: connecting whole sites, and connecting individual people.">
+<meta property="og:url" content="https://netskillup.com/topics/vpn-types.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="VPN Types · netskillup">
+<meta name="twitter:description" content="The same core idea, a private encrypted path across a public network, implemented two very different ways: connecting whole sites, and connecting individual people.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--sec);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
+    <a class="breadcrumb" href="../index.html#module-security">&#8592; Module 06 &middot; Security &amp; Encryption</a>
     <h1>VPN Types</h1>
     <p class="topic-dek">A VPN (Virtual Private Network) is one core idea, a private encrypted path across a public network, built for two very different situations.</p>
   </div>
@@ -32,13 +44,13 @@
 
 <article class="topic-body wrap">
 
-  <h2>A private tunnel through a public road system</h2>
+  <h2 id="a-private-tunnel-through-a-public-road-system">A private tunnel through a public road system</h2>
   <p>Imagine a permanent private tunnel connecting two office buildings across an otherwise public city, versus a single traveler getting a temporary secure escort in from wherever they happen to be. Both get you the same guarantee, a protected path across territory you don't control, but they're built for completely different situations.</p>
 
-  <h2>Site-to-site VPN</h2>
+  <h2 id="site-to-site-vpn">Site-to-site VPN</h2>
   <p>A permanent tunnel between two networks, usually built with <a href="ipsec-fundamentals.html">IPsec in tunnel mode</a>, connecting an entire office to another entire office (or to a cloud network). It's set up once by network administrators, and every device behind either gateway uses it automatically without any configuration of its own. A user at a branch office reaching a file server at headquarters has no idea a tunnel is even involved.</p>
 
-  <h2>Remote-access VPN</h2>
+  <h2 id="remote-access-vpn">Remote-access VPN</h2>
   <p>An individual device connects in from wherever it happens to be, gets treated as if it were on the private network, and this is the kind most people actually interact with directly. It comes in a few common flavors: IPsec-based (often IKEv2/IPsec), an SSL/TLS VPN that can run through little more than a browser, and newer options like WireGuard, built from the ground up to be simpler to configure and faster than older options.</p>
 
   <figure class="diagram-block">
@@ -110,15 +122,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="ikev1-vs-ikev2.html">
-    <span class="nav-label">← PREVIOUS</span>
-    IKEv1 vs IKEv2
-  </a>
-  <a href="firewalls-acls.html">
-    <span class="nav-label">NEXT →</span>
-    Firewalls & ACLs
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="ikev1-vs-ikev2.html"><span class="nav-label">&#8592; PREVIOUS</span>IKEv1 vs IKEv2</a>
+<a href="firewalls-acls.html"><span class="nav-label">NEXT &#8594;</span>Firewalls &amp; ACLs</a>
 </nav>
 
 <footer class="site-footer">

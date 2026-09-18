@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/rstp-mst.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="RSTP &amp; MST · netskillup">
+<meta property="og:description" content="How Rapid Spanning Tree trades 802.1D&#39;s slow timers for a proposal/agreement handshake, and how Multiple Spanning Tree avoids running one instance per VLAN.">
+<meta property="og:url" content="https://netskillup.com/topics/rstp-mst.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RSTP &amp; MST · netskillup">
+<meta name="twitter:description" content="How Rapid Spanning Tree trades 802.1D&#39;s slow timers for a proposal/agreement handshake, and how Multiple Spanning Tree avoids running one instance per VLAN.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l2);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 02 · Layer 2: Data Link</a>
+    <a class="breadcrumb" href="../index.html#module-layer2">&#8592; Module 02 &middot; Layer 2: Data Link</a>
     <h1>RSTP & MST</h1>
     <p class="topic-dek">Same job as classic STP (Spanning Tree Protocol): one active path per segment, loops prevented, but reaching that state in under a second instead of the better part of a minute.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>RSTP (802.1w): The same tree, a faster handshake</h2>
+  <h2 id="rstp-802-1w-the-same-tree-a-faster-handshake">RSTP (802.1w): The same tree, a faster handshake</h2>
   <p>802.1D blocks a port and then just <em>waits</em>, stepping through timers because it has no way to know for certain the topology is actually safe yet. RSTP (Rapid Spanning Tree Protocol) replaces that waiting with an active conversation between neighboring switches: a <strong>proposal/agreement</strong> handshake, where a switch proposes "I'll be your designated port," the neighbor checks that its own ports are safe to synchronize, and agrees. That back-and-forth typically finishes in well under a second, instead of 30–50.</p>
 
   <figure class="diagram-block">
@@ -139,7 +151,7 @@
     </tbody>
   </table>
 
-  <h2>MST (802.1s): One tree isn't always the goal</h2>
+  <h2 id="mst-802-1s-one-tree-isn-t-always-the-goal">MST (802.1s): One tree isn't always the goal</h2>
   <p>Running a single spanning tree across every VLAN (Virtual Local Area Network) means every VLAN blocks the exact same link, which wastes the bandwidth of every other physical link for every VLAN that isn't using it. Cisco's PVST+ (Per-VLAN Spanning Tree Plus) solves that by running one full spanning tree instance <em>per VLAN</em>, so different VLANs can block different links and actually load-balance. But that means hundreds of VLANs can mean hundreds of spanning tree instances, all consuming CPU (Central Processing Unit) cycles and BPDUs (Bridge Protocol Data Units).</p>
   <p><strong>Multiple Spanning Tree (MST)</strong> is the middle ground: VLANs are grouped into a small number of instances, and each instance runs its own independent tree. You get the load-balancing benefit of per-VLAN trees, the CPU and BPDU overhead of only a handful of instances instead of hundreds.</p>
 
@@ -150,15 +162,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="stp-8021d.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Spanning Tree Protocol (802.1D)
-  </a>
-  <a href="etherchannel.html">
-    <span class="nav-label">NEXT →</span>
-    EtherChannel / Link Aggregation
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="stp-8021d.html"><span class="nav-label">&#8592; PREVIOUS</span>Spanning Tree Protocol (802.1D)</a>
+<a href="etherchannel.html"><span class="nav-label">NEXT &#8594;</span>EtherChannel / Link Aggregation</a>
 </nav>
 
 <footer class="site-footer">

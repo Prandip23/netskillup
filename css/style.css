@@ -454,6 +454,23 @@ a.topic-row:hover {
   padding: 1px 5px;
 }
 
+.topic-body pre {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 16px;
+  margin: 16px 0;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.topic-body pre code {
+  display: block;
+  width: max-content;
+  border: 0;
+  padding: 0;
+}
+
 .diagram-block {
   background: var(--bg-raised);
   border: 1px solid var(--border);
@@ -1117,9 +1134,106 @@ a.topic-row:hover {
   background: var(--bg-raised-hover);
 }
 
+.catalog-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 12px;
+  font-size: 13px;
+}
+
+.catalog-tools select {
+  min-height: 40px;
+  padding: 6px 30px 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  color: var(--text);
+  font: inherit;
+}
+
+.topic-info { display: grid; gap: 6px; min-width: 0; }
+.topic-summary { color: var(--text-muted); font-size: 13px; line-height: 1.5; font-weight: 400; }
+.topic-level { color: var(--text-faint); font-family: var(--mono); font-size: 10px; font-weight: 400; }
+
+.search-submit {
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  width: 36px;
+  height: calc(100% - 4px);
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 20px;
+}
+
+#reference-search input { padding-left: 12px; padding-right: 40px; }
+.topic-answer { border-left: 2px solid var(--l2); padding-left: 18px; }
+.topic-body .topic-prerequisites { color: var(--text-muted); font-size: 13px; }
+
+.diagram-expand,
+.diagram-close {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin: 0 0 12px auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  color: var(--text);
+  font: 24px var(--sans);
+  cursor: pointer;
+}
+
+.diagram-viewer {
+  width: min(1100px, calc(100% - 24px));
+  max-width: none;
+  max-height: calc(100dvh - 24px);
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.diagram-viewer::backdrop { background: rgb(0 0 0 / 75%); }
+.diagram-canvas { overflow: auto; max-height: 70dvh; }
+.diagram-canvas svg { display: block; width: max(100%, var(--diagram-width)); max-width: none; height: auto; }
+.diagram-viewer p { color: var(--text-muted); font-size: 13px; }
+
+html:not(.has-js) .topic-body.wrap {
+  max-width: var(--reading-width);
+  padding-right: 24px;
+  padding-left: 24px;
+}
+
+html:not(.has-js) .compare-table { display: block; overflow-x: auto; }
+
+@media print {
+  body { background: white !important; color: black; }
+  .site-header, .site-footer, .topic-contents, .reading-progress, .heading-anchor,
+  .topic-nav, .diagram-expand, .diagram-viewer, .skip-link { display: none !important; }
+  .topic-layout { display: block !important; }
+  .topic-header, .topic-body, .wrap { max-width: none; padding: 12px 0; }
+  .topic-body p, .topic-body li, .topic-dek, .breadcrumb, .callout { color: black !important; }
+  .diagram-block, .callout, .table-scroll { box-shadow: none; break-inside: avoid; }
+  .diagram-block { background: #111415 !important; print-color-adjust: exact; }
+  .table-scroll { overflow: visible; }
+  .compare-table { width: 100%; min-width: 0; }
+  .compare-table th, .compare-table td { color: black; background: white; font-size: 10pt; }
+  a { text-decoration: underline; }
+  h2, h3 { break-after: avoid; }
+}
+
 .topic-contents {
   position: sticky;
   top: 92px;
+  max-height: calc(100dvh - 112px);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
   grid-column: 2;
   grid-row: 1;
   width: 100%;
@@ -1396,6 +1510,7 @@ a.topic-row:hover {
 
   .topic-contents {
     position: static;
+    max-height: none;
     order: -1;
     width: 100%;
     margin-top: var(--space-6);
@@ -1462,8 +1577,11 @@ a.topic-row:hover {
     min-width: 640px;
   }
 
+  .diagram-block:has(.diagram-expand) svg {
+    min-width: 0;
+  }
+
   .diagram-block figcaption {
-    min-width: 640px;
     text-align: left;
   }
 

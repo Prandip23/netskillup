@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/ports-sockets.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Ports &amp; Sockets · netskillup">
+<meta property="og:description" content="What a port number actually identifies, the well-known/registered/ephemeral ranges, and why a socket, not just a port, is the real identifier of a connection.">
+<meta property="og:url" content="https://netskillup.com/topics/ports-sockets.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Ports &amp; Sockets · netskillup">
+<meta name="twitter:description" content="What a port number actually identifies, the well-known/registered/ephemeral ranges, and why a socket, not just a port, is the real identifier of a connection.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l4);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 04 · Layer 4: Transport</a>
+    <a class="breadcrumb" href="../index.html#module-layer4">&#8592; Module 04 &middot; Layer 4: Transport</a>
     <h1>Ports & Sockets</h1>
     <p class="topic-dek">A port number alone doesn't identify a conversation. It takes the full combination, a socket, to tell two connections to the exact same service apart.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>What a port actually is</h2>
+  <h2 id="what-a-port-actually-is">What a port actually is</h2>
   <p>An IP (Internet Protocol) address gets a segment to the right host. A port number, a 16-bit field in both the <a href="tcp-header.html">TCP</a> and <a href="udp-header.html">UDP</a> headers, gets it to the right <strong>application</strong> on that host. Without ports, a single host could only ever run one network application at a time, since there'd be no way to tell a web server's traffic from a DNS (Domain Name System) resolver's.</p>
 
   <table class="compare-table">
@@ -65,7 +77,7 @@
     </tbody>
   </table>
 
-  <h2>A socket is what actually identifies a conversation</h2>
+  <h2 id="a-socket-is-what-actually-identifies-a-conversation">A socket is what actually identifies a conversation</h2>
   <p>An IP address is a building's street address. A port number is the apartment inside that building mail is headed for. But if you're expecting several different replies from the same apartment, one for a package, one for a bill, just knowing the apartment number isn't enough to sort your own incoming mail. A <strong>socket</strong> is the full pairing stapled to every exchange: which address and apartment it came from, which address and apartment it's going to, and which protocol it's using. Formally, it's a five-part combination: protocol, source IP, source port, destination IP, destination port. Change any one of those five, and it's a different socket, a completely distinct connection, even if everything else about it is identical.</p>
 
   <figure class="diagram-block">
@@ -118,15 +130,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="udp-header.html">
-    <span class="nav-label">← PREVIOUS</span>
-    UDP Header & Use Cases
-  </a>
-  <a href="dns-hierarchy-records.html">
-    <span class="nav-label">NEXT →</span>
-    DNS Hierarchy & Record Types
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="udp-header.html"><span class="nav-label">&#8592; PREVIOUS</span>UDP Header &amp; Use Cases</a>
+<a href="dns-hierarchy-records.html"><span class="nav-label">NEXT &#8594;</span>DNS Hierarchy &amp; Record Types</a>
 </nav>
 
 <footer class="site-footer">

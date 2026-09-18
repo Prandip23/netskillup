@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/dns-hierarchy-records.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="DNS Hierarchy &amp; Record Types · netskillup">
+<meta property="og:description" content="Why DNS is structured as a delegated tree instead of one giant list, and what each record type (A, AAAA, CNAME, MX, NS, TXT, SOA, PTR) actually answers.">
+<meta property="og:url" content="https://netskillup.com/topics/dns-hierarchy-records.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DNS Hierarchy &amp; Record Types · netskillup">
+<meta name="twitter:description" content="Why DNS is structured as a delegated tree instead of one giant list, and what each record type (A, AAAA, CNAME, MX, NS, TXT, SOA, PTR) actually answers.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--app);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 05 · Application Layer & Name Resolution</a>
+    <a class="breadcrumb" href="../index.html#module-app-naming">&#8592; Module 05 &middot; Application Layer &amp; Name Resolution</a>
     <h1>DNS Hierarchy & Record Types</h1>
     <p class="topic-dek">DNS (Domain Name System) is organized as a delegated tree, not one giant lookup table, and different record types on the same name answer completely different questions.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>A tree, not a flat list</h2>
+  <h2 id="a-tree-not-a-flat-list">A tree, not a flat list</h2>
   <p>DNS is structured like a global franchise business, not a single company you could look up in one place. The root level is like a headquarters: it doesn't know where "example.com" actually lives, but it knows exactly which regional office handles everything ending in <code>.com</code>. That regional office, a TLD (Top-Level Domain) server, doesn't know example.com's content either, but it knows which specific store location, the <strong>authoritative server</strong> for example.com, is licensed to answer for it. And that store can run its own departments, subdomains like <code>www.example.com</code> or <code>mail.example.com</code>, all still under the same license.</p>
 
   <figure class="diagram-block">
@@ -90,7 +102,7 @@
     <figcaption>Each level only has to know how to reach the next level down. The root never needs to know about www.example.com directly; it only needs to know who to delegate <code>.com</code> to. The <code>.org</code> branch is drawn the same way, it just isn't expanded here, since it delegates to just as many domains of its own.</figcaption>
   </figure>
 
-  <h2>Record types: Different questions, different answers</h2>
+  <h2 id="record-types-different-questions-different-answers">Record types: Different questions, different answers</h2>
   <p>A single name like <code>example.com</code> can have several different kinds of records, each answering a completely different question.</p>
 
   <table class="compare-table">
@@ -110,7 +122,7 @@
     </tbody>
   </table>
 
-  <h2>The request and response, port by port</h2>
+  <h2 id="the-request-and-response-port-by-port">The request and response, port by port</h2>
   <p>A DNS query isn't anything exotic: it's an ordinary UDP (User Datagram Protocol) datagram like any other, and it always targets the same destination port, <strong>53</strong>. The client picks a random high-numbered source port for itself (see <a href="ports-sockets.html">Ports & Sockets</a>), sends its question to the server's port 53, and the server replies from its own port 53 back to whichever ephemeral port the client used. That's the entire exchange: one request, one response, over the socket mechanics already covered in the previous topic.</p>
 
   <figure class="diagram-block">
@@ -156,7 +168,7 @@
 
   <p>Most queries and their answers fit comfortably in a single UDP datagram, so this one round trip is the whole story. A response too large for that falls back to TCP on the same port 53, covered in <a href="udp-header.html">UDP Header &amp; Use Cases</a>.</p>
 
-  <h2>Why delegation matters</h2>
+  <h2 id="why-delegation-matters">Why delegation matters</h2>
   <p>Nobody has to ask a single central server for every name on the internet, and nobody needs the root's permission every time a subdomain changes. The owner of example.com can add, change, or remove <code>www.example.com</code> and <code>mail.example.com</code> freely on their own authoritative server, since the root and the <code>.com</code> TLD only delegated authority for the zone, not control over what's inside it. That's what lets DNS scale to billions of names without a single bottleneck.</p>
 
   <div class="callout">
@@ -166,15 +178,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="ports-sockets.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Ports & Sockets
-  </a>
-  <a href="dns-resolution-flow.html">
-    <span class="nav-label">NEXT →</span>
-    DNS Resolution Flow
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="ports-sockets.html"><span class="nav-label">&#8592; PREVIOUS</span>Ports &amp; Sockets</a>
+<a href="dns-resolution-flow.html"><span class="nav-label">NEXT &#8594;</span>DNS Resolution Flow</a>
 </nav>
 
 <footer class="site-footer">

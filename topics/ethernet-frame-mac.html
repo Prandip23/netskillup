@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/ethernet-frame-mac.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Ethernet Frame &amp; MAC Addressing · netskillup">
+<meta property="og:description" content="What&#39;s actually inside an Ethernet frame, how a MAC address is structured, and why switches only ever look at Layer 2 fields to forward traffic.">
+<meta property="og:url" content="https://netskillup.com/topics/ethernet-frame-mac.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Ethernet Frame &amp; MAC Addressing · netskillup">
+<meta name="twitter:description" content="What&#39;s actually inside an Ethernet frame, how a MAC address is structured, and why switches only ever look at Layer 2 fields to forward traffic.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l2);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 02 · Layer 2: Data Link</a>
+    <a class="breadcrumb" href="../index.html#module-layer2">&#8592; Module 02 &middot; Layer 2: Data Link</a>
     <h1>Ethernet Frame & MAC Addressing</h1>
     <p class="topic-dek">The actual envelope a switch reads. Every Layer 2 decision in this whole module comes down to a handful of fields in this one structure.</p>
   </div>
@@ -32,10 +44,10 @@
 
 <article class="topic-body wrap">
 
-  <h2>What a switch actually looks at</h2>
+  <h2 id="what-a-switch-actually-looks-at">What a switch actually looks at</h2>
   <p>A switch never opens an IP (Internet Protocol) packet or reads a URL (Uniform Resource Locator). It reads exactly one thing: the Ethernet frame wrapped around whatever payload it's carrying, and mostly just two fields inside it, the source and destination MAC (Media Access Control) addresses. Think of a frame like an internal office courier envelope: it doesn't matter what department wrote the memo inside, the courier only reads "to desk 14B, from desk 3A" on the outside and moves on.</p>
 
-  <h2>MAC address structure</h2>
+  <h2 id="mac-address-structure">MAC address structure</h2>
   <p>A MAC address is 48 bits, written as six hex byte pairs like <code>3C:5A:B4:02:9F:E1</code>. It's burned into (or configured on) a network interface and is meant to be globally unique.</p>
   <ul>
     <li>The first 24 bits are the <strong>OUI</strong> (Organizationally Unique Identifier), assigned to the manufacturer. <code>3C:5A:B4</code> might be Cisco, another block might be Intel; you can look up a device's vendor from just its OUI.</li>
@@ -80,7 +92,7 @@
     <figcaption>The Ethernet II frame. Everything a switch does comes down to reading two of these fields.</figcaption>
   </figure>
 
-  <h2>The two fields that actually matter</h2>
+  <h2 id="the-two-fields-that-actually-matter">The two fields that actually matter</h2>
   <ul>
     <li><strong>Destination MAC:</strong> the switch checks this against its MAC address table to decide which single port to forward the frame out of. No match means it floods out every port except the one it arrived on.</li>
     <li><strong>Source MAC:</strong> every time a frame arrives, the switch notes "this MAC lives on this port" and stores it in its MAC table, so the next reply back doesn't need to be flooded.</li>
@@ -95,15 +107,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="duplex.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Duplex: Half vs Full
-  </a>
-  <a href="arp.html">
-    <span class="nav-label">NEXT →</span>
-    ARP
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="duplex.html"><span class="nav-label">&#8592; PREVIOUS</span>Duplex: Half vs Full</a>
+<a href="arp.html"><span class="nav-label">NEXT &#8594;</span>ARP</a>
 </nav>
 
 <footer class="site-footer">

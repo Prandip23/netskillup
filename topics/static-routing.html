@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/static-routing.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Static Routing · netskillup">
+<meta property="og:description" content="Manually configured routes: what they&#39;re good for, where they fall apart at scale, and how a floating static route deliberately steps in as a backup path.">
+<meta property="og:url" content="https://netskillup.com/topics/static-routing.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Static Routing · netskillup">
+<meta name="twitter:description" content="Manually configured routes: what they&#39;re good for, where they fall apart at scale, and how a floating static route deliberately steps in as a backup path.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
+    <a class="breadcrumb" href="../index.html#module-layer3">&#8592; Module 03 &middot; Layer 3: Network</a>
     <h1>Static Routing</h1>
     <p class="topic-dek">The simplest possible way to tell a router how to reach a network: just tell it, no protocol, no negotiation, no automatic adaptation either.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>What a static route actually is</h2>
+  <h2 id="what-a-static-route-actually-is">What a static route actually is</h2>
   <p>A static route is an administrator manually entering a destination network and how to reach it, either a next-hop IP (Internet Protocol) address or an outgoing interface. That's the entire mechanism: no protocol runs in the background, no negotiation with neighboring routers, nothing gets learned automatically.</p>
 
   <figure class="diagram-block">
@@ -59,17 +71,17 @@
     <figcaption>Two entries, typed by hand, one on each router, and this is only two routers. A full mesh of ten would need dozens.</figcaption>
   </figure>
 
-  <h2>Where it's the right tool</h2>
+  <h2 id="where-it-s-the-right-tool">Where it's the right tool</h2>
   <ul>
     <li>Small networks with few routers and paths that basically never change.</li>
     <li>A default route pointing a stub network's only exit toward its single upstream connection.</li>
     <li>Point-to-point links where there's only ever one possible path anyway, so a dynamic protocol has nothing to compute.</li>
   </ul>
 
-  <h2>Where it falls apart</h2>
+  <h2 id="where-it-falls-apart">Where it falls apart</h2>
   <p>Static routes don't adapt. If the configured next-hop goes down, the route stays in the table (unless the router also loses reachability to the next-hop itself) and traffic keeps getting sent into a dead end until a human notices and fixes it. And every network has to be entered by hand, on every router that needs to reach it. A topology with dozens of routers becomes an enormous, error-prone amount of manual configuration. That's exactly the problem the dynamic routing protocols later in this module exist to solve.</p>
 
-  <h2>Working example: A floating static route as a backup ISP link</h2>
+  <h2 id="working-example-a-floating-static-route-as-a-backup-isp-link">Working example: A floating static route as a backup ISP link</h2>
   <p>The floating static route from the previous topic, worked through concretely. R1 has two paths out to the internet: a primary link through ISP-A, and a backup link through ISP-B that should only ever carry traffic if the primary is actually down.</p>
   <p>Two static default routes point at the same destination, <code>0.0.0.0/0</code>, but with different administrative distances:</p>
   <ul>
@@ -150,15 +162,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="admin-distance-metrics.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Administrative Distance & Metrics
-  </a>
-  <a href="distance-vector-rip-eigrp.html">
-    <span class="nav-label">NEXT →</span>
-    Distance-Vector Routing (RIP, EIGRP)
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="admin-distance-metrics.html"><span class="nav-label">&#8592; PREVIOUS</span>Administrative Distance &amp; Metrics</a>
+<a href="distance-vector-rip-eigrp.html"><span class="nav-label">NEXT &#8594;</span>Distance-Vector Routing (RIP, EIGRP)</a>
 </nav>
 
 <footer class="site-footer">

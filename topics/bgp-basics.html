@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/bgp-basics.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="BGP Basics · netskillup">
+<meta property="og:description" content="The routing protocol that actually holds the internet together: Autonomous Systems, eBGP vs iBGP, and why BGP picks routes on policy, not just shortest path.">
+<meta property="og:url" content="https://netskillup.com/topics/bgp-basics.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="BGP Basics · netskillup">
+<meta name="twitter:description" content="The routing protocol that actually holds the internet together: Autonomous Systems, eBGP vs iBGP, and why BGP picks routes on policy, not just shortest path.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
+    <a class="breadcrumb" href="../index.html#module-layer3">&#8592; Module 03 &middot; Layer 3: Network</a>
     <h1>BGP Basics</h1>
     <p class="topic-dek">Every protocol so far in this module routes traffic inside one organization's network. BGP is what routes traffic between organizations, which is to say, it's what the actual internet runs on.</p>
   </div>
@@ -32,11 +44,11 @@
 
 <article class="topic-body wrap">
 
-  <h2>Autonomous Systems: The internet's real "networks"</h2>
+  <h2 id="autonomous-systems-the-internet-s-real-networks">Autonomous Systems: The internet's real "networks"</h2>
   <p>OSPF (Open Shortest Path First) and EIGRP (Enhanced Interior Gateway Routing Protocol) assume one administrator controls the whole topology. The internet is the opposite: thousands of independently-operated networks, each one an <strong>Autonomous System (AS)</strong>, identified by an AS number, that has to agree to exchange traffic with its neighbors without any single authority dictating the whole map. BGP (Border Gateway Protocol) is the protocol those ASes use to tell each other what they can reach.</p>
   <p>It's less like a road network inside one city, and more like national airlines negotiating bilateral agreements about which routes they'll fly between each other's countries. Every relationship is its own negotiated agreement, not a single global authority assigning routes.</p>
 
-  <h2>eBGP vs. iBGP</h2>
+  <h2 id="ebgp-vs-ibgp">eBGP vs. iBGP</h2>
   <ul>
     <li><strong>eBGP</strong> (external): a session between routers in <em>different</em> ASes. This is the actual internet-facing peering or transit relationship.</li>
     <li><strong>iBGP</strong> (internal): a session between routers <em>inside the same</em> AS, used to make sure everything learned from the outside world gets distributed consistently throughout that AS's own network.</li>
@@ -67,10 +79,10 @@
     <figcaption>eBGP crosses AS boundaries; iBGP keeps everything learned from outside consistent inside your own AS.</figcaption>
   </figure>
 
-  <h2>"Best" isn't just "shortest"</h2>
+  <h2 id="best-isn-t-just-shortest">"Best" isn't just "shortest"</h2>
   <p>Interior protocols like OSPF pick the lowest-cost path, full stop. BGP is different on purpose: it's as much a policy and business tool as a technical one, since real transit and peering relationships involve contracts, cost, and trust, not just distance. Instead of a simple metric, BGP compares a whole ordered list of <strong>path attributes</strong>, and it works through them in a fixed order, stopping at the first one that produces a single winner.</p>
 
-  <h2>The path attributes, and where each one lives</h2>
+  <h2 id="the-path-attributes-and-where-each-one-lives">The path attributes, and where each one lives</h2>
   <p>Not every attribute travels the same distance. Some never leave the router they're configured on; others cross AS boundaries and get compared against everyone else's:</p>
 
   <table class="compare-table">
@@ -89,7 +101,7 @@
 
   <p>LOCAL_PREF only ever matters inside your own AS, since it's an iBGP-only attribute your own routers use to agree with each other. MED is the opposite kind of local: it only gets compared between routes offered by the <em>same</em> neighboring AS, so it can't override a shorter path from a completely different neighbor.</p>
 
-  <h2>The order BGP actually checks them in</h2>
+  <h2 id="the-order-bgp-actually-checks-them-in">The order BGP actually checks them in</h2>
   <p>Real implementations vary slightly, but the practical order is close to this, and it's evaluated top to bottom until one candidate route is left standing:</p>
   <ol>
     <li>Highest WEIGHT</li>
@@ -162,15 +174,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="link-state-ospf-isis.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Link-State Routing (OSPF, IS-IS)
-  </a>
-  <a href="nat-pat.html">
-    <span class="nav-label">NEXT →</span>
-    NAT & PAT
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="link-state-ospf-isis.html"><span class="nav-label">&#8592; PREVIOUS</span>Link-State Routing (OSPF, IS-IS)</a>
+<a href="nat-pat.html"><span class="nav-label">NEXT &#8594;</span>NAT &amp; PAT</a>
 </nav>
 
 <footer class="site-footer">

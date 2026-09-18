@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/ipv4-fragmentation.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="IPv4 Fragmentation · netskillup">
+<meta property="og:description" content="How a router splits an oversized IPv4 packet into fragments, how Flags and Fragment Offset let the destination tell first, middle, and last pieces apart, and what the DF bit changes.">
+<meta property="og:url" content="https://netskillup.com/topics/ipv4-fragmentation.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="IPv4 Fragmentation · netskillup">
+<meta name="twitter:description" content="How a router splits an oversized IPv4 packet into fragments, how Flags and Fragment Offset let the destination tell first, middle, and last pieces apart, and what the DF bit changes.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
+    <a class="breadcrumb" href="../index.html#module-layer3">&#8592; Module 03 &middot; Layer 3: Network</a>
     <h1>IPv4 Fragmentation</h1>
     <p class="topic-dek">A packet too big for the next link doesn't just fail. A router splits it into fragments, each carrying just enough header information for the destination to put it back together in the right order. IPv6 dropped this mechanism entirely, which is exactly why it's worth understanding on the IPv4 side first.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>Why a router ever splits a packet</h2>
+  <h2 id="why-a-router-ever-splits-a-packet">Why a router ever splits a packet</h2>
   <p>Every outgoing link has an <strong>MTU</strong> (Maximum Transmission Unit): the largest frame it'll carry, commonly 1500 bytes on Ethernet. If a router receives an IPv4 packet bigger than the MTU of the link it needs to forward that packet out on, it has two options: drop the packet, or cut it into smaller pieces called <strong>fragments</strong> and send those separately. Each fragment gets its own full IP (Internet Protocol) header and travels independently, possibly by a different path, and only the final destination host reassembles them. Routers in between never reassemble anything.</p>
   <p>It's like moving a wardrobe that won't fit through a doorway: the movers break it into numbered boxes, label where each box belongs in the finished piece, and mark only the very last box as "that's everything." Whoever unpacks it at the other end doesn't need the boxes to arrive in order, just enough labeling to know where each one goes and when the last one has shown up.</p>
 
@@ -95,7 +107,7 @@
     <figcaption>A 3800-byte payload can't fit through a 1500-byte-MTU link in one piece, so the router splits it into three fragments. Each one is a fully independent IP packet with its own header.</figcaption>
   </figure>
 
-  <h2>Flags: More Fragments and Don't Fragment</h2>
+  <h2 id="flags-more-fragments-and-don-t-fragment">Flags: More Fragments and Don't Fragment</h2>
   <p>The IPv4 header's 3-bit <strong>Flags</strong> field (covered briefly in the IPv4 Header Structure topic) is where the fragmentation logic actually lives:</p>
   <ul>
     <li><strong>Bit 0, reserved:</strong> always 0, unused.</li>
@@ -103,7 +115,7 @@
     <li><strong>Bit 2, MF (More Fragments):</strong> set to 1 on every fragment except the last one. The last fragment of a split packet clears it to 0. An ordinary, unfragmented packet also has MF=0, since as far as it's concerned there was never anything to split.</li>
   </ul>
 
-  <h2>Fragment Offset: Telling first, middle, and last apart</h2>
+  <h2 id="fragment-offset-telling-first-middle-and-last-apart">Fragment Offset: Telling first, middle, and last apart</h2>
   <p>The 13-bit <strong>Fragment Offset</strong> field says where in the <em>original</em> payload this particular fragment's data starts, measured in 8-byte units (so a fragment starting at byte 1480 of the original payload carries an offset value of <code>1480 / 8 = 185</code>). That's what lets fragments be reassembled correctly even if they arrive out of order, since every fragment knows exactly where it belongs regardless of when it shows up.</p>
   <p>Combine Offset with MF and every fragment's position becomes unambiguous:</p>
 
@@ -133,15 +145,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="ipv6-basics.html">
-    <span class="nav-label">← PREVIOUS</span>
-    IPv6 Addressing & Header Basics
-  </a>
-  <a href="icmp.html">
-    <span class="nav-label">NEXT →</span>
-    ICMP: Ping & Traceroute Mechanics
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="ipv6-basics.html"><span class="nav-label">&#8592; PREVIOUS</span>IPv6 Addressing &amp; Header Basics</a>
+<a href="icmp.html"><span class="nav-label">NEXT &#8594;</span>ICMP: Ping &amp; Traceroute Mechanics</a>
 </nav>
 
 <footer class="site-footer">

@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/firewalls-acls.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Firewalls &amp; ACLs · netskillup">
+<meta property="og:description" content="The difference between checking every packet against a static list every single time, and actually remembering which conversations are already permitted.">
+<meta property="og:url" content="https://netskillup.com/topics/firewalls-acls.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Firewalls &amp; ACLs · netskillup">
+<meta name="twitter:description" content="The difference between checking every packet against a static list every single time, and actually remembering which conversations are already permitted.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--sec);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
+    <a class="breadcrumb" href="../index.html#module-security">&#8592; Module 06 &middot; Security &amp; Encryption</a>
     <h1>Firewalls & ACLs</h1>
     <p class="topic-dek">A building's security desk can check every visitor against a list every single time, or it can remember who it already let in. Both approaches exist in networking, with very different trade-offs.</p>
   </div>
@@ -32,10 +44,10 @@
 
 <article class="topic-body wrap">
 
-  <h2>ACLs: Stateless, rule by rule, every time</h2>
+  <h2 id="acls-stateless-rule-by-rule-every-time">ACLs: Stateless, rule by rule, every time</h2>
   <p>An ACL (Access Control List) is an ordered list of permit and deny rules, matched from top to bottom, first match wins, with an implicit deny at the very end for anything that matched nothing. A standard ACL matches only on source address; an extended ACL can also match destination address, protocol, and port. What an ACL has no memory of is prior traffic: a reply packet has to match its own explicit rule going the other direction, or it gets blocked, even if it's just the response to a request the same device already sent.</p>
 
-  <h2>Stateful firewalls: Remembering the conversation</h2>
+  <h2 id="stateful-firewalls-remembering-the-conversation">Stateful firewalls: Remembering the conversation</h2>
   <p>A stateful firewall tracks connection state, TCP's handshake progress, or a simple timeout-based session for UDP (User Datagram Protocol) and ICMP (Internet Control Message Protocol), which don't have a handshake at all. Once an outbound connection is permitted and recorded, its return traffic is automatically allowed without needing a separate explicit rule for the reply direction. That's what makes a simple "allow outbound" policy actually usable in practice.</p>
 
   <figure class="diagram-block">
@@ -127,11 +139,11 @@
     <p>Extended ACLs sometimes offer an <code>established</code> keyword, permitting a packet if its ACK bit is set. It's a limited, cruder approximation of statefulness, just checking one bit rather than tracking real connection state, and it exists specifically because plain ACLs have no memory of their own to rely on otherwise.</p>
   </div>
 
-  <h2>Next-generation firewalls (NGFW): Beyond stateful inspection</h2>
+  <h2 id="next-generation-firewalls-ngfw-beyond-stateful-inspection">Next-generation firewalls (NGFW): Beyond stateful inspection</h2>
   <p>A traditional firewall, stateful or not, makes its decisions from the outside of a packet in: source and destination address, port, protocol, and connection state. A <strong>Next-Generation Firewall (NGFW)</strong> builds on all of that and adds something a plain stateful firewall never had: the ability to look at what's actually riding inside the connection, and act on that too.</p>
   <p>The practical difference is which OSI layers each one can act on. A stateless ACL and a stateful firewall both stop at roughly Layer 4, addresses, ports, and connection state. An NGFW reaches all the way up to Layer 7, the application itself, which is what lets it tell "this is port 443 traffic" apart from "this is specifically a file-sharing app tunneling over port 443," something a port number alone could never reveal.</p>
 
-  <h3>Key features</h3>
+  <h3 id="key-features">Key features</h3>
   <p>Each of these adds a different kind of visibility a stateful firewall alone doesn't have.</p>
 
   <details class="wire-detail">
@@ -184,7 +196,7 @@
     </div>
   </details>
 
-  <h3>Deployment types</h3>
+  <h3 id="deployment-types">Deployment types</h3>
   <table class="compare-table">
     <thead>
       <tr><th>Type</th><th>Runs as</th></tr>
@@ -203,15 +215,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="vpn-types.html">
-    <span class="nav-label">← PREVIOUS</span>
-    VPN Types
-  </a>
-  <a href="common-attacks.html">
-    <span class="nav-label">NEXT →</span>
-    Common Attacks: ARP Spoofing, MITM, DDoS
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="vpn-types.html"><span class="nav-label">&#8592; PREVIOUS</span>VPN Types</a>
+<a href="common-attacks.html"><span class="nav-label">NEXT &#8594;</span>Common Attacks: ARP Spoofing, MITM, DDoS</a>
 </nav>
 
 <footer class="site-footer">

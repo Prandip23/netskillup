@@ -100,6 +100,8 @@
 
       const target = document.getElementById(decodeURIComponent(link.hash.slice(1)));
       if (target) {
+        target.tabIndex = -1;
+        target.focus({ preventScroll: true });
         target.scrollIntoView({
           behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
             ? "auto"
@@ -164,6 +166,58 @@
     });
   }
 
+  function addDiagramViewer() {
+    const figures = Array.from(article.querySelectorAll("figure.diagram-block")).filter((figure) =>
+      figure.querySelector("svg")?.viewBox.baseVal.width >= 600
+    );
+    if (!figures.length || typeof HTMLDialogElement === "undefined") return;
+    const dialog = document.createElement("dialog");
+    dialog.className = "diagram-viewer";
+    dialog.setAttribute("aria-label", "Expanded diagram");
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "diagram-close";
+    close.setAttribute("aria-label", "Close diagram");
+    close.title = "Close diagram";
+    close.textContent = "\u00d7";
+    const canvas = document.createElement("div");
+    canvas.className = "diagram-canvas";
+    canvas.tabIndex = 0;
+    canvas.setAttribute("role", "region");
+    canvas.setAttribute("aria-label", "Scrollable diagram");
+    const caption = document.createElement("p");
+    dialog.append(close, canvas, caption);
+    document.body.appendChild(dialog);
+    let restore;
+    close.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("close", () => {
+      restore?.();
+      restore = undefined;
+    });
+    figures.forEach((figure) => {
+      const diagram = figure.querySelector("svg");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "diagram-expand";
+      button.title = "Expand diagram";
+      button.setAttribute("aria-label", "Expand diagram");
+      button.textContent = "\u26f6";
+      figure.prepend(button);
+      button.addEventListener("click", () => {
+        const next = diagram.nextSibling;
+        restore = () => {
+          figure.insertBefore(diagram, next);
+          button.focus();
+        };
+        canvas.style.setProperty("--diagram-width", `${diagram.viewBox.baseVal.width}px`);
+        canvas.appendChild(diagram);
+        caption.textContent = figure.querySelector("figcaption")?.textContent || "";
+        dialog.showModal();
+        close.focus();
+      });
+    });
+  }
+
   function addSkipLink() {
     if (document.querySelector(".skip-link")) return;
 
@@ -196,6 +250,7 @@
   layout.insertBefore(contents, article);
   wrapTables();
   startDiagramsOnEntry();
+  addDiagramViewer();
 
   const progressIndicator = addReadingProgress();
   const siteHeader = document.querySelector(".site-header");

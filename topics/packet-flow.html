@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/packet-flow.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Packet Flow Across Networks · netskillup">
+<meta property="og:description" content="Every mechanism from this module and the last, walked through in order: what actually happens, step by step, when a device sends a packet to a remote address.">
+<meta property="og:url" content="https://netskillup.com/topics/packet-flow.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Packet Flow Across Networks · netskillup">
+<meta name="twitter:description" content="Every mechanism from this module and the last, walked through in order: what actually happens, step by step, when a device sends a packet to a remote address.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
+    <a class="breadcrumb" href="../index.html#module-layer3">&#8592; Module 03 &middot; Layer 3: Network</a>
     <h1>Packet Flow Across Networks</h1>
     <p class="topic-dek">Every mechanism from the last two modules, in the order they actually fire, for one ordinary packet leaving your device and reaching somewhere else entirely.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>The walk-through</h2>
+  <h2 id="the-walk-through">The walk-through</h2>
   <p>This is worth working through slowly, out loud, the first few times. It's the single best way to check that all the pieces from this module and the last one actually fit together instead of sitting in your head as separate facts.</p>
   <ol>
     <li><strong>Is the destination local?</strong> The sending host compares the destination IP (Internet Protocol) address against its own subnet mask. Same subnet, and it can ARP (Address Resolution Protocol) for the destination directly and send straight to it at Layer 2.</li>
@@ -100,15 +112,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="inter-vlan-routing.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Inter-VLAN Routing
-  </a>
-  <a href="tcp-header.html">
-    <span class="nav-label">NEXT →</span>
-    TCP Header Structure
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="inter-vlan-routing.html"><span class="nav-label">&#8592; PREVIOUS</span>Inter-VLAN Routing</a>
+<a href="tcp-header.html"><span class="nav-label">NEXT &#8594;</span>TCP Header Structure</a>
 </nav>
 
 <footer class="site-footer">

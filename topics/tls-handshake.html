@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/tls-handshake.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="TLS/SSL Handshake (1.2 vs 1.3) · netskillup">
+<meta property="og:description" content="How a client and server that have never spoken before agree on a shared secret in the open, and why TLS 1.3 does it in half the round trips TLS 1.2 needed.">
+<meta property="og:url" content="https://netskillup.com/topics/tls-handshake.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TLS/SSL Handshake (1.2 vs 1.3) · netskillup">
+<meta name="twitter:description" content="How a client and server that have never spoken before agree on a shared secret in the open, and why TLS 1.3 does it in half the round trips TLS 1.2 needed.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,24 +30,28 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--sec);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
+    <a class="breadcrumb" href="../index.html#module-security">&#8592; Module 06 &middot; Security &amp; Encryption</a>
     <h1>TLS/SSL Handshake (1.2 vs 1.3)</h1>
-    <p class="topic-dek">How a client and server that have never spoken before agree on a shared secret entirely in the open, before a single byte of actual data is encrypted.</p>
+    <p class="topic-dek">How a client and server authenticate and derive traffic keys without sending those keys across the network. Modern connections use TLS; SSL is an obsolete predecessor.</p>
   </div>
 </div>
 
 <article class="topic-body wrap">
 
-  <h2>What the handshake has to accomplish</h2>
+  <p class="topic-answer"><strong>Short answer:</strong> A certificate-authenticated TLS handshake negotiates parameters, proves the server's identity, and derives encryption keys. A typical full TLS 1.2 exchange takes two round trips; TLS 1.3 commonly takes one. Those counts exclude TCP setup and have resumption and retry exceptions.</p>
+  <p class="topic-prerequisites">Before this: <a href="symmetric-vs-asymmetric.html">symmetric and asymmetric encryption</a> and <a href="pki-certificates.html">certificate chains</a>.</p>
+
+  <h2 id="what-the-handshake-has-to-accomplish">What the handshake has to accomplish</h2>
   <p>Meeting a new business contact for the first time means checking their credentials, agreeing on which shared rules you'll both follow, and settling on a private code only the two of you know before discussing anything sensitive. TLS (Transport Layer Security) does exactly that, in three jobs: agree on a protocol version and cipher suite, authenticate the server using the certificate chain from <a href="pki-certificates.html">PKI & Digital Certificates</a>, and establish shared symmetric session keys. That last part is <a href="symmetric-vs-asymmetric.html">hybrid encryption</a> in action: asymmetric crypto is used only to set the session keys up, then fast symmetric encryption handles the actual data for the rest of the connection.</p>
 
-  <h2>TLS 1.2: Two round trips</h2>
-  <p>A full TLS 1.2 handshake needs two full round trips between client and server before any application data can be sent: one to agree on parameters and receive the server's certificate, a second to actually exchange the key material and confirm both sides derived the same session keys.</p>
+  <h2 id="tls-1-2-two-round-trips">TLS 1.2: Two round trips</h2>
+  <p>The ordinary full TLS 1.2 handshake shown here uses ephemeral elliptic-curve Diffie-Hellman (ECDHE) with server certificate authentication and no client certificate. It takes two round trips before the client can send application data after verifying the server's Finished. Resumption and the optional False Start optimization change this timing. In the business meeting analogy, the first exchange checks credentials and rules; the second confirms both parties derived the private code.</p>
 
   <figure class="diagram-block">
     <svg viewBox="0 0 640 175" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of the TLS 1.2 handshake: ClientHello, ServerHello with certificate and key exchange, ClientKeyExchange with Finished, and ServerFinished, two full round trips before encrypted data flows">
@@ -108,10 +123,10 @@
         }
       ]]></script>
     </svg>
-    <figcaption>Two round trips of pure negotiation before a single byte of the actual page loads.</figcaption>
+    <figcaption>The illustrated full handshake takes two round trips before the client sends application data. TCP setup, resumption, and False Start are outside this diagram.</figcaption>
   </figure>
 
-  <h3>What's actually on the wire, message by message</h3>
+  <h3 id="what-s-actually-on-the-wire-message-by-message">What's actually on the wire, message by message</h3>
   <p>The diagram above shows the shape of the conversation. Here's what's actually inside each flight; expand any of them.</p>
 
   <details class="wire-detail">
@@ -166,13 +181,13 @@
     <div class="wire-body">
       <p>Nothing sent so far is the actual encryption key. Both sides separately compute it from what was exchanged, and never transmit it.</p>
       <div class="wire-field"><span class="wire-field-name">1. Pre-Master Secret</span><span class="wire-field-value">Both sides combine their own private key with the other side's public key (Diffie-Hellman). Same math, same result on both ends, without either one ever sending the secret itself</span></div>
-      <div class="wire-field"><span class="wire-field-name">2. Master Secret</span><span class="wire-field-value">A 48-byte value derived by repeatedly running HMAC-SHA256 over the pre-master secret, the literal string "master secret", and both randoms</span></div>
-      <div class="wire-field"><span class="wire-field-name">3. Key expansion</span><span class="wire-field-value">The master secret is stretched the same way into six separate keys: a MAC key and a write key for each direction, plus an IV for each</span></div>
+      <div class="wire-field"><span class="wire-field-name">2. Master Secret</span><span class="wire-field-value">A 48-byte value produced by the TLS 1.2 pseudorandom function. Its hash depends on the cipher suite. With Extended Master Secret (RFC 7627), derivation binds to the handshake transcript rather than just the two randoms</span></div>
+      <div class="wire-field"><span class="wire-field-name">3. Key expansion</span><span class="wire-field-value">The master secret produces directional key material appropriate to the cipher suite. AEAD suites such as AES-GCM do not use separate record MAC keys; their authentication is integrated</span></div>
     </div>
   </details>
 
-  <h2>TLS 1.3: One round trip, sometimes zero</h2>
-  <p>TLS 1.3 cuts this down by having the client guess which key exchange method the server will accept and send its key share immediately in the ClientHello, instead of waiting to be told. If the guess is right, the whole handshake collapses into a single round trip.</p>
+  <h2 id="tls-1-3-one-round-trip-sometimes-zero">TLS 1.3: One round trip, sometimes zero</h2>
+  <p>TLS 1.3 commonly includes the client's <code>key_share</code> in ClientHello. If the server accepts the offered group, the client can verify the server's first flight and send Finished plus application data after one round trip. A HelloRetryRequest adds a round trip when another key share is needed. The business contact arrives with a proposed key-agreement method instead of asking which one to prepare. Messages after ServerHello are encrypted with handshake keys, before application traffic keys take over.</p>
 
   <figure class="diagram-block">
     <svg viewBox="0 0 640 175" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of the TLS 1.3 handshake: ClientHello with a key share guess, ServerHello with certificate and Finished combined, and ClientFinished, a single round trip before encrypted data flows">
@@ -234,7 +249,7 @@
     <figcaption>Half the round trips of TLS 1.2. Reconnecting to a server visited recently can drop to zero extra round trips (0-RTT) using a resumed session, though 0-RTT data carries its own replay-attack caveats.</figcaption>
   </figure>
 
-  <h3>What's actually on the wire, message by message</h3>
+  <h3 id="what-s-actually-on-the-wire-message-by-message-2">What's actually on the wire, message by message</h3>
 
   <details class="wire-detail">
     <summary>ClientHello <span class="wire-tag">client → server, plaintext</span></summary>
@@ -256,10 +271,10 @@
   <details class="wire-detail">
     <summary>EncryptedExtensions, Certificate, CertificateVerify, Finished <span class="wire-tag">server → client, encrypted</span></summary>
     <div class="wire-body">
-      <p>Everything from here on is encrypted with handshake keys derived right after ServerHello. Four messages the server used to send as a separate, later flight in TLS 1.2 are now sent together, and hidden from anyone just watching the wire.</p>
+      <p>These TLS 1.3 server messages use handshake keys derived after ServerHello. They are not a one-for-one rearrangement of TLS 1.2 messages. In particular, EncryptedExtensions and server CertificateVerify have distinct TLS 1.3 roles.</p>
       <div class="wire-field"><span class="wire-field-name">EncryptedExtensions</span><span class="wire-field-value">Extensions that don't need to be public, now that encryption is already active</span></div>
       <div class="wire-field"><span class="wire-field-name">Certificate</span><span class="wire-field-value">The server's certificate chain, same as before, just now encrypted</span></div>
-      <div class="wire-field"><span class="wire-field-name">CertificateVerify</span><span class="wire-field-value">A signature, made with the certificate's own private key, over everything exchanged so far. This is new: TLS 1.2 never proved the server holds that key this directly</span></div>
+      <div class="wire-field"><span class="wire-field-name">CertificateVerify</span><span class="wire-field-value">A signature over a context-bound handshake transcript hash, proving possession of the certificate's private key. TLS 1.2 ECDHE also proves possession, through its signed ServerKeyExchange, but signs different material</span></div>
       <div class="wire-field"><span class="wire-field-name">Finished</span><span class="wire-field-value">Proof the server derived the right keys, the same role it played in TLS 1.2</span></div>
     </div>
   </details>
@@ -267,25 +282,38 @@
   <details class="wire-detail">
     <summary>Finished <span class="wire-tag">client → server, encrypted</span></summary>
     <div class="wire-body">
-      <p>The client's own proof. The moment the server verifies it, application data flows freely in both directions, and both sides derive a completely separate set of application traffic keys from the ones that encrypted the handshake itself.</p>
+      <p>The client's proof authenticates its view of the transcript and confirms the handshake keys. Application traffic uses separate keys. The server can send application data after its own Finished, before receiving the client's Finished; it must not treat the client as authenticated before verification where client authentication is required.</p>
     </div>
   </details>
 
   <details class="wire-detail">
-    <summary>0-RTT early data <span class="wire-tag">optional, only on a resumed connection</span></summary>
+    <summary>0-RTT early data <span class="wire-tag">optional, requires a suitable PSK</span></summary>
     <div class="wire-body">
-      <p>If the client already holds a PSK (Pre-Shared Key) from a previous connection's session ticket, it can attach encrypted application data directly to its very first ClientHello, before the server has replied at all. That's what "0-RTT" means: zero extra round trips beyond just sending the request. The trade-off is that this early data has no forward secrecy yet and can be replayed by an attacker who captured it, so servers typically only accept it for requests that are safe to repeat, like a GET, never for anything that changes state.</p>
+      <p>With a suitable PSK (Pre-Shared Key), commonly from a previous session ticket, the client may send early application-data records alongside ClientHello, not inside that handshake message. The server may reject early data. It lacks forward secrecy and can be replayed, so application-level replay safety matters. A method named GET is not by itself proof that replay is harmless. The handshake still completes; 0-RTT describes when eligible early data can be sent.</p>
     </div>
   </details>
 
   <table class="compare-table">
     <thead>
-      <tr><th></th><th>TLS 1.2</th><th>TLS 1.3</th></tr>
+      <tr><th>Property</th><th>TLS 1.2</th><th>TLS 1.3</th></tr>
     </thead>
     <tbody>
-      <tr><td>Round trips before data</td><td>Two</td><td>One (zero with session resumption)</td></tr>
-      <tr><td>Weak/legacy ciphers</td><td>Still permitted</td><td>Removed entirely</td></tr>
-      <tr><td>Forward secrecy</td><td>Optional, depends on cipher suite</td><td>Mandatory for every connection</td></tr>
+      <tr><td>Typical full handshake, excluding TCP</td><td>Two RTTs</td><td>One RTT without HelloRetryRequest; optional 0-RTT early data has separate rules</td></tr>
+      <tr><td>Cipher selection</td><td>Broader suite set; current security guidance excludes weak choices</td><td>AEAD suites only; static RSA key transport and CBC suites removed</td></tr>
+      <tr><td>Forward secrecy</td><td>Depends on key exchange, such as ECDHE</td><td>Provided by ephemeral (EC)DHE; PSK-only mode and 0-RTT do not provide it</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="worked-handshake">Worked example: negotiation is not identity</h2>
+  <p>In an illustrative TLS 1.3 connection to <code>portal.example</code>, the client offers <code>supported_versions = 0x0304</code> and an X25519 <code>key_share</code>. The server selects <code>TLS_AES_128_GCM_SHA256</code> and returns its key share. This cipher-suite name selects record encryption and the key-schedule hash; it does not select X25519 or the certificate signature algorithm.</p>
+  <p>The client still has to validate a trusted certificate chain, check certificate validity, match the requested DNS name against the certificate's subjectAltName, and verify CertificateVerify and Finished. Agreeing on a private code with the business contact does not establish their identity until the credentials are checked. A passive TLS 1.3 capture can show the hellos but cannot normally read the encrypted certificate flight without session secrets.</p>
+  <table class="compare-table">
+    <thead><tr><th>Failure</th><th>Check</th><th>Interpretation</th></tr></thead>
+    <tbody>
+      <tr><td>Hostname mismatch</td><td>Compare requested hostname, SNI, and certificate subjectAltName</td><td>Reaching a server and negotiating encryption do not prove it is the intended server.</td></tr>
+      <tr><td>Unknown issuer or incomplete chain</td><td>Inspect the presented intermediates and the client's trust store</td><td>A locally trusted root may be absent on another device. Disabling verification hides the problem.</td></tr>
+      <tr><td>Protocol or handshake failure</td><td>Inspect client/server logs and supported versions, groups, and signature algorithms</td><td>A generic alert is not enough to identify which negotiation or policy check failed.</td></tr>
+      <tr><td>Expired or not-yet-valid certificate</td><td>Check certificate dates and the client's clock</td><td>Clock error and actual expiry can produce similar symptoms.</td></tr>
     </tbody>
   </table>
 
@@ -294,17 +322,20 @@
     <p>TLS still assumes a reliable, ordered byte stream underneath it, which is exactly what TCP provides. That's true for TLS 1.2 and 1.3 alike. QUIC, the transport HTTP/3 uses (see <a href="http-https-versions.html">HTTP/HTTPS: 1.1 vs 2 vs 3</a>), handles this differently by folding TLS 1.3 directly into its own transport instead of layering it on top of TCP.</p>
   </div>
 
+  <h2 id="related-and-sources">Related topics and sources</h2>
+  <p>Connect this to <a href="tcp-handshake-termination.html">TCP connection setup</a> and <a href="http-https-versions.html">HTTP/2 and HTTP/3</a>.</p>
+  <ul>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc5246.html">RFC 5246: TLS 1.2</a></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc8446.html">RFC 8446: TLS 1.3, key schedule, PSK modes, and early data</a></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc7627.html">RFC 7627: Extended Master Secret</a></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc9525.html">RFC 9525: service identity verification</a></li>
+  </ul>
+
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="pki-certificates.html">
-    <span class="nav-label">← PREVIOUS</span>
-    PKI & Digital Certificates
-  </a>
-  <a href="ipsec-fundamentals.html">
-    <span class="nav-label">NEXT →</span>
-    IPsec Fundamentals (AH vs ESP)
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="pki-certificates.html"><span class="nav-label">&#8592; PREVIOUS</span>PKI &amp; Digital Certificates</a>
+<a href="ipsec-fundamentals.html"><span class="nav-label">NEXT &#8594;</span>IPsec Fundamentals (AH vs ESP)</a>
 </nav>
 
 <footer class="site-footer">

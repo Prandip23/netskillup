@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/native-vlan-hopping.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Native VLAN &amp; VLAN Hopping · netskillup">
+<meta property="og:description" content="What the native VLAN is, why it travels untagged across a trunk, and how double-tagging abuses that to hop from one VLAN into another it was never allowed on.">
+<meta property="og:url" content="https://netskillup.com/topics/native-vlan-hopping.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Native VLAN &amp; VLAN Hopping · netskillup">
+<meta name="twitter:description" content="What the native VLAN is, why it travels untagged across a trunk, and how double-tagging abuses that to hop from one VLAN into another it was never allowed on.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l2);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 02 · Layer 2: Data Link</a>
+    <a class="breadcrumb" href="../index.html#module-layer2">&#8592; Module 02 &middot; Layer 2: Data Link</a>
     <h1>Native VLAN & VLAN Hopping</h1>
     <p class="topic-dek">One VLAN on every trunk gets to skip its tag entirely. That convenience is also the exact crack an attacker can wedge a frame into.</p>
   </div>
@@ -32,11 +44,11 @@
 
 <article class="topic-body wrap">
 
-  <h2>The native VLAN</h2>
+  <h2 id="the-native-vlan">The native VLAN</h2>
   <p>A trunk port tags every frame with its VLAN (Virtual Local Area Network) ID, with one exception: the <strong>native VLAN</strong>. Frames belonging to it cross the trunk completely untagged, the same way they would on a plain access port. This exists mostly for backward compatibility with older equipment that never understood 802.1Q tags at all.</p>
   <p>By default, the native VLAN is VLAN 1 on every port, on every switch, out of the box. That means if nobody changes it, every trunk in a network is quietly agreeing to treat the same VLAN as the "untagged, trust it" one.</p>
 
-  <h2>Double tagging: How VLAN hopping actually works</h2>
+  <h2 id="double-tagging-how-vlan-hopping-actually-works">Double tagging: How VLAN hopping actually works</h2>
   <p>An attacker on an access port can't normally reach a different VLAN. Their switch strips any tag they try to add and treats the frame as belonging to their own access VLAN. Double tagging abuses the native VLAN's blind spot instead of fighting that rule directly.</p>
   <p>The attacker crafts a frame with <em>two</em> stacked 802.1Q tags: the outer tag set to the native VLAN, the inner tag set to the VLAN they actually want to reach.</p>
 
@@ -92,15 +104,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="vlans-trunking.html">
-    <span class="nav-label">← PREVIOUS</span>
-    VLANs & 802.1Q Trunking
-  </a>
-  <a href="stp-8021d.html">
-    <span class="nav-label">NEXT →</span>
-    Spanning Tree Protocol (802.1D)
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="vlans-trunking.html"><span class="nav-label">&#8592; PREVIOUS</span>VLANs &amp; 802.1Q Trunking</a>
+<a href="stp-8021d.html"><span class="nav-label">NEXT &#8594;</span>Spanning Tree Protocol (802.1D)</a>
 </nav>
 
 <footer class="site-footer">

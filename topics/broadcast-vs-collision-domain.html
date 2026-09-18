@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/broadcast-vs-collision-domain.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Collision Domain vs Broadcast Domain · netskillup">
+<meta property="og:description" content="What a collision domain and a broadcast domain actually are, which devices break which, and why VLANs exist.">
+<meta property="og:url" content="https://netskillup.com/topics/broadcast-vs-collision-domain.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Collision Domain vs Broadcast Domain · netskillup">
+<meta name="twitter:description" content="What a collision domain and a broadcast domain actually are, which devices break which, and why VLANs exist.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--fund);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 01 · Networking Fundamentals</a>
+    <a class="breadcrumb" href="../index.html#module-fundamentals">&#8592; Module 01 &middot; Networking Fundamentals</a>
     <h1>Collision Domain vs Broadcast Domain</h1>
     <p class="topic-dek">Two different kinds of "who has to share this segment": one about electrical contention, one about who hears a broadcast. Confusing them is one of the most common early mistakes.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>Collision domain</h2>
+  <h2 id="collision-domain">Collision domain</h2>
   <p>A collision domain is a segment of network where two devices transmitting <strong>at the same time</strong> can collide: their signals interfere on the shared medium and both transmissions are corrupted. This only matters on shared, half-duplex media.</p>
   <ul>
     <li>A <code>hub</code> repeats every bit it receives out every other port, so all connected devices are in <strong>one</strong> collision domain.</li>
@@ -45,7 +57,7 @@
     <p>Hubs are essentially extinct in production networks. Full-duplex switched Ethernet means collision domains are mostly a historical concept today, but it's still the correct mental model for <em>why</em> switches replaced hubs.</p>
   </div>
 
-  <h2>Broadcast domain</h2>
+  <h2 id="broadcast-domain">Broadcast domain</h2>
   <p>A broadcast domain is the set of devices that receive a Layer 2 broadcast frame (destination MAC, or Media Access Control, address <code>FFFF.FFFF.FFFF</code>) sent by any one device in that domain.</p>
   <ul>
     <li>A <code>switch</code> does <strong>not</strong> break up a broadcast domain, so every port in the same VLAN (Virtual Local Area Network) floods and receives broadcasts together.</li>
@@ -118,7 +130,7 @@
     <figcaption>Left: every device shares one collision domain through the hub. Right: two switches each form their own broadcast domain. A broadcast from a host behind SW-A never reaches SW-B unless R1 explicitly routes it, which routers don't do for broadcasts.</figcaption>
   </figure>
 
-  <h2>Side by side</h2>
+  <h2 id="side-by-side">Side by side</h2>
   <table class="compare-table">
     <thead>
       <tr><th>Device</th><th>Breaks collision domain?</th><th>Breaks broadcast domain?</th></tr>
@@ -130,20 +142,14 @@
     </tbody>
   </table>
 
-  <h2>Why it matters in practice</h2>
+  <h2 id="why-it-matters-in-practice">Why it matters in practice</h2>
   <p>Broadcast domain size is the real design constraint in modern networks. Too large a broadcast domain means ARP (Address Resolution Protocol) requests, DHCP (Dynamic Host Configuration Protocol) discovers, and other broadcast traffic gets flooded to hundreds of hosts that don't care, wasting bandwidth and CPU (Central Processing Unit) cycles. This is the entire justification for VLANs: they let you keep broadcast domains small and purposeful without running separate physical switches for every segment.</p>
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="network-topologies.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Network Topologies
-  </a>
-  <a href="hubs-switches-routers.html">
-    <span class="nav-label">NEXT →</span>
-    Hubs vs Switches vs Routers
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="network-topologies.html"><span class="nav-label">&#8592; PREVIOUS</span>Network Topologies</a>
+<a href="hubs-switches-routers.html"><span class="nav-label">NEXT &#8594;</span>Hubs vs Switches vs Routers</a>
 </nav>
 
 <footer class="site-footer">

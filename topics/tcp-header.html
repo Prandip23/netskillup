@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/tcp-header.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="TCP Header Structure · netskillup">
+<meta property="og:description" content="Field by field, what&#39;s inside a TCP header and why each one exists: ports, sequence and acknowledgment numbers, the six control flags, window size, and checksum.">
+<meta property="og:url" content="https://netskillup.com/topics/tcp-header.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TCP Header Structure · netskillup">
+<meta name="twitter:description" content="Field by field, what&#39;s inside a TCP header and why each one exists: ports, sequence and acknowledgment numbers, the six control flags, window size, and checksum.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l4);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 04 · Layer 4: Transport</a>
+    <a class="breadcrumb" href="../index.html#module-layer4">&#8592; Module 04 &middot; Layer 4: Transport</a>
     <h1>TCP Header Structure</h1>
     <p class="topic-dek">TCP (Transmission Control Protocol) turns an unreliable, best-effort IP (Internet Protocol) network into something that behaves like an ordered, reliable conversation. Every field in this header exists to support that job.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>What this header is actually for</h2>
+  <h2 id="what-this-header-is-actually-for">What this header is actually for</h2>
   <p>IP's job stops at "get this packet from one host toward another, best effort, no promises." It doesn't guarantee delivery, doesn't guarantee order, and a packet can even arrive duplicated. TCP sits directly on top of IP and makes up the difference. Every field below exists to support one of three jobs:</p>
   <ol>
     <li>Identifying which application conversation a segment belongs to.</li>
@@ -41,7 +53,7 @@
   </ol>
   <p>Picture a warehouse shipping cartons through a courier that makes no promises on its own: no guaranteed delivery, no guaranteed order, cartons can even get duplicated in transit. TCP's header is the packing slip stapled to every carton: which shipment this carton belongs to, which carton number it is within the batch, a receipt confirming which cartons already arrived, how much room the receiving dock currently has for more, a stamp for special handling, and a tamper seal. That's the whole header, mapped field by field below.</p>
 
-  <h2>The header, field by field</h2>
+  <h2 id="the-header-field-by-field">The header, field by field</h2>
 
   <figure class="diagram-block">
     <svg viewBox="0 0 640 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of the TCP header laid out as 32-bit rows: source and destination port, sequence number, acknowledgment number, data offset/reserved/flags/window size, checksum/urgent pointer, options, and the data that follows the header">
@@ -101,7 +113,7 @@
     </tbody>
   </table>
 
-  <h2>The six control flags</h2>
+  <h2 id="the-six-control-flags">The six control flags</h2>
   <table class="compare-table">
     <thead>
       <tr><th>Flag</th><th>Means</th><th>Typically set when</th></tr>
@@ -117,7 +129,7 @@
   </table>
   <p>The three-way handshake and connection termination, both built entirely from these flags, get their own full walkthrough in the <a href="tcp-handshake-termination.html">next topic</a>.</p>
 
-  <h2>Sequence and acknowledgment numbers: TCP counts bytes, not packets</h2>
+  <h2 id="sequence-and-acknowledgment-numbers-tcp-counts-bytes-not-packets">Sequence and acknowledgment numbers: TCP counts bytes, not packets</h2>
   <p>A sequence number doesn't count segments. It counts <strong>bytes</strong>. Each connection starts with a random initial sequence number (ISN), and every byte of data sent after that gets its own implicit position in the stream. A segment's Sequence Number field is just the position of its first byte; its Acknowledgment Number, sent by the other side, is the position of the next byte it's still waiting for.</p>
 
   <figure class="diagram-block">
@@ -167,15 +179,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="packet-flow.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Packet Flow Across Networks
-  </a>
-  <a href="tcp-handshake-termination.html">
-    <span class="nav-label">NEXT →</span>
-    TCP 3-Way Handshake & Termination
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="packet-flow.html"><span class="nav-label">&#8592; PREVIOUS</span>Packet Flow Across Networks</a>
+<a href="tcp-handshake-termination.html"><span class="nav-label">NEXT &#8594;</span>TCP 3-Way Handshake &amp; Termination</a>
 </nav>
 
 <footer class="site-footer">

@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/nat-pat.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="NAT &amp; PAT · netskillup">
+<meta property="og:description" content="How Network Address Translation lets a whole private network share one public IP, and how PAT uses port numbers to keep every device&#39;s traffic straight.">
+<meta property="og:url" content="https://netskillup.com/topics/nat-pat.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="NAT &amp; PAT · netskillup">
+<meta name="twitter:description" content="How Network Address Translation lets a whole private network share one public IP, and how PAT uses port numbers to keep every device&#39;s traffic straight.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
+    <a class="breadcrumb" href="../index.html#module-layer3">&#8592; Module 03 &middot; Layer 3: Network</a>
     <h1>NAT & PAT</h1>
     <p class="topic-dek">Hundreds of private devices, one public IP (Internet Protocol) address, and somehow the replies still find their way back to the right device. This is how.</p>
   </div>
@@ -32,18 +44,18 @@
 
 <article class="topic-body wrap">
 
-  <h2>The problem: Too many devices, too few public addresses</h2>
+  <h2 id="the-problem-too-many-devices-too-few-public-addresses">The problem: Too many devices, too few public addresses</h2>
   <p>Private IPv4 ranges (like <code>192.168.0.0/16</code> or <code>10.0.0.0/8</code>) can be reused by literally every home and office network on earth, because they're never routed on the public internet. But a device using one of those addresses can't be reached from the internet directly. Something has to translate between the private address inside the network and a real, routable public address at the edge. That something is <strong>NAT</strong> (Network Address Translation).</p>
   <p>It's exactly like an office building with one public street address, where every employee has their own internal extension. Mail addressed to the building's street address still needs a mailroom to figure out which specific desk it's actually for.</p>
 
-  <h2>Static NAT, dynamic NAT, and PAT</h2>
+  <h2 id="static-nat-dynamic-nat-and-pat">Static NAT, dynamic NAT, and PAT</h2>
   <ul>
     <li><strong>Static NAT:</strong> one private address always maps to the same one public address, a fixed, permanent mapping, typically for a server that needs to be reachable at a consistent public IP.</li>
     <li><strong>Dynamic NAT:</strong> private addresses are mapped to public addresses from a shared pool, on a first-come basis, still one-to-one at any given moment, but not a fixed pairing.</li>
     <li><strong>PAT</strong> (Port Address Translation, also called NAT overload): many private addresses share a <em>single</em> public address, distinguished from each other by port number. This is what almost every home and small-office router actually does.</li>
   </ul>
 
-  <h2>How PAT keeps replies straight</h2>
+  <h2 id="how-pat-keeps-replies-straight">How PAT keeps replies straight</h2>
   <p>Every outbound connection gets a unique combination of (public IP, public port) assigned to it, and the router keeps a translation table mapping that pair back to the original (private IP, private port) it came from. When a reply comes back addressed to that public IP and port, the router looks up the table and rewrites it back to the correct private device, exactly like a receptionist routing an incoming call to the right desk extension based on which line it came in on.</p>
 
   <figure class="diagram-block">
@@ -108,15 +120,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="bgp-basics.html">
-    <span class="nav-label">← PREVIOUS</span>
-    BGP Basics
-  </a>
-  <a href="inter-vlan-routing.html">
-    <span class="nav-label">NEXT →</span>
-    Inter-VLAN Routing
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="bgp-basics.html"><span class="nav-label">&#8592; PREVIOUS</span>BGP Basics</a>
+<a href="inter-vlan-routing.html"><span class="nav-label">NEXT &#8594;</span>Inter-VLAN Routing</a>
 </nav>
 
 <footer class="site-footer">

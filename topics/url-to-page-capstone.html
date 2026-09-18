@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/url-to-page-capstone.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Capstone: What Happens When You Type a URL · netskillup">
+<meta property="og:description" content="Every mechanism from this module and the ones before it, walked through in order: what actually happens, step by step, when a browser loads a page.">
+<meta property="og:url" content="https://netskillup.com/topics/url-to-page-capstone.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Capstone: What Happens When You Type a URL · netskillup">
+<meta name="twitter:description" content="Every mechanism from this module and the ones before it, walked through in order: what actually happens, step by step, when a browser loads a page.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--app);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 05 · Application Layer & Name Resolution</a>
+    <a class="breadcrumb" href="../index.html#module-app-naming">&#8592; Module 05 &middot; Application Layer &amp; Name Resolution</a>
     <h1>Capstone: What Happens When You Type a URL</h1>
     <p class="topic-dek">Every mechanism from this module, and several from the ones before it, in the order they actually fire, for one ordinary page load.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>The walk-through</h2>
+  <h2 id="the-walk-through">The walk-through</h2>
   <p>This is worth working through slowly, out loud, the first few times. It's the single best way to check that every mechanism you have covered actually fits together, instead of sitting in your head as separate, disconnected facts.</p>
   <ol>
     <li><strong>Parse the URL.</strong> Split it into a scheme (<code>https://</code>), a host (<code>example.com</code>), and a path (<code>/page</code>).</li>
@@ -122,15 +134,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="http-https-versions.html">
-    <span class="nav-label">← PREVIOUS</span>
-    HTTP/HTTPS: 1.1 vs 2 vs 3
-  </a>
-  <a href="symmetric-vs-asymmetric.html">
-    <span class="nav-label">NEXT →</span>
-    Symmetric vs Asymmetric Encryption
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="http-https-versions.html"><span class="nav-label">&#8592; PREVIOUS</span>HTTP/HTTPS: 1.1 vs 2 vs 3</a>
+<a href="symmetric-vs-asymmetric.html"><span class="nav-label">NEXT &#8594;</span>Symmetric vs Asymmetric Encryption</a>
 </nav>
 
 <footer class="site-footer">

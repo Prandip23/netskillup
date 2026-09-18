@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/common-attacks.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Common Attacks: ARP Spoofing, MITM, DDoS · netskillup">
+<meta property="og:description" content="Three attacks working at three different layers: a forged ARP reply, a secretly relayed conversation, and a flood of traffic no server can keep up with.">
+<meta property="og:url" content="https://netskillup.com/topics/common-attacks.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Common Attacks: ARP Spoofing, MITM, DDoS · netskillup">
+<meta name="twitter:description" content="Three attacks working at three different layers: a forged ARP reply, a secretly relayed conversation, and a flood of traffic no server can keep up with.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--sec);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
+    <a class="breadcrumb" href="../index.html#module-security">&#8592; Module 06 &middot; Security &amp; Encryption</a>
     <h1>Common Attacks: ARP Spoofing, MITM, DDoS</h1>
     <p class="topic-dek">Three attacks working at three different layers, and a good final tour of exactly how much this whole site's mechanisms exist to defend against.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>ARP spoofing: A fake directory desk</h2>
+  <h2 id="arp-spoofing-a-fake-directory-desk">ARP spoofing: A fake directory desk</h2>
   <p>Picture someone setting up a fake "building directory" sign, so people asking "which office is this?" get sent to the wrong place entirely. <a href="arp.html">ARP</a> (Address Resolution Protocol) has no authentication built in: any device on a segment can send an unsolicited ARP reply, and other devices will simply believe it. An attacker exploits this by sending forged replies claiming to own the gateway's IP address, poisoning the victim's ARP cache so traffic meant for the real gateway gets sent to the attacker's MAC (Media Access Control) address instead.</p>
 
   <figure class="diagram-block">
@@ -77,7 +89,7 @@
     <figcaption>The real gateway is never even contacted. Its ARP cache entry has simply been overwritten with a lie.</figcaption>
   </figure>
 
-  <h2>Man-in-the-middle (MITM): A secret relay</h2>
+  <h2 id="man-in-the-middle-mitm-a-secret-relay">Man-in-the-middle (MITM): A secret relay</h2>
   <p>Once an attacker can redirect traffic, whether through ARP spoofing, a rogue WiFi access point, or another method entirely, they can sit silently in the middle of a conversation, relaying everything between two parties who both believe they're talking directly to each other. The attacker can read the traffic, and if it isn't encrypted, modify it in transit too.</p>
 
   <figure class="diagram-block">
@@ -121,7 +133,7 @@
     <figcaption>The traffic actually takes the solid path through the attacker, never the dashed one either side believes it's taking. TLS (see <a href="tls-handshake.html">TLS/SSL Handshake</a>) defeats this by encrypting the payload and tying the certificate to a specific domain, so a relayed connection either fails validation or shows content the attacker still can't read.</figcaption>
   </figure>
 
-  <h2>DDoS: Flooding the doorway</h2>
+  <h2 id="ddos-flooding-the-doorway">DDoS: Flooding the doorway</h2>
   <p>A DoS (Denial of Service) attack overwhelms a target with more traffic or requests than it can handle, from a single source. A <strong>D</strong>DoS does the same thing from many sources at once, often a botnet of compromised devices, which makes it far harder to stop by simply blocking one IP address. Either way the goal is the same: legitimate users can't get through, because the doorway is jammed with far more visitors than it can process.</p>
 
   <figure class="diagram-block">
@@ -187,15 +199,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="firewalls-acls.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Firewalls & ACLs
-  </a>
-  <a href="../index.html#modules">
-    <span class="nav-label">YOU'VE REACHED THE END</span>
-    Back to the Module Index
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="firewalls-acls.html"><span class="nav-label">&#8592; PREVIOUS</span>Firewalls &amp; ACLs</a>
+<a href="../index.html"><span class="nav-label">NEXT &#8594;</span>All topics</a>
 </nav>
 
 <footer class="site-footer">

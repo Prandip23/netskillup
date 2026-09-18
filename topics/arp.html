@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/arp.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="ARP · netskillup">
+<meta property="og:description" content="How the Address Resolution Protocol maps an IP address to a MAC address: the request/reply exchange, the ARP cache, and why ARP never crosses a router.">
+<meta property="og:url" content="https://netskillup.com/topics/arp.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ARP · netskillup">
+<meta name="twitter:description" content="How the Address Resolution Protocol maps an IP address to a MAC address: the request/reply exchange, the ARP cache, and why ARP never crosses a router.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l2);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 02 · Layer 2: Data Link</a>
+    <a class="breadcrumb" href="../index.html#module-layer2">&#8592; Module 02 &middot; Layer 2: Data Link</a>
     <h1>ARP</h1>
     <p class="topic-dek">A device knows the IP (Internet Protocol) address it wants to reach. It has no idea what MAC address that is. ARP (Address Resolution Protocol) is the one-question, one-answer exchange that fixes that.</p>
   </div>
@@ -32,14 +44,17 @@
 
 <article class="topic-body wrap">
 
-  <h2>The problem ARP solves</h2>
+  <p class="topic-answer"><strong>Short answer:</strong> On Ethernet, ARP finds the MAC address for an on-link IPv4 next hop. For a remote destination reached through a router, the sender resolves that router's local IP, not the remote server's IP.</p>
+  <p class="topic-prerequisites">Before this: <a href="ethernet-frame-mac.html">Ethernet frames</a> and <a href="ipv4-subnetting-cidr-vlsm.html">IPv4 subnet boundaries</a>.</p>
+
+  <h2 id="the-problem-arp-solves">The problem ARP solves</h2>
   <p>Every Ethernet frame needs a destination MAC (Media Access Control) address before it can be sent, but applications and routing tables only ever deal in IP addresses. Something has to bridge that gap on the local segment. That's the <strong>Address Resolution Protocol</strong>: given an IP address, find the MAC address of whatever device is actually holding it.</p>
   <p>It works like calling out across an open-plan office: "Who has desk assignment 10.0.0.5?" You don't know or care who that is yet, you just want them to identify themselves. Whoever holds that assignment calls back directly: "That's me, and here's exactly which desk to walk to."</p>
 
-  <h2>Request and reply</h2>
+  <h2 id="request-and-reply">Request and reply</h2>
   <ul>
-    <li><strong>ARP request:</strong> sent as a Layer 2 <strong>broadcast</strong> (destination MAC <code>FF:FF:FF:FF:FF:FF</code>), meaning "who has 10.0.0.5? tell 10.0.0.1." Every device on the segment receives it, but only the device that owns that IP responds.</li>
-    <li><strong>ARP reply:</strong> sent as a <strong>unicast</strong> straight back to the requester: "10.0.0.5 is at MAC AA:BB:CC:11:22:33."</li>
+    <li><strong>ARP request:</strong> initial resolution normally uses a Layer 2 <strong>broadcast</strong> (destination MAC <code>FF:FF:FF:FF:FF:FF</code>), meaning "who has 10.0.0.5? tell 10.0.0.1." The target normally replies; a router configured for proxy ARP can answer on another host's behalf. Some implementations also use unicast requests to recheck cached neighbors.</li>
+    <li><strong>ARP reply:</strong> in this ordinary request/reply exchange, sent as a <strong>unicast</strong> straight back to the requester: "10.0.0.5 is at MAC AA:BB:CC:11:22:33."</li>
   </ul>
 
   <figure class="diagram-block">
@@ -93,53 +108,79 @@
     <figcaption>C and D both hear the broadcast request but only B, the owner of 10.0.0.5, replies. It answers directly to A, not to everyone.</figcaption>
   </figure>
 
-  <h2>The ARP cache</h2>
+  <h2 id="the-arp-cache">The ARP cache</h2>
   <p>Doing this exchange for every single packet would be wasteful, so each device keeps an <strong>ARP cache</strong>: a table of recently resolved IP-to-MAC mappings with a timeout (commonly a few minutes, varying by OS). As long as an entry is cached, the device skips straight to sending the frame.</p>
-  <p>A device can also send a <strong>gratuitous ARP</strong>, an unsolicited announcement of its own IP-to-MAC mapping, typically right after it boots or changes its address. Every other device on the segment updates its cache immediately instead of waiting for someone to ask.</p>
+  <p>A device can also send a <strong>gratuitous ARP</strong>, an unsolicited announcement of its own IP-to-MAC mapping, for example after an address change or gateway failover. Neighbors may update existing cache entries; whether they accept or create an entry depends on their implementation and policy. In the office analogy, it's someone announcing a desk move. Not every listener necessarily writes it down.</p>
 
   <table class="compare-table">
     <thead>
-      <tr><th></th><th>ARP Request</th><th>ARP Reply</th></tr>
+      <tr><th>Initial resolution</th><th>ARP Request</th><th>ARP Reply</th></tr>
     </thead>
     <tbody>
       <tr><td>Destination MAC</td><td>Broadcast (FF:FF:FF:FF:FF:FF)</td><td>Unicast, straight to the requester</td></tr>
-      <tr><td>Who sends it</td><td>Any device that needs a mapping</td><td>Only the device that owns the IP</td></tr>
+      <tr><td>Who sends it</td><td>A device resolving a neighbor</td><td>Normally the owner; a configured proxy can answer for another host</td></tr>
       <tr><td>Who processes it</td><td>Every device on the segment</td><td>Only the original requester</td></tr>
     </tbody>
   </table>
 
-  <h2>ARP cache vs. the switch's CAM table</h2>
+  <h2 id="arp-cache-vs-the-switch-s-cam-table">ARP cache vs. the switch's CAM table</h2>
   <p>The ARP cache and a switch's <strong>CAM table</strong> (Content Addressable Memory table, also called the MAC address table) get mixed up constantly, because both are just small lookup tables sitting one layer apart. They solve two different problems.</p>
-  <p>The ARP cache lives on an <strong>end host</strong> and maps an <strong>IP address to a MAC address</strong>: "who do I send this frame to?" The CAM table lives on a <strong>switch</strong> and maps a <strong>MAC address to a physical port</strong>: "which wire does this address actually live on?" A switch never looks at IP addresses to build its CAM table at all. It just watches source MAC addresses go by on each port, the same mechanism covered in <a href="ethernet-frame-mac.html">Ethernet Frame & MAC Addressing</a>.</p>
+  <p>The ARP cache lives on <strong>IPv4 hosts and routers</strong> and maps an <strong>IP address to a MAC address</strong>: "who do I send this frame to?" The CAM table lives on a <strong>switch</strong> and maps a <strong>MAC address and VLAN to a port</strong>: "which wire does this address live on in this VLAN?" Layer 2 learning watches source MAC addresses, not IP addresses, as covered in <a href="ethernet-frame-mac.html">Ethernet Frame & MAC Addressing</a>. The desk directory is ARP; the switch's table tells the building's internal delivery system which corridor reaches a desk.</p>
 
   <table class="compare-table">
     <thead>
-      <tr><th></th><th>ARP Cache</th><th>CAM Table</th></tr>
+      <tr><th>Property</th><th>ARP Cache</th><th>CAM Table</th></tr>
     </thead>
     <tbody>
-      <tr><td>Lives on</td><td>Each end host</td><td>Each switch</td></tr>
-      <tr><td>Maps</td><td>IP address → MAC address</td><td>MAC address → switch port</td></tr>
+      <tr><td>Lives on</td><td>IPv4 hosts and routers</td><td>Each switch</td></tr>
+      <tr><td>Maps</td><td>IP address → MAC address</td><td>MAC address and VLAN → switch port</td></tr>
       <tr><td>Built by</td><td>ARP requests and replies</td><td>Watching source MAC addresses on incoming frames</td></tr>
       <tr><td>Answers</td><td>"Who do I send this frame to?"</td><td>"Which wire does this address live on?"</td></tr>
     </tbody>
   </table>
 
+  <h2 id="worked-next-hop">Worked example: whose MAC do you need?</h2>
+  <p>A workstation is <code>10.0.0.10/24</code> with gateway <code>10.0.0.1</code>. In this example its selected route to <code>192.0.2.80</code> uses that gateway. Assuming no cached mapping, it broadcasts an ARP request for <code>10.0.0.1</code>. The gateway replies with <code>02:00:00:00:00:01</code>. The outgoing frame targets that MAC, while the enclosed IP packet still targets <code>192.0.2.80</code>. Asking for the gateway is like finding the office's exit desk before visiting another building.</p>
+  <table class="compare-table">
+    <thead><tr><th>Field</th><th>Illustrative request</th><th>Reply</th></tr></thead>
+    <tbody>
+      <tr><td>EtherType</td><td>0x0806 (ARP)</td><td>0x0806</td></tr>
+      <tr><td>Operation</td><td>1 (request)</td><td>2 (reply)</td></tr>
+      <tr><td>Sender protocol address</td><td>10.0.0.10</td><td>10.0.0.1</td></tr>
+      <tr><td>Target protocol address</td><td>10.0.0.1</td><td>10.0.0.10</td></tr>
+      <tr><td>Ethernet destination</td><td>ff:ff:ff:ff:ff:ff</td><td>The workstation's MAC</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="diagnose-neighbor-resolution">Diagnose neighbor resolution</h2>
+  <p>On Windows PowerShell, <code>Get-NetNeighbor -AddressFamily IPv4</code> lists neighbor entries. On Linux with iproute2, <code>ip neigh show</code> does the same job. Entries and state names vary by OS; a stale entry can remain usable while its reachability is checked.</p>
+  <table class="compare-table">
+    <thead><tr><th>Observation</th><th>Next check</th><th>What it means</th></tr></thead>
+    <tbody>
+      <tr><td>Repeated requests, no reply</td><td>Verify prefix, VLAN, interface state, and the target's address at both ends</td><td>Resolution did not complete at this capture point. A host firewall dropping ping is not the same as failed ARP.</td></tr>
+      <tr><td>Gateway resolves, remote service fails</td><td>Inspect the selected route, upstream reachability, and service connection</td><td>A local mapping does not prove end-to-end connectivity.</td></tr>
+      <tr><td>One IP changes MAC unexpectedly</td><td>Compare gateway failover events and duplicate-address evidence</td><td>A change may be legitimate or suspicious; ARP alone does not authenticate the sender.</td></tr>
+    </tbody>
+  </table>
+
   <div class="callout">
     <span class="callout-label">WHY ARP NEVER CROSSES A ROUTER</span>
-    <p>ARP is a broadcast, and routers don't forward broadcasts between networks. That's exactly what makes them a broadcast domain boundary (see <a href="broadcast-vs-collision-domain.html">Collision Domain vs Broadcast Domain</a>). To reach a device on another network, a host ARPs for its <em>default gateway's</em> MAC address instead, and lets routing take over from there.</p>
+    <p>Normal initial ARP requests are link-layer broadcasts, not routed IP packets. Routers do not forward those requests into another broadcast domain. A host resolves the next hop chosen by its routing table, often its default gateway. Proxy ARP is a local reply on another host's behalf, not forwarding the original broadcast. IPv6 uses Neighbor Discovery rather than ARP.</p>
   </div>
+
+  <h2 id="related-and-sources">Related topics and sources</h2>
+  <p>Connect this to <a href="packet-flow.html">packet flow across networks</a> and <a href="dhcp-dora.html">DHCP address assignment</a>.</p>
+  <ul>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc826.html">RFC 826: Address Resolution Protocol</a></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc5227.html">RFC 5227: IPv4 address conflict detection and announcements</a></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc1027.html">RFC 1027: proxy ARP</a></li>
+  </ul>
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="ethernet-frame-mac.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Ethernet Frame & MAC Addressing
-  </a>
-  <a href="vlans-trunking.html">
-    <span class="nav-label">NEXT →</span>
-    VLANs & 802.1Q Trunking
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="ethernet-frame-mac.html"><span class="nav-label">&#8592; PREVIOUS</span>Ethernet Frame &amp; MAC Addressing</a>
+<a href="vlans-trunking.html"><span class="nav-label">NEXT &#8594;</span>VLANs &amp; 802.1Q Trunking</a>
 </nav>
 
 <footer class="site-footer">

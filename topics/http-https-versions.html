@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/http-https-versions.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="HTTP/HTTPS: 1.1 vs 2 vs 3 · netskillup">
+<meta property="og:description" content="The same request/response model across three very different transport strategies: parallel connections, multiplexed streams over TCP, and independent streams over QUIC.">
+<meta property="og:url" content="https://netskillup.com/topics/http-https-versions.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HTTP/HTTPS: 1.1 vs 2 vs 3 · netskillup">
+<meta name="twitter:description" content="The same request/response model across three very different transport strategies: parallel connections, multiplexed streams over TCP, and independent streams over QUIC.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--app);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 05 · Application Layer & Name Resolution</a>
+    <a class="breadcrumb" href="../index.html#module-app-naming">&#8592; Module 05 &middot; Application Layer &amp; Name Resolution</a>
     <h1>HTTP/HTTPS: 1.1 vs 2 vs 3</h1>
     <p class="topic-dek">The same request/response model, HTTP (Hypertext Transfer Protocol), carried across three increasingly different strategies for getting many requests answered at once without one slow request blocking the rest.</p>
   </div>
@@ -32,21 +44,22 @@
 
 <article class="topic-body wrap">
 
-  <h2>The part that never changes: Request and response</h2>
+  <h2 id="the-part-that-never-changes-request-and-response">The part that never changes: Request and response</h2>
   <p>Every version below still speaks the same basic language: a client sends a request (a method like <code>GET</code> or <code>POST</code>, a path, and headers), and a server sends back a response (a status code like <code>200</code> or <code>404</code>, headers, and a body). What's changed release to release isn't that model. It's the machinery underneath it, aimed entirely at one problem: a real page needs dozens of requests (HTML, CSS, JavaScript, images), and waiting for them one at a time is slow.</p>
-  <p>Picture a kitchen sending dishes out to a table. HTTP/1.1 sends one dish out, waits for the table to be done with it, then sends the next; restaurants worked around that by opening several parallel delivery routes at once. HTTP/2 sends multiple dishes out interleaved on a single route, no more waiting between them, but if that one route gets physically blocked, everything behind the blockage still waits. HTTP/3 gives every dish its own independent route entirely, so a holdup on one never touches the others.</p>
+  <p>Picture a kitchen sending dishes out to several diners. With HTTP/1.1, each server delivers complete dishes in order; using several servers adds parallelism. HTTP/2 lets one server interleave portions for different diners, but a missing tray holds up all later portions at the receiving counter because TCP requires one delivery order. HTTP/3 tracks the portions for each diner separately: diners can receive their complete portions without waiting for someone else's missing portion. A dropped tray can still contain portions for several diners, and everyone still shares the kitchen's capacity.</p>
 
-  <h2>HTTP/1.1: Parallel connections as a workaround</h2>
+  <h2 id="http-1-1-parallel-connections-as-a-workaround">HTTP/1.1: Parallel connections as a workaround</h2>
   <p>Within a single TCP (Transmission Control Protocol) connection, HTTP/1.1 responses have to come back in the order they were requested; a slow response blocks everything queued behind it on that same connection. Browsers worked around this by opening several TCP connections to the same server at once, commonly six, so requests could run in parallel across them. It works, but every one of those connections pays its own TCP handshake cost and, over HTTPS, its own TLS (Transport Layer Security) handshake cost too.</p>
 
-  <h2>HTTP/2: Multiplexing many requests over one connection</h2>
+  <h2 id="http-2-multiplexing-many-requests-over-one-connection">HTTP/2: Multiplexing many requests over one connection</h2>
   <p>HTTP/2 fixes the workaround at the application layer: many requests and responses are broken into frames and interleaved over a <strong>single</strong> TCP connection, so nothing has to wait its turn behind an unrelated response anymore, and headers are compressed (HPACK) instead of repeated in full on every request. But the connection underneath is still one ordinary TCP stream, and TCP still guarantees strictly in-order delivery. If a single packet belonging to any one stream is lost, TCP holds up <strong>every</strong> stream's data behind it until that packet is retransmitted, even though the other streams' data has nothing to do with the loss.</p>
 
-  <h2>HTTP/3: Fixing the transport itself</h2>
-  <p>HTTP/3 runs over QUIC, a transport protocol built on UDP (User Datagram Protocol) instead of TCP. QUIC still multiplexes streams the way HTTP/2 does, but each stream's reliability and ordering is now tracked independently. A lost packet only stalls the one stream it belonged to; every other stream keeps moving. QUIC also folds in TLS 1.3 encryption by default (there's no unencrypted HTTP/3) and can resume a previous connection in as little as zero extra round trips.</p>
+  <h2 id="http-3-fixing-the-transport-itself">HTTP/3: Fixing the transport itself</h2>
+  <p>HTTP/3 runs over QUIC, a transport protocol carried in UDP (User Datagram Protocol) datagrams instead of TCP. QUIC tracks reliability and ordering separately for each stream. A lost QUIC packet can contain <code>STREAM</code> frames from several streams, so every stream missing data from that packet may have to wait. Streams with no missing data have no transport-level ordering dependency on those streams. This does not provide independent network paths: connection-level congestion control and flow-control limits still affect progress.</p>
+  <p>QUIC integrates TLS 1.3 (there's no unencrypted HTTP/3). Eligible resumed connections can send early application data with 0-RTT, but the server can reject it and replay risks restrict its safe use. It is not a guarantee that every request or handshake takes zero round trips.</p>
 
   <figure class="diagram-block">
-    <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram contrasting HTTP/2 over TCP, where a single lost packet on one stream stalls all streams because TCP delivers everything in strict order, with HTTP/3 over QUIC, where each stream is independent and a lost packet only stalls its own stream">
+    <svg viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="HTTP/2 over TCP holds later stream data behind missing TCP bytes. In this HTTP/3 example, the lost packet carried only stream 2 data, so streams 1 and 3 have no ordering wait. A packet carrying data from several streams could affect all of them.">
       <text x="150" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">HTTP/2 OVER TCP</text>
       <text x="490" y="18" text-anchor="middle" font-size="10.5" fill="#8d9bb3">HTTP/3 OVER QUIC (UDP)</text>
 
@@ -117,11 +130,11 @@
       </g>
       <text x="490" y="180" text-anchor="middle" font-size="10" fill="#4fd1c5">
         <animate attributeName="opacity" values="0;1" dur="0.3s" begin="0.9s" fill="freeze"/>
-        only that one stream stalls
+        this loss affects stream 2 only
       </text>
       <text x="490" y="195" text-anchor="middle" font-size="9" fill="#5b6a86">
         <animate attributeName="opacity" values="0;1" dur="0.3s" begin="1s" fill="freeze"/>
-        streams 1 and 3 keep flowing uninterrupted
+        streams 1 and 3 have no ordering wait
       </text>
 
       <script type="text/javascript"><![CDATA[
@@ -133,7 +146,7 @@
         }
       ]]></script>
     </svg>
-    <figcaption>Same failure, two very different blast radii. HTTP/2's single ordered TCP connection means one lost packet stalls everything sharing it; HTTP/3's independent QUIC streams mean it stalls only itself.</figcaption>
+    <figcaption>Here the lost QUIC packet carried data only for stream 2. Streams 1 and 3 do not wait for its missing bytes, unlike later data in TCP's single ordered byte stream. A real QUIC packet may carry several streams; congestion control still applies to the connection.</figcaption>
   </figure>
 
   <table class="compare-table">
@@ -149,20 +162,21 @@
 
   <div class="callout">
     <span class="callout-label">WHY HTTP/3 NEEDED A NEW TRANSPORT ENTIRELY</span>
-    <p>TCP's in-order delivery guarantee is exactly what caused the blocking that was still left over in HTTP/2. Fixing it meant giving up that guarantee at the transport layer, not just changing how HTTP frames data again, which is why HTTP/3 moved off TCP entirely instead of shipping a fourth revision on top of it.</p>
+    <p>TCP's connection-wide in-order delivery causes the transport blocking left over in HTTP/2. QUIC keeps reliable, ordered delivery within each stream but removes that ordering requirement between streams. It changes where the guarantee applies, not whether reliable ordering exists at all.</p>
   </div>
+
+  <h2 id="sources">Sources</h2>
+  <ul>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc9000.html#section-13">RFC 9000, section 13: packet contents and stream delivery</a></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc9114.html">RFC 9114: HTTP/3</a></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc9001.html#section-9.2">RFC 9001, section 9.2: replay risks of 0-RTT</a></li>
+  </ul>
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="dhcp-dora.html">
-    <span class="nav-label">← PREVIOUS</span>
-    DHCP Process (DORA)
-  </a>
-  <a href="url-to-page-capstone.html">
-    <span class="nav-label">NEXT →</span>
-    Capstone: What Happens When You Type a URL
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="dhcp-dora.html"><span class="nav-label">&#8592; PREVIOUS</span>DHCP Process (DORA)</a>
+<a href="url-to-page-capstone.html"><span class="nav-label">NEXT &#8594;</span>Capstone: What Happens When You Type a URL</a>
 </nav>
 
 <footer class="site-footer">

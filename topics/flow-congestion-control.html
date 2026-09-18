@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/flow-congestion-control.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Flow Control &amp; Congestion Control · netskillup">
+<meta property="og:description" content="Two different problems TCP solves by adjusting how much data is in flight: an overwhelmed receiver (flow control), and a congested network path (congestion control).">
+<meta property="og:url" content="https://netskillup.com/topics/flow-congestion-control.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flow Control &amp; Congestion Control · netskillup">
+<meta name="twitter:description" content="Two different problems TCP solves by adjusting how much data is in flight: an overwhelmed receiver (flow control), and a congested network path (congestion control).">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l4);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 04 · Layer 4: Transport</a>
+    <a class="breadcrumb" href="../index.html#module-layer4">&#8592; Module 04 &middot; Layer 4: Transport</a>
     <h1>Flow Control & Congestion Control</h1>
     <p class="topic-dek">Two different problems, both solved by TCP (Transmission Control Protocol) dynamically shrinking or growing how much data is allowed to be in flight at once.</p>
   </div>
@@ -32,12 +44,15 @@
 
 <article class="topic-body wrap">
 
-  <h2>Two different problems, two different mechanisms</h2>
-  <p>It's easy to lump these together since both end up controlling "how much can I send right now," but they're solving completely different problems, and one of them is told directly while the other has to be guessed.</p>
-  <p>Picture dictating a letter to someone writing it by hand, over a shared phone line other calls are also using. <strong>Flow control</strong> is your listener saying "stop, wait, my hand's cramping" whenever they need to. You don't send more words until they say go again: a direct, explicit signal. <strong>Congestion control</strong> is different. Nobody tells you the phone line itself is getting crowded. You just notice the line crackling or words cutting out and, on your own, decide to slow down until it clears: an inferred signal, based on what you observe, not what anyone reports.</p>
+  <p class="topic-answer"><strong>Short answer:</strong> Flow control protects the receiver using its advertised window (<code>rwnd</code>). Congestion control protects the network path using the sender's congestion window (<code>cwnd</code>) and algorithm. The smaller window normally limits outstanding data.</p>
+  <p class="topic-prerequisites">Before this: <a href="tcp-header.html">TCP header fields</a> and <a href="tcp-handshake-termination.html">the TCP handshake</a>.</p>
 
-  <h2>Flow control: The receive window</h2>
-  <p>Every TCP segment carries a Window Size field (see the <a href="tcp-header.html">TCP header</a>): how many more bytes the sender of that segment can currently accept, based on how much space is actually free in its receive buffer. If a fast sender is about to overrun a slow receiver's buffer, the receiver just advertises a smaller window, and the sender is required to respect it. A window of <code>0</code> means "stop sending entirely," and the sender has to periodically probe with a small segment until the receiver advertises room again.</p>
+  <h2 id="two-different-problems-two-different-mechanisms">Two different problems, two different mechanisms</h2>
+  <p>Both mechanisms affect "how much can I send right now," but they protect different resources.</p>
+  <p>Picture carts carrying parts to a workbench through a shared factory corridor. <strong>Flow control</strong> is the worker reporting how many more parts fit on the bench. <strong>Congestion control</strong> is the dispatcher limiting carts in transit when deliveries slow down or fail. The bench may be empty while the corridor is jammed, or full while the corridor is clear. With Explicit Congestion Notification (ECN), network devices can also mark congestion, like a warning light in the corridor; loss is not the only possible signal.</p>
+
+  <h2 id="flow-control-the-receive-window">Flow control: The receive window</h2>
+  <p>The Window Size field in the <a href="tcp-header.html">TCP header</a> advertises a receive budget beginning at the acknowledgment number, with negotiated window scaling applied after the SYN exchange. It reflects how much data the receiving TCP is prepared to accept. If its application reads slowly, the receiver can advertise a smaller window, which the sender must respect. A window of <code>0</code> pauses normal new data in that direction, not ACKs or the entire connection. The sender periodically probes so it can discover when the receive window reopens.</p>
 
   <figure class="diagram-block">
     <svg viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of a sender transmitting data while the receiver's advertised window shrinks, pausing once the window reaches zero, then resuming after a window update reopens it">
@@ -97,13 +112,13 @@
     <figcaption>The receiver, not the network, sets this limit. It's purely about protecting the receiving application's buffer from being overrun.</figcaption>
   </figure>
 
-  <h2>Congestion control: What the sender infers on its own</h2>
-  <p>The receive window says nothing about the network path in between, which might be far more congested than the receiver's buffer ever is. For that, the sender keeps its own internal value, the <strong>congestion window (cwnd)</strong>, that never appears in any header field and is never advertised to anyone. It starts small and grows based on what the sender infers from how segments are being acknowledged, and shrinks fast the moment it infers loss.</p>
+  <h2 id="congestion-control-what-the-sender-infers-on-its-own">Congestion control: What the sender infers on its own</h2>
+  <p>The receive window says nothing about capacity along the path. The sender therefore maintains a <strong>congestion window (cwnd)</strong>, which is not a TCP header field. The classic Reno-style model below responds to ACKs, inferred loss, and optionally ECN. Other algorithms, including CUBIC, use different growth and reduction rules. In the factory, cwnd is the dispatcher's cap on outstanding carts, not the workbench's free space.</p>
   <ul>
     <li><strong>Slow start:</strong> cwnd starts at a small number of segments (historically as low as 1, larger in modern stacks) and roughly doubles every round-trip, growing exponentially, until it hits a threshold called <strong>ssthresh</strong>.</li>
     <li><strong>Congestion avoidance:</strong> past ssthresh, growth switches to roughly linear, one segment's worth of extra room per round-trip, a much more cautious climb.</li>
-    <li><strong>Loss response:</strong> three duplicate ACKs in a row usually mean a single segment was dropped, not a serious jam. TCP does <strong>fast retransmit</strong>, sends that segment again immediately, and cuts cwnd roughly in half rather than starting over from scratch.</li>
-    <li><strong>Timeout response:</strong> no ACK at all for a segment is treated as a much worse sign. cwnd drops all the way back down and slow start restarts from the beginning.</li>
+    <li><strong>Loss response:</strong> three duplicate ACKs trigger classic <strong>fast retransmit</strong> and recovery. Reno reduces its sending window roughly by half. Duplicate ACKs can also come from reordering, so this is an inference, not proof of a single dropped segment or mild congestion.</li>
+    <li><strong>Timeout response:</strong> when the retransmission timer expires without acknowledgment of the outstanding data, classic TCP reduces cwnd sharply and returns to slow start. This does not require total silence on the connection.</li>
   </ul>
 
   <figure class="diagram-block">
@@ -153,25 +168,43 @@
         }
       ]]></script>
     </svg>
-    <figcaption>The classic TCP "sawtooth": exponential growth, a switch to cautious linear growth, a sharp cut on loss, and the climb starts again. This pattern is exactly why a long-lived TCP transfer's throughput graph looks jagged instead of flat.</figcaption>
+    <figcaption>A schematic Reno-style congestion-window curve, not a measured throughput trace. The dashed line marks the initial ssthresh; recovery updates the threshold. Other congestion-control algorithms and application limits can produce different shapes.</figcaption>
   </figure>
+
+  <h2 id="worked-window-budget">Worked example: the window is a byte budget</h2>
+  <p>Suppose <code>rwnd = 65,536 bytes</code>, <code>cwnd = 32,768 bytes</code>, and 12,288 bytes remain unacknowledged. Ignoring recovery and other limits, the sender can put another <code>min(65,536, 32,768) - 12,288 = 20,480 bytes</code> in flight. The dispatcher has room for more carts, but only within the smaller of the corridor budget and the bench budget.</p>
+  <p>At a steady 50 ms round-trip time, a 32,768-byte flight limit corresponds to roughly <code>32,768 / 0.05 = 655,360 bytes/s</code>, about 5.24 Mbit/s before overhead. This is a window-limited estimate, not a throughput promise. Loss, ACK behavior, pacing, sender data availability, and receiver processing can reduce it. A faster Ethernet link alone does not enlarge this budget.</p>
+
+  <h2 id="tell-the-limits-apart">Tell the limits apart</h2>
+  <table class="compare-table">
+    <thead><tr><th>Evidence</th><th>Check</th><th>Interpretation</th></tr></thead>
+    <tbody>
+      <tr><td>Receiver advertises a zero window</td><td>Inspect receiver buffer pressure and whether the application reads promptly</td><td>Flow control is stopping new normal data; zero-window probes can still occur.</td></tr>
+      <tr><td>Retransmissions with an open receive window</td><td>Compare captures at both ends, ACK timing, and congestion signals</td><td>Loss or reordering may limit progress. A one-sided capture can also miss packets.</td></tr>
+      <tr><td>Small raw Window field in a capture</td><td>Inspect Window Scale options in both SYNs</td><td>Post-handshake windows may be scaled; the raw 16-bit field alone is not the effective byte limit.</td></tr>
+      <tr><td>Need the actual cwnd</td><td>Use sender-side TCP telemetry; Linux iproute2 offers <code>ss -ti</code></td><td>cwnd is local sender state and cannot be read directly from a packet header. Tool units must be checked before comparing values.</td></tr>
+    </tbody>
+  </table>
 
   <div class="callout">
     <span class="callout-label">THE ACTUAL LIMIT IS WHICHEVER WINDOW IS SMALLER</span>
     <p>A sender never gets to use more than <code>min(receive window, congestion window)</code> worth of unacknowledged data at once. A fast local network with a slow, congested path to the destination will be limited by cwnd; a fast path to a receiver with a tiny buffer will be limited by the receive window. Either one alone tells an incomplete story.</p>
   </div>
 
+  <h2 id="related-and-sources">Related topics and sources</h2>
+  <p>Continue with <a href="ipv4-fragmentation.html">MTU and fragmentation</a> or <a href="http-https-versions.html">HTTP transport behavior</a>.</p>
+  <ul>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc9293.html">RFC 9293: TCP and receive-window behavior</a></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc5681.html">RFC 5681: classic TCP congestion control</a></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc3168.html">RFC 3168: ECN</a></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc9438.html">RFC 9438: CUBIC</a></li>
+  </ul>
+
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="tcp-handshake-termination.html">
-    <span class="nav-label">← PREVIOUS</span>
-    TCP 3-Way Handshake & Termination
-  </a>
-  <a href="udp-header.html">
-    <span class="nav-label">NEXT →</span>
-    UDP Header & Use Cases
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="tcp-handshake-termination.html"><span class="nav-label">&#8592; PREVIOUS</span>TCP 3-Way Handshake &amp; Termination</a>
+<a href="udp-header.html"><span class="nav-label">NEXT &#8594;</span>UDP Header &amp; Use Cases</a>
 </nav>
 
 <footer class="site-footer">

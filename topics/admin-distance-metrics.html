@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/admin-distance-metrics.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Administrative Distance &amp; Metrics · netskillup">
+<meta property="og:description" content="Administrative distance decides which routing source to trust when several disagree. Metric decides which route to trust within one source. They solve two different problems.">
+<meta property="og:url" content="https://netskillup.com/topics/admin-distance-metrics.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Administrative Distance &amp; Metrics · netskillup">
+<meta name="twitter:description" content="Administrative distance decides which routing source to trust when several disagree. Metric decides which route to trust within one source. They solve two different problems.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
+    <a class="breadcrumb" href="../index.html#module-layer3">&#8592; Module 03 &middot; Layer 3: Network</a>
     <h1>Administrative Distance & Metrics</h1>
     <p class="topic-dek">Two numbers that both sound like "how good is this route," used to answer two completely different questions.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>Two different questions</h2>
+  <h2 id="two-different-questions">Two different questions</h2>
   <p>Once longest prefix match (previous topic) has narrowed things down to routes for the exact same destination network, a router can still end up with more than one candidate: maybe a static route <em>and</em> an OSPF (Open Shortest Path First) route both claim to know how to reach <code>10.0.2.0/24</code>. Two separate numbers resolve that, each answering a different question:</p>
   <ul>
     <li><strong>Administrative Distance (AD):</strong> "Which <em>source</em> of routing information do I trust more?" Lower wins. This only matters when routes for the same destination come from <em>different</em> protocols or origins.</li>
@@ -55,7 +67,7 @@
     </tbody>
   </table>
 
-  <h2>Using AD on purpose: The floating static route</h2>
+  <h2 id="using-ad-on-purpose-the-floating-static-route">Using AD on purpose: The floating static route</h2>
   <p>Because a lower AD always wins, you can deliberately configure a static route with a <em>higher</em> AD than your dynamic protocol, so it sits unused and ignored under normal conditions. If the dynamic route ever disappears (a link fails, the protocol stops advertising it), that static route "floats" up into use automatically as a backup path, no manual intervention required.</p>
 
   <div class="callout">
@@ -65,15 +77,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="routing-tables-lpm.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Routing Tables & Longest Prefix Match
-  </a>
-  <a href="static-routing.html">
-    <span class="nav-label">NEXT →</span>
-    Static Routing
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="routing-tables-lpm.html"><span class="nav-label">&#8592; PREVIOUS</span>Routing Tables &amp; Longest Prefix Match</a>
+<a href="static-routing.html"><span class="nav-label">NEXT &#8594;</span>Static Routing</a>
 </nav>
 
 <footer class="site-footer">

@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/ipsec-fundamentals.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="IPsec Fundamentals (AH vs ESP) · netskillup">
+<meta property="og:description" content="How IPsec authenticates and encrypts traffic at the IP layer itself: the difference between AH and ESP, and transport mode versus tunnel mode.">
+<meta property="og:url" content="https://netskillup.com/topics/ipsec-fundamentals.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="IPsec Fundamentals (AH vs ESP) · netskillup">
+<meta name="twitter:description" content="How IPsec authenticates and encrypts traffic at the IP layer itself: the difference between AH and ESP, and transport mode versus tunnel mode.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--sec);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
+    <a class="breadcrumb" href="../index.html#module-security">&#8592; Module 06 &middot; Security &amp; Encryption</a>
     <h1>IPsec Fundamentals (AH vs ESP)</h1>
     <p class="topic-dek">IPsec (IP Security) protects traffic at the network layer itself, transparent to everything running above it, using two very differently capable protocols.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>Two protocols, two different jobs</h2>
+  <h2 id="two-protocols-two-different-jobs">Two protocols, two different jobs</h2>
   <p>Think of a shipping container. A tamper-evident seal on the outside proves nobody opened it in transit and confirms who sent it, but anyone can still see straight through the container's mesh sides at what's inside if they look. A fully sealed, opaque, locked container does both: nobody can see the contents without the key, and it can carry that same tamper-proof seal too. IPsec's two protocols map directly onto that difference.</p>
   <ul>
     <li><strong>AH (Authentication Header):</strong> authenticates the packet and checks its integrity, including parts of the IP header itself, but doesn't encrypt anything. The contents stay fully visible to anyone watching.</li>
@@ -52,7 +64,7 @@
     </tbody>
   </table>
 
-  <h2>Transport mode vs tunnel mode</h2>
+  <h2 id="transport-mode-vs-tunnel-mode">Transport mode vs tunnel mode</h2>
   <p><strong>Transport mode</strong> protects just the original payload, leaving the original IP header alone; it's a host-to-host arrangement. <strong>Tunnel mode</strong> wraps the <em>entire</em> original packet, header and all, inside a brand new outer IP header, which is what makes site-to-site VPNs possible: the two gateways' IP addresses are all that's visible from the outside, and every internal host behind either gateway is completely unaware the tunnel even exists.</p>
 
   <figure class="diagram-block">
@@ -87,15 +99,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="tls-handshake.html">
-    <span class="nav-label">← PREVIOUS</span>
-    TLS/SSL Handshake (1.2 vs 1.3)
-  </a>
-  <a href="ikev1-vs-ikev2.html">
-    <span class="nav-label">NEXT →</span>
-    IKEv1 vs IKEv2
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="tls-handshake.html"><span class="nav-label">&#8592; PREVIOUS</span>TLS/SSL Handshake (1.2 vs 1.3)</a>
+<a href="ikev1-vs-ikev2.html"><span class="nav-label">NEXT &#8594;</span>IKEv1 vs IKEv2</a>
 </nav>
 
 <footer class="site-footer">

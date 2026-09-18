@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/pki-certificates.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="PKI &amp; Digital Certificates · netskillup">
+<meta property="og:description" content="How a stranger&#39;s public key gets trusted without ever having met them: certificate authorities, what&#39;s inside a certificate, and the chain of trust.">
+<meta property="og:url" content="https://netskillup.com/topics/pki-certificates.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PKI &amp; Digital Certificates · netskillup">
+<meta name="twitter:description" content="How a stranger&#39;s public key gets trusted without ever having met them: certificate authorities, what&#39;s inside a certificate, and the chain of trust.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--sec);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
+    <a class="breadcrumb" href="../index.html#module-security">&#8592; Module 06 &middot; Security &amp; Encryption</a>
     <h1>PKI & Digital Certificates</h1>
     <p class="topic-dek">How a public key belonging to a total stranger gets trusted anyway, without the two of you ever having met.</p>
   </div>
@@ -32,10 +44,10 @@
 
 <article class="topic-body wrap">
 
-  <h2>A passport, not a personal introduction</h2>
+  <h2 id="a-passport-not-a-personal-introduction">A passport, not a personal introduction</h2>
   <p>A passport doesn't work because a border agent personally knows you. It works because a trusted government verified your identity once and issued a document that's extremely hard to forge, and every other country downstream agrees to trust that government's word for it. PKI (Public Key Infrastructure) works the same way for public keys: a <strong>Certificate Authority (CA)</strong> verifies that a public key genuinely belongs to a specific domain or organization, then issues a digital certificate binding the two together, backed by the CA's own digital signature vouching for it.</p>
 
-  <h2>What's actually inside a certificate</h2>
+  <h2 id="what-s-actually-inside-a-certificate">What's actually inside a certificate</h2>
   <table class="compare-table">
     <thead>
       <tr><th>Field</th><th>What it holds</th></tr>
@@ -50,7 +62,7 @@
     </tbody>
   </table>
 
-  <h2>The chain of trust</h2>
+  <h2 id="the-chain-of-trust">The chain of trust</h2>
   <p>Browsers and operating systems don't ship with every website's certificate pre-trusted. They ship with a small, curated list of <strong>root CAs</strong> they trust unconditionally, called a trust store. A root CA's certificate is self-signed: nobody vouches for it but itself, and that's fine, since it's the trust anchor everything else is built on. Root CAs rarely sign server certificates directly; instead they sign an <strong>intermediate CA's</strong> certificate, which then signs the actual server certificate. Verifying a certificate means walking that chain, server certificate, up through each intermediate, until it reaches a root already sitting in the trust store.</p>
 
   <figure class="diagram-block">
@@ -87,7 +99,7 @@
     <figcaption>Verifying example.com's certificate means checking the intermediate's signature, then checking that the intermediate itself was signed by a root already in the trust store, not trusting example.com's certificate in isolation.</figcaption>
   </figure>
 
-  <h2>Revocation: When a certificate shouldn't be trusted anymore</h2>
+  <h2 id="revocation-when-a-certificate-shouldn-t-be-trusted-anymore">Revocation: When a certificate shouldn't be trusted anymore</h2>
   <p>A certificate can be compromised or issued in error before its expiry date arrives. Two mechanisms exist to catch that: a <strong>CRL (Certificate Revocation List)</strong>, a published list of revoked serial numbers a client can check, and <strong>OCSP (Online Certificate Status Protocol)</strong>, a live query asking a CA "is this specific certificate still good?" instead of downloading an entire list.</p>
 
   <div class="callout">
@@ -97,15 +109,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="symmetric-vs-asymmetric.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Symmetric vs Asymmetric Encryption
-  </a>
-  <a href="tls-handshake.html">
-    <span class="nav-label">NEXT →</span>
-    TLS/SSL Handshake (1.2 vs 1.3)
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="symmetric-vs-asymmetric.html"><span class="nav-label">&#8592; PREVIOUS</span>Symmetric vs Asymmetric Encryption</a>
+<a href="tls-handshake.html"><span class="nav-label">NEXT &#8594;</span>TLS/SSL Handshake (1.2 vs 1.3)</a>
 </nav>
 
 <footer class="site-footer">

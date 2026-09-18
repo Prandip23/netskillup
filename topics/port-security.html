@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/port-security.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Switch Port Security · netskillup">
+<meta property="og:description" content="How limiting the number of MAC addresses allowed on a switchport stops rogue devices and MAC flooding attacks, and what protect, restrict, and shutdown actually do.">
+<meta property="og:url" content="https://netskillup.com/topics/port-security.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Switch Port Security · netskillup">
+<meta name="twitter:description" content="How limiting the number of MAC addresses allowed on a switchport stops rogue devices and MAC flooding attacks, and what protect, restrict, and shutdown actually do.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l2);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 02 · Layer 2: Data Link</a>
+    <a class="breadcrumb" href="../index.html#module-layer2">&#8592; Module 02 &middot; Layer 2: Data Link</a>
     <h1>Switch Port Security</h1>
     <p class="topic-dek">A switchport will happily learn as many MAC addresses as devices plug into it. Port security is what puts a limit on that.</p>
   </div>
@@ -32,17 +44,17 @@
 
 <article class="topic-body wrap">
 
-  <h2>What it actually restricts</h2>
+  <h2 id="what-it-actually-restricts">What it actually restricts</h2>
   <p>Recall from <a href="ethernet-frame-mac.html">Ethernet Frame & MAC Addressing</a> that a switch learns a MAC (Media Access Control) address for whatever port it sees that address arrive on. Nothing stops someone from plugging an unauthorized laptop into an open conference-room jack, or worse, plugging in a cheap unmanaged hub to fan one jack out to several devices. Port security caps how many MAC addresses a single port is allowed to learn, like a keycard reader that locks the door the moment a sixth unrecognized badge tries to swipe through, when only five badges were ever supposed to exist for that door.</p>
 
-  <h2>How addresses get allowed onto a port</h2>
+  <h2 id="how-addresses-get-allowed-onto-a-port">How addresses get allowed onto a port</h2>
   <ul>
     <li><strong>Static:</strong> the administrator manually types in the exact MAC address(es) permitted on the port.</li>
     <li><strong>Dynamic:</strong> the switch learns whatever MAC address(es) show up first, up to the configured maximum, but forgets them on reboot.</li>
     <li><strong>Sticky:</strong> the switch learns them dynamically, the same as above, but then saves them into the running configuration so they survive a reboot without retyping anything.</li>
   </ul>
 
-  <h2>What happens on a violation</h2>
+  <h2 id="what-happens-on-a-violation">What happens on a violation</h2>
   <p>If a port is already at its MAC limit and a new, unrecognized address shows up, one of three violation modes decides what happens next:</p>
 
   <figure class="diagram-block">
@@ -94,15 +106,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="etherchannel.html">
-    <span class="nav-label">← PREVIOUS</span>
-    EtherChannel / Link Aggregation
-  </a>
-  <a href="ipv4-subnetting-cidr-vlsm.html">
-    <span class="nav-label">NEXT →</span>
-    IPv4 Addressing, CIDR & VLSM
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="etherchannel.html"><span class="nav-label">&#8592; PREVIOUS</span>EtherChannel / Link Aggregation</a>
+<a href="ipv4-subnetting-cidr-vlsm.html"><span class="nav-label">NEXT &#8594;</span>IPv4 Addressing, CIDR &amp; VLSM</a>
 </nav>
 
 <footer class="site-footer">

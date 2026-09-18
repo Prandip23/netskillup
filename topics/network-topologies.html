@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/network-topologies.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Network Topologies · netskillup">
+<meta property="og:description" content="Bus, star, ring, mesh, and hybrid topologies explained with real-world analogies and diagrams: what each one is, and why almost nothing uses pure bus or ring anymore.">
+<meta property="og:url" content="https://netskillup.com/topics/network-topologies.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Network Topologies · netskillup">
+<meta name="twitter:description" content="Bus, star, ring, mesh, and hybrid topologies explained with real-world analogies and diagrams: what each one is, and why almost nothing uses pure bus or ring anymore.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--fund);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 01 · Networking Fundamentals</a>
+    <a class="breadcrumb" href="../index.html#module-fundamentals">&#8592; Module 01 &middot; Networking Fundamentals</a>
     <h1>Network Topologies</h1>
     <p class="topic-dek">The shape of how devices are physically or logically wired together, and why that shape decides how a network fails.</p>
   </div>
@@ -111,19 +123,19 @@
     <figcaption>Four ways to wire the same four devices together. Each trades cabling cost against how gracefully it survives a failure.</figcaption>
   </figure>
 
-  <h2>Bus</h2>
+  <h2 id="bus">Bus</h2>
   <p>Every device taps into a single shared cable, like one long hallway that every apartment opens directly onto. It's cheap (minimal cabling) but fragile: a single break anywhere in that hallway cuts off everyone past the break, and every device hears every other device's traffic, so collisions are common. This is how early Ethernet (10BASE2/10BASE5, coaxial cable) actually worked. You won't find a real bus network in production today. It's here mostly so you recognize the term and understand why it was abandoned.</p>
 
-  <h2>Star</h2>
+  <h2 id="star">Star</h2>
   <p>Every device connects to one central point, like every house in a neighborhood having its own private road to a roundabout. This is what a modern switch does: each device gets its own cable back to the switch, so one bad cable only takes down one device. The trade-off is the reverse of bus: if the central switch itself dies, everyone connected to it loses connectivity at once. This is the topology behind virtually every office and home network today.</p>
 
-  <h2>Ring</h2>
+  <h2 id="ring">Ring</h2>
   <p>Each device connects to exactly two neighbors, forming a loop, like a one-way loop road where traffic passes from stop to stop all the way around until it's back where it started. Token Ring and FDDI (Fiber Distributed Data Interface) networks worked this way, literally passing a token around the loop to decide which device could transmit next. A single break in a simple ring stops traffic entirely, so real implementations often used a <em>dual counter-rotating ring</em>: a second loop running the opposite direction as backup. You'll mostly encounter ring topology today in metro and service-provider fiber rings like SONET (Synchronous Optical Network) and SDH (Synchronous Digital Hierarchy), not in office LANs (Local Area Networks).</p>
 
-  <h2>Mesh</h2>
+  <h2 id="mesh">Mesh</h2>
   <p>Every device connects directly to every other device, like a friend group where everyone has everyone else's phone number, with no need to go through a middleman. This is maximally resilient (many paths survive any single failure), but the cabling cost grows fast: for <code>n</code> devices you need <code>n(n-1)/2</code> links, so a full mesh of 10 devices needs 45 connections. In practice you'll see <strong>partial mesh</strong>, where critical core devices (like data center routers) are meshed together while everything else uses star.</p>
 
-  <h2>Hybrid</h2>
+  <h2 id="hybrid">Hybrid</h2>
   <p>Almost every real network is a hybrid. A typical company might use star topology within each office floor (everyone cabled to a floor switch), those floor switches connected in a resilient ring or partial mesh at the building core, and multiple buildings connected to each other over a WAN (Wide Area Network). You mix topologies to get star's easy fault isolation at the edge and mesh/ring's resilience at the core, without paying full-mesh cost everywhere.</p>
 
   <div class="callout">
@@ -133,15 +145,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="osi-vs-tcpip.html">
-    <span class="nav-label">← PREVIOUS</span>
-    OSI Model vs TCP/IP Model
-  </a>
-  <a href="broadcast-vs-collision-domain.html">
-    <span class="nav-label">NEXT →</span>
-    Collision Domain vs Broadcast Domain
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="osi-vs-tcpip.html"><span class="nav-label">&#8592; PREVIOUS</span>OSI Model vs TCP/IP Model</a>
+<a href="broadcast-vs-collision-domain.html"><span class="nav-label">NEXT &#8594;</span>Collision Domain vs Broadcast Domain</a>
 </nav>
 
 <footer class="site-footer">

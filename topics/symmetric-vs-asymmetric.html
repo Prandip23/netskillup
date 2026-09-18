@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/symmetric-vs-asymmetric.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Symmetric vs Asymmetric Encryption · netskillup">
+<meta property="og:description" content="Two fundamentally different ways to keep data secret: one identical shared key, or a public/private key pair, and why real systems almost always use both together.">
+<meta property="og:url" content="https://netskillup.com/topics/symmetric-vs-asymmetric.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Symmetric vs Asymmetric Encryption · netskillup">
+<meta name="twitter:description" content="Two fundamentally different ways to keep data secret: one identical shared key, or a public/private key pair, and why real systems almost always use both together.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--sec);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 06 · Security & Encryption</a>
+    <a class="breadcrumb" href="../index.html#module-security">&#8592; Module 06 &middot; Security &amp; Encryption</a>
     <h1>Symmetric vs Asymmetric Encryption</h1>
     <p class="topic-dek">Two fundamentally different ways to keep data secret, and why almost every real system, including the one securing this page, ends up using both together.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>Two kinds of drop-box</h2>
+  <h2 id="two-kinds-of-drop-box">Two kinds of drop-box</h2>
   <p>Imagine two different kinds of secure drop-box. The first kind has one identical key that both locks and unlocks it: whoever holds a copy of that exact key can put something in or take something out. That's <strong>symmetric encryption</strong>. The same key both encrypts and decrypts, so both sides need an identical copy of it, and getting that copy to the other side safely in the first place is the entire hard problem.</p>
   <p>The second kind works differently. Anyone can walk up and snap the box's lock shut using a key that's published publicly, but only the one person holding the matching private key can ever open it again. That's <strong>asymmetric encryption</strong>: two mathematically related keys, a public one anyone can use to lock, and a private one only the owner holds to unlock.</p>
 
@@ -88,10 +100,10 @@
     <figcaption>Left: the same key travels both directions. Right: the key that locks the message (Bob's public key) is never the key that unlocks it (Bob's private key), and Bob never has to share that private key with anyone.</figcaption>
   </figure>
 
-  <h2>Symmetric encryption</h2>
+  <h2 id="symmetric-encryption">Symmetric encryption</h2>
   <p>Algorithms like AES (Advanced Encryption Standard), commonly used with a 128-bit or 256-bit key, are fast enough to encrypt large amounts of data with almost no performance cost. The problem it doesn't solve is getting that one shared key to the other party in the first place: send it over the same insecure channel you're trying to protect, and anyone watching that channel gets the key too.</p>
 
-  <h2>Asymmetric encryption</h2>
+  <h2 id="asymmetric-encryption">Asymmetric encryption</h2>
   <p>Algorithms like RSA and ECC (Elliptic Curve Cryptography) solve exactly that problem: a public key can be handed out completely openly, since it's only useful for locking, not unlocking. Nobody needs a shared secret arranged in advance. The trade-off is speed: the math involved is far more computationally expensive than symmetric encryption, which makes it impractical for encrypting large amounts of data directly.</p>
 
   <table class="compare-table">
@@ -114,15 +126,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="url-to-page-capstone.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Capstone: What Happens When You Type a URL
-  </a>
-  <a href="pki-certificates.html">
-    <span class="nav-label">NEXT →</span>
-    PKI & Digital Certificates
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="url-to-page-capstone.html"><span class="nav-label">&#8592; PREVIOUS</span>Capstone: What Happens When You Type a URL</a>
+<a href="pki-certificates.html"><span class="nav-label">NEXT &#8594;</span>PKI &amp; Digital Certificates</a>
 </nav>
 
 <footer class="site-footer">

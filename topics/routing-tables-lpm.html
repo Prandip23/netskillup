@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/routing-tables-lpm.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Routing Tables &amp; Longest Prefix Match · netskillup">
+<meta property="og:description" content="What&#39;s actually stored in a routing table, and the rule a router always follows when more than one entry could match a destination: the most specific one wins.">
+<meta property="og:url" content="https://netskillup.com/topics/routing-tables-lpm.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Routing Tables &amp; Longest Prefix Match · netskillup">
+<meta name="twitter:description" content="What&#39;s actually stored in a routing table, and the rule a router always follows when more than one entry could match a destination: the most specific one wins.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
+    <a class="breadcrumb" href="../index.html#module-layer3">&#8592; Module 03 &middot; Layer 3: Network</a>
     <h1>Routing Tables & Longest Prefix Match</h1>
     <p class="topic-dek">A router's whole job comes down to one lookup, repeated for every packet: given this destination address, which entry in my table actually applies?</p>
   </div>
@@ -32,10 +44,10 @@
 
 <article class="topic-body wrap">
 
-  <h2>What's in a routing table entry</h2>
+  <h2 id="what-s-in-a-routing-table-entry">What's in a routing table entry</h2>
   <p>Every entry describes: a destination network (as an address and prefix, like <code>10.0.2.0/24</code>), the <strong>next-hop</strong> address to forward toward, the outgoing interface, and a metric/administrative distance (covered in the next topic) used to break ties between competing sources of routes.</p>
 
-  <h2>When more than one entry matches</h2>
+  <h2 id="when-more-than-one-entry-matches">When more than one entry matches</h2>
   <p>Routing tables are built with prefixes of different lengths, and a single destination IP (Internet Protocol) address can legitimately match several entries at once: a broad <code>10.0.0.0/16</code> entry and a more specific <code>10.0.2.0/24</code> entry could both technically cover the same address. The router always picks the entry with the <strong>longest matching prefix</strong>, meaning the most specific one, regardless of which entry appears first in the table or which one has a "better" metric.</p>
   <p>This is exactly how postal sorting works: a rule for "Springfield, Illinois" is more specific than a rule for "the state of Illinois," and a sorter routes mail using whichever rule matches most precisely, not whichever rule was written first.</p>
 
@@ -67,7 +79,7 @@
     <figcaption>Three entries all technically cover 10.0.2.55. Only the most specific one is ever actually used.</figcaption>
   </figure>
 
-  <h2>The default route</h2>
+  <h2 id="the-default-route">The default route</h2>
   <p>A <code>0.0.0.0/0</code> entry, the <strong>default route</strong> (sometimes called the "route of last resort"), matches literally every address with the least specificity possible: a prefix length of zero. It only gets used when nothing more specific matches anything at all, which is exactly what makes it the right entry for "everywhere else on the internet I don't have an explicit route for."</p>
 
   <div class="callout">
@@ -77,15 +89,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="icmp.html">
-    <span class="nav-label">← PREVIOUS</span>
-    ICMP: Ping & Traceroute Mechanics
-  </a>
-  <a href="admin-distance-metrics.html">
-    <span class="nav-label">NEXT →</span>
-    Administrative Distance & Metrics
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="icmp.html"><span class="nav-label">&#8592; PREVIOUS</span>ICMP: Ping &amp; Traceroute Mechanics</a>
+<a href="admin-distance-metrics.html"><span class="nav-label">NEXT &#8594;</span>Administrative Distance &amp; Metrics</a>
 </nav>
 
 <footer class="site-footer">

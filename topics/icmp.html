@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/icmp.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="ICMP: Ping &amp; Traceroute Mechanics · netskillup">
+<meta property="og:description" content="How ping&#39;s echo request/reply works, and how traceroute abuses the TTL field and ICMP Time Exceeded messages to map every router along a path.">
+<meta property="og:url" content="https://netskillup.com/topics/icmp.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ICMP: Ping &amp; Traceroute Mechanics · netskillup">
+<meta name="twitter:description" content="How ping&#39;s echo request/reply works, and how traceroute abuses the TTL field and ICMP Time Exceeded messages to map every router along a path.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
+    <a class="breadcrumb" href="../index.html#module-layer3">&#8592; Module 03 &middot; Layer 3: Network</a>
     <h1>ICMP: Ping & Traceroute Mechanics</h1>
     <p class="topic-dek">Not TCP (Transmission Control Protocol), not UDP (User Datagram Protocol), no port numbers at all. ICMP is the network's own diagnostic and error-reporting channel, and it's the entire mechanism behind two of the most-used tools in networking.</p>
   </div>
@@ -32,13 +44,13 @@
 
 <article class="topic-body wrap">
 
-  <h2>What ICMP actually is</h2>
+  <h2 id="what-icmp-actually-is">What ICMP actually is</h2>
   <p>ICMP (Internet Control Message Protocol) rides directly inside IP (Internet Protocol; Protocol number 1, from the IPv4 header topic) rather than on top of TCP or UDP. It has no ports, no sessions, nothing to connect to. It exists purely to carry short, structured control and error messages between devices. Every ICMP message has a <strong>type</strong> and <strong>code</strong> that say exactly what it's reporting.</p>
 
-  <h2>Ping: Echo request and reply</h2>
+  <h2 id="ping-echo-request-and-reply">Ping: Echo request and reply</h2>
   <p>Ping is the simplest possible use of ICMP: send a <strong>type 8, Echo Request</strong>, and if the destination is reachable and willing to answer, it sends back a <strong>type 0, Echo Reply</strong>. No data exchanged beyond "are you there," and how long the round trip took.</p>
 
-  <h2>Traceroute: Abusing TTL on purpose</h2>
+  <h2 id="traceroute-abusing-ttl-on-purpose">Traceroute: Abusing TTL on purpose</h2>
   <p>Recall from the IPv4 header topic that every router decrements a packet's TTL (Time to Live) by one, and drops it with a <strong>type 11, Time Exceeded</strong> message if TTL hits zero. Traceroute turns that error condition into a mapping tool: it sends a packet with <code>TTL=1</code>, which dies at the very first router, revealing that router's address in the Time Exceeded reply. Then it sends one with <code>TTL=2</code>, which dies at the second router. It keeps incrementing until a packet finally survives all the way to the destination.</p>
 
   <figure class="diagram-block">
@@ -106,7 +118,7 @@
     </tbody>
   </table>
 
-  <h2>ICMP types and codes, in full</h2>
+  <h2 id="icmp-types-and-codes-in-full">ICMP types and codes, in full</h2>
   <p>Every ICMP message carries both fields: <strong>type</strong> says the general category, <strong>code</strong> narrows it down within that category. Some types only ever have one code; others, like Destination Unreachable, use the code to say exactly <em>why</em> the packet couldn't be delivered.</p>
 
   <table class="compare-table">
@@ -135,15 +147,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="ipv4-fragmentation.html">
-    <span class="nav-label">← PREVIOUS</span>
-    IPv4 Fragmentation
-  </a>
-  <a href="routing-tables-lpm.html">
-    <span class="nav-label">NEXT →</span>
-    Routing Tables & Longest Prefix Match
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="ipv4-fragmentation.html"><span class="nav-label">&#8592; PREVIOUS</span>IPv4 Fragmentation</a>
+<a href="routing-tables-lpm.html"><span class="nav-label">NEXT &#8594;</span>Routing Tables &amp; Longest Prefix Match</a>
 </nav>
 
 <footer class="site-footer">

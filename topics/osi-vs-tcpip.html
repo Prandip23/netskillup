@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/osi-vs-tcpip.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="OSI Model vs TCP/IP Model · netskillup">
+<meta property="og:description" content="Why networking has two competing layer models, what each layer actually does, and how the 7-layer OSI model maps onto the 4-layer TCP/IP model.">
+<meta property="og:url" content="https://netskillup.com/topics/osi-vs-tcpip.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OSI Model vs TCP/IP Model · netskillup">
+<meta name="twitter:description" content="Why networking has two competing layer models, what each layer actually does, and how the 7-layer OSI model maps onto the 4-layer TCP/IP model.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--fund);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 01 · Networking Fundamentals</a>
+    <a class="breadcrumb" href="../index.html#module-fundamentals">&#8592; Module 01 &middot; Networking Fundamentals</a>
     <h1>OSI Model vs TCP/IP Model</h1>
     <p class="topic-dek">Two different ways of slicing up "everything involved in getting data from A to B" into layers. You'll hear both used interchangeably in the real world, so you need to be fluent in both.</p>
   </div>
@@ -32,11 +44,11 @@
 
 <article class="topic-body wrap">
 
-  <h2>Why layer anything at all?</h2>
+  <h2 id="why-layer-anything-at-all">Why layer anything at all?</h2>
   <p>A single web request touches dozens of separate concerns: what the user asked for, how the data is encoded, whether the connection is encrypted, how it's split into packets, which path those packets take across the internet, and how electrical signals move across a physical cable. No single piece of software could sanely handle all of that at once. So networking splits the problem into layers, each one solving exactly one concern and trusting that the layer below it already solved its own.</p>
   <p>A food delivery app works the same way. The app itself only cares about what you ordered. It doesn't think about how your payment gets encrypted, which delivery zone your address falls into, or which street the rider takes to get there. Those are separate systems, each doing one job. OSI and TCP/IP are just two different ways of drawing the lines between those jobs for a network connection. We'll use this same delivery app the whole way down, one layer at a time, so the mapping actually sticks.</p>
 
-  <h2>The OSI Model (7 layers)</h2>
+  <h2 id="the-osi-model-7-layers">The OSI Model (7 layers)</h2>
   <p>OSI (Open Systems Interconnection) is the academic, 7-layer version. Almost nothing implements it exactly as written, but its vocabulary is what engineers actually say out loud: "that's a Layer 2 problem," "we're seeing Layer 7 errors." You need the terms even though the real internet doesn't run on this model directly.</p>
   <ul>
     <li><strong>Layer 7 (Application):</strong> the request itself, the thing the user actually wants. In the app, this is tapping "order" on one large pepperoni pizza. On a network, this is <strong>HTTP</strong> (Hypertext Transfer Protocol), <strong>DNS</strong> (Domain Name System), and <strong>SMTP</strong> (Simple Mail Transfer Protocol) doing the actual asking.</li>
@@ -48,7 +60,7 @@
     <li><strong>Layer 1 (Physical):</strong> the scooter, the road, the fuel. The physical stuff nothing else could happen without. On a network this is voltage on copper, light pulses in <strong>fiber</strong>, and radio waves for <strong>Wi-Fi</strong>, the actual signal on the medium.</li>
   </ul>
 
-  <h2>The TCP/IP Model (4 layers)</h2>
+  <h2 id="the-tcp-ip-model-4-layers">The TCP/IP Model (4 layers)</h2>
   <p>TCP/IP is the model the real internet is actually built on. It's more practical than OSI because it merges layers that, in practice, get handled by the same piece of software anyway.</p>
   <ul>
     <li><strong>Application:</strong> merges OSI's Application, Presentation, and Session. <strong>HTTP</strong>, <strong>DNS</strong>, <strong>TLS</strong>, and <strong>SSH</strong> (Secure Shell) all live here: the request, its formatting/encryption, and its session tracking, together.</li>
@@ -133,7 +145,7 @@
     <figcaption>OSI's Application, Presentation, and Session layers all collapse into one TCP/IP Application layer; Data Link and Physical collapse into Network Access.</figcaption>
   </figure>
 
-  <h2>Side by side</h2>
+  <h2 id="side-by-side">Side by side</h2>
   <table class="compare-table">
     <thead>
       <tr><th>OSI Layer</th><th>TCP/IP Layer</th><th>Delivery-app equivalent</th><th>Examples</th></tr>
@@ -153,12 +165,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <span></span>
-  <a href="network-topologies.html">
-    <span class="nav-label">NEXT →</span>
-    Network Topologies
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="../index.html"><span class="nav-label">&#8592; PREVIOUS</span>All topics</a>
+<a href="network-topologies.html"><span class="nav-label">NEXT &#8594;</span>Network Topologies</a>
 </nav>
 
 <footer class="site-footer">

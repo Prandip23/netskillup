@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/stp-8021d.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Spanning Tree Protocol (802.1D) · netskillup">
+<meta property="og:description" content="Why redundant switch links cause an infinite Layer 2 loop, and how STP elects a root bridge and blocks just enough ports to stop it without removing the backup link.">
+<meta property="og:url" content="https://netskillup.com/topics/stp-8021d.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spanning Tree Protocol (802.1D) · netskillup">
+<meta name="twitter:description" content="Why redundant switch links cause an infinite Layer 2 loop, and how STP elects a root bridge and blocks just enough ports to stop it without removing the backup link.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l2);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 02 · Layer 2: Data Link</a>
+    <a class="breadcrumb" href="../index.html#module-layer2">&#8592; Module 02 &middot; Layer 2: Data Link</a>
     <h1>Spanning Tree Protocol (802.1D)</h1>
     <p class="topic-dek">Redundant links are good for resilience and terrible for Ethernet, which has no TTL (Time To Live). STP is what keeps the second one from destroying the network.</p>
   </div>
@@ -32,11 +44,11 @@
 
 <article class="topic-body wrap">
 
-  <h2>Why a backup cable can take down a whole network</h2>
+  <h2 id="why-a-backup-cable-can-take-down-a-whole-network">Why a backup cable can take down a whole network</h2>
   <p>Wiring two switches together twice sounds like sensible redundancy. On an IP (Internet Protocol) network it would be, because IP packets carry a TTL that gets decremented and eventually killed off. An Ethernet frame carries no such thing. If three switches are cabled in a triangle with no loop prevention, a single broadcast frame gets flooded out every other port, arrives at the next switch, gets flooded again, and keeps circulating forever, doubling in volume every trip around the loop. This is a <strong>broadcast storm</strong>, and it can saturate a network in seconds.</p>
   <p>Picture three neighborhoods connected by three roads forming a loop, with no traffic authority. One piece of junk mail addressed to "everyone" gets photocopied and forwarded at every intersection, forever, in both directions. The fix isn't removing a road, it's temporarily closing exactly one of them until it's needed.</p>
 
-  <h2>How STP picks which link to close</h2>
+  <h2 id="how-stp-picks-which-link-to-close">How STP picks which link to close</h2>
   <ol>
     <li><strong>Elect a root bridge.</strong> Every switch advertises a Bridge ID (priority + MAC, or Media Access Control, address) in a <strong>BPDU</strong> (Bridge Protocol Data Unit). The switch with the lowest Bridge ID becomes the root of the tree everyone else measures distance from.</li>
     <li><strong>Every other switch picks a root port.</strong> The port with the lowest-cost path back to the root bridge stays forwarding.</li>
@@ -68,7 +80,7 @@
     <figcaption>SW2 and SW3 both have a path to the root already. The direct link between them stays physically connected but blocked, ready to take over if either forwarding link fails.</figcaption>
   </figure>
 
-  <h2>Port states and why convergence is slow</h2>
+  <h2 id="port-states-and-why-convergence-is-slow">Port states and why convergence is slow</h2>
   <p>A port doesn't jump straight to forwarding. It steps through <strong>Blocking → Listening → Learning → Forwarding</strong>, spending time in each state so the switch can rebuild its view of the topology safely before trusting it with real traffic. Combined with the standard timers, a topology change under classic 802.1D can take <strong>30–50 seconds</strong> to fully converge, an outage that's very noticeable to anyone using the network at the time.</p>
 
   <table class="compare-table">
@@ -89,15 +101,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="native-vlan-hopping.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Native VLAN & VLAN Hopping
-  </a>
-  <a href="rstp-mst.html">
-    <span class="nav-label">NEXT →</span>
-    RSTP & MST
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="native-vlan-hopping.html"><span class="nav-label">&#8592; PREVIOUS</span>Native VLAN &amp; VLAN Hopping</a>
+<a href="rstp-mst.html"><span class="nav-label">NEXT &#8594;</span>RSTP &amp; MST</a>
 </nav>
 
 <footer class="site-footer">

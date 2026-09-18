@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/duplex.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Duplex: Half vs Full · netskillup">
+<meta property="og:description" content="Half-duplex vs full-duplex explained through walkie-talkies and phone calls, and why it made collisions disappear from modern networks.">
+<meta property="og:url" content="https://netskillup.com/topics/duplex.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Duplex: Half vs Full · netskillup">
+<meta name="twitter:description" content="Half-duplex vs full-duplex explained through walkie-talkies and phone calls, and why it made collisions disappear from modern networks.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--fund);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 01 · Networking Fundamentals</a>
+    <a class="breadcrumb" href="../index.html#module-fundamentals">&#8592; Module 01 &middot; Networking Fundamentals</a>
     <h1>Duplex: Half vs Full</h1>
     <p class="topic-dek">Whether a link can carry traffic in both directions at the same instant, and the single biggest reason collisions basically don't happen anymore.</p>
   </div>
@@ -32,10 +44,10 @@
 
 <article class="topic-body wrap">
 
-  <h2>Half-duplex: Walkie-talkies</h2>
+  <h2 id="half-duplex-walkie-talkies">Half-duplex: Walkie-talkies</h2>
   <p>On a half-duplex link, only one side can transmit at a time. If both sides try to talk at once, the signals collide and both transmissions are lost. This is exactly how a walkie-talkie works: you press the button, say your piece, say "over," and only then does the other person reply. You physically cannot both talk and clearly hear the other person at the same moment. Old hub-based Ethernet and early wireless links worked this way, and it's the entire reason collision domains and CSMA/CD (Carrier Sense Multiple Access with Collision Detection: the "listen before you talk, and detect if you collided" logic) had to exist in the first place.</p>
 
-  <h2>Full-duplex: A phone call</h2>
+  <h2 id="full-duplex-a-phone-call">Full-duplex: A phone call</h2>
   <p>On a full-duplex link, both sides can transmit and receive at the exact same time, over separate transmit and receive paths (on twisted-pair Ethernet, literally separate wire pairs). This is a phone call: you can talk while the other person is talking, interrupt, and hear them simultaneously. There's no "over." Modern switched Ethernet is full-duplex by default, which is why collisions are essentially a non-issue on any current network: there's no shared medium left to collide on.</p>
 
   <figure class="diagram-block">
@@ -129,15 +141,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="hubs-switches-routers.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Hubs vs Switches vs Routers
-  </a>
-  <a href="ethernet-frame-mac.html">
-    <span class="nav-label">NEXT →</span>
-    Ethernet Frame & MAC Addressing
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="hubs-switches-routers.html"><span class="nav-label">&#8592; PREVIOUS</span>Hubs vs Switches vs Routers</a>
+<a href="ethernet-frame-mac.html"><span class="nav-label">NEXT &#8594;</span>Ethernet Frame &amp; MAC Addressing</a>
 </nav>
 
 <footer class="site-footer">

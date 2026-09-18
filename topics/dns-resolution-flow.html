@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/dns-resolution-flow.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="DNS Resolution Flow · netskillup">
+<meta property="og:description" content="What actually happens between typing a name and getting back an IP address: recursive queries, iterative queries, and how a resolver walks the DNS hierarchy.">
+<meta property="og:url" content="https://netskillup.com/topics/dns-resolution-flow.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DNS Resolution Flow · netskillup">
+<meta name="twitter:description" content="What actually happens between typing a name and getting back an IP address: recursive queries, iterative queries, and how a resolver walks the DNS hierarchy.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--app);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 05 · Application Layer & Name Resolution</a>
+    <a class="breadcrumb" href="../index.html#module-app-naming">&#8592; Module 05 &middot; Application Layer &amp; Name Resolution</a>
     <h1>DNS Resolution Flow</h1>
     <p class="topic-dek">One question from you turns into a chain of increasingly specific questions someone else asks on your behalf, walking the DNS (Domain Name System) hierarchy one level at a time.</p>
   </div>
@@ -32,9 +44,12 @@
 
 <article class="topic-body wrap">
 
-  <h2>A concierge who does the legwork for you</h2>
-  <p>A recursive resolver, typically your ISP's (Internet Service Provider's) or a public one like 8.8.8.8, acts like a concierge. You ask them one question and walk away; they go ask a chain of increasingly specific direction-givers, root, then TLD (Top-Level Domain), then authoritative, until they actually have the answer, then bring the whole thing back to you as a single reply. You never talk to root or TLD servers directly. The resolver does.</p>
-  <p>That distinction has a name. Your query to the resolver is <strong>recursive</strong>: you're asking it to fully resolve the name and hand you a final answer, not a partial one. Every query the resolver then sends onward is <strong>iterative</strong>: each server it asks is allowed to reply "I don't know the final answer, but here's who to ask next" instead of doing any of the legwork itself.</p>
+  <p class="topic-answer"><strong>Short answer:</strong> A client usually asks a recursive resolver for a final answer. The resolver uses cached records, follows referrals itself, or forwards the question to another resolver. A successful answer may contain an address, an alias, or other record types, not just an IP address.</p>
+  <p class="topic-prerequisites">Before this: <a href="dns-hierarchy-records.html">DNS hierarchy and record types</a>.</p>
+
+  <h2 id="a-concierge-who-does-the-legwork-for-you">A concierge who does the legwork for you</h2>
+  <p>A recursive resolver, perhaps your organization's DNS service, your ISP's (Internet Service Provider's), or a public one like 8.8.8.8, acts like a concierge. You ask one question; they consult their notebook or ask others and return an answer. In the cold lookup below, with no useful cached records and no forwarding, they ask increasingly specific direction-givers: root, then TLD (Top-Level Domain), then authoritative. An ordinary stub client leaves that work to its resolver.</p>
+  <p>That distinction has a name. The client requests <strong>recursion</strong>: resolve the name and return an answer or error. In the illustrated hierarchy walk, the resolver sends <strong>iterative</strong> queries: a server can supply an answer or a referral to the next authority. A forwarding resolver instead asks another recursive resolver to finish the job, like one concierge consulting another. Its onward query need not be iterative.</p>
 
   <figure class="diagram-block">
     <svg viewBox="0 0 640 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of a client asking a recursive resolver to resolve a name, and the resolver making iterative queries to a root server, a TLD server, and an authoritative server in turn before returning the final answer to the client">
@@ -130,7 +145,7 @@
         }
       ]]></script>
     </svg>
-    <figcaption>Five hops for a completely cold lookup. In practice, caching means most of these never happen at all.</figcaption>
+    <figcaption>Five logical stages, not five network hops or five packets. This simplified cold lookup omits referral replies, retries, and possible alias lookups. Cached answers or delegations can skip stages.</figcaption>
   </figure>
 
   <table class="compare-table">
@@ -146,22 +161,42 @@
     </tbody>
   </table>
 
+  <h2 id="read-a-dns-answer">Read a DNS answer</h2>
+  <p>Consider this illustrative record for a documentation-only hostname. It is not a live lookup or a command result:</p>
+  <pre tabindex="0" role="region" aria-label="Illustrative DNS record"><code>portal.example.  300  IN  A  192.0.2.80</code></pre>
+  <p><code>portal.example.</code> is the fully qualified name; <code>300</code> is the TTL in seconds; <code>IN</code> is the Internet class; <code>A</code> means an IPv4 address. The address is from a documentation range. If a resolver cached this answer 40 seconds ago, a response might carry about 260 seconds of remaining TTL. The concierge's notebook keeps the answer and an expiry time, not a permanent guarantee.</p>
+  <p>To query your configured resolver on Windows, use <code>Resolve-DnsName example.com -Type A -DnsOnly</code>. On Linux with BIND's dig installed, use <code>dig example.com A</code>. Real answers and timing vary. In dig's response flags, <code>rd</code> means recursion was requested, <code>ra</code> means the server supports recursion, and <code>aa</code> marks an authoritative answer. Neither <code>rd</code> nor <code>ra</code> proves that a fresh hierarchy walk occurred.</p>
+
+  <h2 id="distinguish-dns-failures">Distinguish an absent name from a failed lookup</h2>
+  <table class="compare-table">
+    <thead><tr><th>Result</th><th>Meaning</th><th>Next check</th></tr></thead>
+    <tbody>
+      <tr><td>NXDOMAIN</td><td>The queried name, or the final target of a CNAME chain, does not exist according to the answer</td><td>Check spelling, aliases, search suffixes, the authoritative zone, and whether a VPN uses private DNS.</td></tr>
+      <tr><td>NODATA: NOERROR with no requested records, not a referral</td><td>The name exists but has no record of that type. NODATA is not a separate response code.</td><td>Compare A and AAAA and inspect the answer and authority sections. An empty answer alone can also be a referral.</td></tr>
+      <tr><td>SERVFAIL</td><td>The resolver could not complete the lookup</td><td>Check resolver logs, authoritative reachability, delegation, and DNSSEC validation. It does not mean the name is absent.</td></tr>
+      <tr><td>Timeout</td><td>No response arrived within the client's wait</td><td>Check the configured resolver and permitted UDP/TCP 53 path. The resolver may be unreachable, filtering, or still waiting upstream.</td></tr>
+    </tbody>
+  </table>
+  <p>A concierge who reports "no such office" (NXDOMAIN) differs from one who cannot contact the directory (SERVFAIL), or never answers you (timeout). Negative answers can also be cached under rules based on the zone's SOA record. Browsers may use DNS over HTTPS and a different resolver from a command-line tool, so compare the actual query path before calling two answers inconsistent.</p>
+
   <div class="callout">
     <span class="callout-label">WHY MOST QUERIES NEVER ACTUALLY REACH THE ROOT</span>
-    <p>Resolvers cache answers for as long as each record's TTL (Time to Live) allows, and root/TLD server addresses in particular barely ever change, so they get cached hard. In practice, the vast majority of real-world lookups are answered straight from a resolver's cache after step 1, and the full five-step walk in the diagram above only happens for a genuinely cold, uncached name.</p>
+    <p>Resolvers cache answers and delegations subject to their TTLs and local policy. Even when the requested A record is missing, a cached delegation may let the resolver start at the authoritative server instead of the root. How often queries hit cache depends on traffic and TTLs; an unfamiliar name does not necessarily mean an entirely cold resolver.</p>
   </div>
+
+  <h2 id="related-and-sources">Related topics and sources</h2>
+  <p>Continue with <a href="dhcp-dora.html">how DHCP supplies resolver settings</a> or <a href="url-to-page-capstone.html">DNS in a complete page load</a>.</p>
+  <ul>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc1034.html">RFC 1034: DNS concepts and resolution</a></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc1035.html#section-4.1">RFC 1035, section 4.1: DNS message fields</a></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc2308.html">RFC 2308: negative caching</a></li>
+  </ul>
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="dns-hierarchy-records.html">
-    <span class="nav-label">← PREVIOUS</span>
-    DNS Hierarchy & Record Types
-  </a>
-  <a href="dhcp-dora.html">
-    <span class="nav-label">NEXT →</span>
-    DHCP Process (DORA)
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="dns-hierarchy-records.html"><span class="nav-label">&#8592; PREVIOUS</span>DNS Hierarchy &amp; Record Types</a>
+<a href="dhcp-dora.html"><span class="nav-label">NEXT &#8594;</span>DHCP Process (DORA)</a>
 </nav>
 
 <footer class="site-footer">

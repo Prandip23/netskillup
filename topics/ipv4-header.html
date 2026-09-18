@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/ipv4-header.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="IPv4 Header Structure · netskillup">
+<meta property="og:description" content="Field by field, what&#39;s actually inside an IPv4 header: TTL, Protocol, Flags/Fragment Offset, and the rest, and what each one is for.">
+<meta property="og:url" content="https://netskillup.com/topics/ipv4-header.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="IPv4 Header Structure · netskillup">
+<meta name="twitter:description" content="Field by field, what&#39;s actually inside an IPv4 header: TTL, Protocol, Flags/Fragment Offset, and the rest, and what each one is for.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
+    <a class="breadcrumb" href="../index.html#module-layer3">&#8592; Module 03 &middot; Layer 3: Network</a>
     <h1>IPv4 Header Structure</h1>
     <p class="topic-dek">Every router between a packet and its destination reads exactly these fields, and nothing else, to decide what to do with it.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>The header, field by field</h2>
+  <h2 id="the-header-field-by-field">The header, field by field</h2>
   <p>A router doesn't care what's inside a packet's payload, HTTP (Hypertext Transfer Protocol) request or DNS (Domain Name System) query or anything else. It only reads the IPv4 header wrapped around that payload, and mostly just a handful of fields in it.</p>
 
   <figure class="diagram-block">
@@ -74,7 +86,7 @@
     <figcaption>The IPv4 header. Everything below the first row is 32 bits wide, exactly like the header diagrams you'll see in any packet capture tool. The payload isn't part of the header itself, but it's what the header exists to wrap.</figcaption>
   </figure>
 
-  <h2>Every field, decoded</h2>
+  <h2 id="every-field-decoded">Every field, decoded</h2>
   <p>Field by field, in the order they appear in the diagram above:</p>
 
   <table class="compare-table">
@@ -99,7 +111,7 @@
     </tbody>
   </table>
 
-  <h2>The fields that actually drive behavior</h2>
+  <h2 id="the-fields-that-actually-drive-behavior">The fields that actually drive behavior</h2>
   <ul>
     <li><strong>TTL (Time to Live):</strong> starts at some value (commonly 64 or 128) and is decremented by <strong>every</strong> router the packet passes through. Hit zero, and the packet is dropped, with an ICMP (Internet Control Message Protocol) Time Exceeded message sent back. This single field is the entire mechanism behind <code>traceroute</code>, covered in the next topic.</li>
     <li><strong>Protocol:</strong> tells the receiving host what's riding inside the payload: <code>6</code> means TCP (Transmission Control Protocol), <code>17</code> means UDP (User Datagram Protocol), <code>1</code> means ICMP is next.</li>
@@ -115,15 +127,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="ipv4-subnetting-cidr-vlsm.html">
-    <span class="nav-label">← PREVIOUS</span>
-    IPv4 Addressing, CIDR & VLSM
-  </a>
-  <a href="ipv6-basics.html">
-    <span class="nav-label">NEXT →</span>
-    IPv6 Addressing & Header Basics
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="ipv4-subnetting-cidr-vlsm.html"><span class="nav-label">&#8592; PREVIOUS</span>IPv4 Addressing, CIDR &amp; VLSM</a>
+<a href="ipv6-basics.html"><span class="nav-label">NEXT &#8594;</span>IPv6 Addressing &amp; Header Basics</a>
 </nav>
 
 <footer class="site-footer">

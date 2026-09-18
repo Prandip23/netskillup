@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/etherchannel.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="EtherChannel / Link Aggregation · netskillup">
+<meta property="og:description" content="How bundling several physical links into one logical link gives you more bandwidth and redundancy without STP blocking any of them, plus PAgP vs LACP.">
+<meta property="og:url" content="https://netskillup.com/topics/etherchannel.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="EtherChannel / Link Aggregation · netskillup">
+<meta name="twitter:description" content="How bundling several physical links into one logical link gives you more bandwidth and redundancy without STP blocking any of them, plus PAgP vs LACP.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l2);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 02 · Layer 2: Data Link</a>
+    <a class="breadcrumb" href="../index.html#module-layer2">&#8592; Module 02 &middot; Layer 2: Data Link</a>
     <h1>EtherChannel / Link Aggregation</h1>
     <p class="topic-dek">Instead of one cable and a blocked backup, bundle several cables into one link that spanning tree treats as if it were only ever one.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>The problem: STP has to block your extra bandwidth</h2>
+  <h2 id="the-problem-stp-has-to-block-your-extra-bandwidth">The problem: STP has to block your extra bandwidth</h2>
   <p>Cable two switches together with two separate physical links and spanning tree sees exactly what the last two topics described: a loop. It picks one link to forward on and <strong>blocks</strong> the other outright, sitting idle unless the first one fails. You paid for double the bandwidth and STP (Spanning Tree Protocol) is only letting you use half of it.</p>
   <p><strong>EtherChannel</strong> (the generic term is <em>link aggregation</em>) solves this by bundling multiple physical links into a single logical link before STP ever sees them. Picture a toll plaza widened from one lane to four: instead of building a whole second redundant highway that traffic control has to keep closed, you widen the one road everyone already agrees is open.</p>
 
@@ -68,10 +80,10 @@
     <figcaption>Four physical links act as one EtherChannel. Lose one member and the bundle keeps running on the rest, no STP recalculation needed.</figcaption>
   </figure>
 
-  <h2>How traffic is actually split across the links</h2>
+  <h2 id="how-traffic-is-actually-split-across-the-links">How traffic is actually split across the links</h2>
   <p>A single flow (say, one file transfer) still rides entirely on one member link. EtherChannel doesn't slice individual frames across cables. What it does is hash each flow, based on some combination of source/destination MAC (Media Access Control) address, IP (Internet Protocol) address, or port number depending on configuration, to consistently pick <em>which</em> member link that flow rides on. Different flows land on different links, and in aggregate, traffic spreads across the whole bundle.</p>
 
-  <h2>PAgP vs. LACP</h2>
+  <h2 id="pagp-vs-lacp">PAgP vs. LACP</h2>
   <p>Two link members won't bundle themselves just because they're plugged in with matching config. A control protocol negotiates the bundle and continuously verifies every member is still healthy and consistently configured.</p>
   <ul>
     <li><strong>PAgP</strong> (Port Aggregation Protocol): Cisco proprietary, older.</li>
@@ -85,15 +97,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="rstp-mst.html">
-    <span class="nav-label">← PREVIOUS</span>
-    RSTP & MST
-  </a>
-  <a href="port-security.html">
-    <span class="nav-label">NEXT →</span>
-    Switch Port Security
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="rstp-mst.html"><span class="nav-label">&#8592; PREVIOUS</span>RSTP &amp; MST</a>
+<a href="port-security.html"><span class="nav-label">NEXT &#8594;</span>Switch Port Security</a>
 </nav>
 
 <footer class="site-footer">

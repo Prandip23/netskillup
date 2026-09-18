@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/vlans-trunking.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="VLANs &amp; 802.1Q Trunking · netskillup">
+<meta property="og:description" content="How VLANs split one physical switch into multiple logical broadcast domains, the 802.1Q tag that makes it possible, and the difference between an access port and a trunk port.">
+<meta property="og:url" content="https://netskillup.com/topics/vlans-trunking.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="VLANs &amp; 802.1Q Trunking · netskillup">
+<meta name="twitter:description" content="How VLANs split one physical switch into multiple logical broadcast domains, the 802.1Q tag that makes it possible, and the difference between an access port and a trunk port.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l2);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 02 · Layer 2: Data Link</a>
+    <a class="breadcrumb" href="../index.html#module-layer2">&#8592; Module 02 &middot; Layer 2: Data Link</a>
     <h1>VLANs & 802.1Q Trunking</h1>
     <p class="topic-dek">One physical switch, split into several logical networks that can't hear each other's broadcasts, without running separate cabling for each one.</p>
   </div>
@@ -32,17 +44,17 @@
 
 <article class="topic-body wrap">
 
-  <h2>Why split one switch into several networks</h2>
+  <h2 id="why-split-one-switch-into-several-networks">Why split one switch into several networks</h2>
   <p>An earlier topic (<a href="broadcast-vs-collision-domain.html">Collision Domain vs Broadcast Domain</a>) covered why keeping broadcast domains small matters. The obvious way to get multiple broadcast domains is multiple physical switches, one per department. That's expensive and inflexible: move someone to a new team and you're re-cabling a desk.</p>
   <p>A <strong>VLAN</strong> (Virtual LAN) gets the same isolation in software. It's like one office building where every floor has its own badge-access elevator bank: everyone shares the same building and wiring, but Finance's badge doesn't open Engineering's floor, and an announcement made on one floor doesn't play on another. A switch can have VLAN 10 on some ports and VLAN 20 on others, and traffic between them stays fully separated unless something at Layer 3 deliberately connects them.</p>
 
-  <h2>Access ports vs. trunk ports</h2>
+  <h2 id="access-ports-vs-trunk-ports">Access ports vs. trunk ports</h2>
   <ul>
     <li><strong>Access port:</strong> belongs to exactly one VLAN. This is what an end device (a laptop, a printer, a phone) plugs into. The device has no idea VLANs even exist, it just sends normal untagged frames.</li>
     <li><strong>Trunk port:</strong> carries traffic for <em>multiple</em> VLANs over a single physical link, typically between two switches or a switch and a router. To keep the VLANs distinguishable in transit, each frame gets tagged with which VLAN it belongs to.</li>
   </ul>
 
-  <h2>The 802.1Q tag</h2>
+  <h2 id="the-802-1q-tag">The 802.1Q tag</h2>
   <p>802.1Q defines a 4-byte tag inserted into the Ethernet frame right after the source MAC (Media Access Control) address. It carries a 12-bit VLAN ID, giving room for VLANs 1 through 4094.</p>
 
   <figure class="diagram-block">
@@ -85,15 +97,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="arp.html">
-    <span class="nav-label">← PREVIOUS</span>
-    ARP
-  </a>
-  <a href="native-vlan-hopping.html">
-    <span class="nav-label">NEXT →</span>
-    Native VLAN & VLAN Hopping
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="arp.html"><span class="nav-label">&#8592; PREVIOUS</span>ARP</a>
+<a href="native-vlan-hopping.html"><span class="nav-label">NEXT &#8594;</span>Native VLAN &amp; VLAN Hopping</a>
 </nav>
 
 <footer class="site-footer">

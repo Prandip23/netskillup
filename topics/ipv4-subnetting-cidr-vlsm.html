@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/ipv4-subnetting-cidr-vlsm.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="IPv4 Addressing, CIDR &amp; VLSM · netskillup">
+<meta property="og:description" content="What a subnet mask actually does, how CIDR notation replaced rigid address classes, and how VLSM lets you size each subnet to what it actually needs instead of wasting addresses.">
+<meta property="og:url" content="https://netskillup.com/topics/ipv4-subnetting-cidr-vlsm.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="IPv4 Addressing, CIDR &amp; VLSM · netskillup">
+<meta name="twitter:description" content="What a subnet mask actually does, how CIDR notation replaced rigid address classes, and how VLSM lets you size each subnet to what it actually needs instead of wasting addresses.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
+    <a class="breadcrumb" href="../index.html#module-layer3">&#8592; Module 03 &middot; Layer 3: Network</a>
     <h1>IPv4 Addressing, CIDR & VLSM</h1>
     <p class="topic-dek">An IP (Internet Protocol) address is only half the story. The other half is the mask that decides where the network ends and the host begins.</p>
   </div>
@@ -32,11 +44,14 @@
 
 <article class="topic-body wrap">
 
-  <h2>Network bits and host bits</h2>
+  <p class="topic-answer"><strong>Short answer:</strong> A prefix sets the subnet boundary. A /26 leaves 6 host bits, giving 64 addresses and ordinarily 62 usable hosts. VLSM uses different prefix lengths inside one parent block so each subnet fits its requirements.</p>
+  <p class="topic-prerequisites">Before this: <a href="osi-vs-tcpip.html">OSI and TCP/IP</a> and <a href="hubs-switches-routers.html">switches and routers</a>.</p>
+
+  <h2 id="network-bits-and-host-bits">Network bits and host bits</h2>
   <p>An IPv4 address is 32 bits, written as four decimal bytes like <code>192.168.10.37</code>. On its own, that number doesn't tell you anything about which network the device is on. You need a second number, the <strong>subnet mask</strong>, to split those 32 bits into a network portion and a host portion.</p>
   <p>Think of a whole office building's street address as the network part, and each individual unit number as the host part. <code>192.168.10.0/24</code> means the first 24 bits are the "building," and the remaining 8 bits are free for up to 254 "units" inside it.</p>
 
-  <h2>CIDR replaced fixed classes</h2>
+  <h2 id="cidr-replaced-fixed-classes">CIDR replaced fixed classes</h2>
   <p>IPv4 originally split addresses into fixed-size classes (A, B, C), each with a mask baked into the address range itself. That was inflexible, and wasteful for anyone who needed a network with, say, 40 hosts, but not 254. <strong>CIDR</strong> (Classless Inter-Domain Routing) replaced that with the <code>/prefix</code> notation you actually use today: the number after the slash is just how many bits are network bits, period, independent of any class.</p>
 
   <table class="compare-table">
@@ -46,19 +61,20 @@
     <tbody>
       <tr><td>/24</td><td>255.255.255.0</td><td>254</td></tr>
       <tr><td>/25</td><td>255.255.255.128</td><td>126</td></tr>
+      <tr><td>/26</td><td>255.255.255.192</td><td>62</td></tr>
       <tr><td>/27</td><td>255.255.255.224</td><td>30</td></tr>
       <tr><td>/28</td><td>255.255.255.240</td><td>14</td></tr>
       <tr><td>/30</td><td>255.255.255.252</td><td>2 (point-to-point link)</td></tr>
     </tbody>
   </table>
 
-  <h2>VLSM: Sizing each subnet to what it actually needs</h2>
-  <p><strong>VLSM</strong> (Variable Length Subnet Masking) is simply subnetting a subnet, allowing different-sized masks across the same address block instead of forcing every subnet to be identical. Handing a 200-person office and a 2-device point-to-point router link the same fixed /26 block wastes dozens of addresses on the router link. VLSM lets the office keep a large block while the router link gets carved down to a /30.</p>
+  <h2 id="vlsm-sizing-each-subnet-to-what-it-actually-needs">VLSM: Sizing each subnet to what it actually needs</h2>
+  <p><strong>VLSM</strong> (Variable Length Subnet Masking) allows different-sized subnets inside the same address block. Suppose the main office needs 50 host addresses, a branch needs 25, and a router link needs 2, including any interface and gateway addresses. Giving all three a /26 would waste space. Instead, allocate a /26, a /27, and a /30, largest first. In the building analogy, each subnet is a wing with its own range of unit numbers; a small wing doesn't need as many numbers as a large one.</p>
 
   <figure class="diagram-block">
     <svg viewBox="0 0 640 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of a /24 network split via VLSM into a /26 for a large office, a /27 for a smaller office, and a /30 for a point-to-point router link">
       <rect x="20" y="20" width="600" height="40" rx="4" fill="none" stroke="#8d9bb3" stroke-width="1.5"/>
-      <text x="320" y="45" text-anchor="middle" font-size="11" fill="#cbd4e3">10.0.1.0 / 24, 254 addresses to divide up</text>
+      <text x="320" y="45" text-anchor="middle" font-size="11" fill="#cbd4e3">10.0.1.0 / 24, 256 total addresses to divide up</text>
 
       <line x1="120" y1="60" x2="120" y2="90" stroke="#3a4a6b" stroke-width="1.2"/>
       <line x1="320" y1="60" x2="320" y2="90" stroke="#3a4a6b" stroke-width="1.2"/>
@@ -81,22 +97,45 @@
     <figcaption>Same original block, three differently sized subnets, each one no bigger than it needs to be.</figcaption>
   </figure>
 
+  <h2 id="worked-allocation">Worked allocation: boundaries matter</h2>
+  <p>A /26 advances in blocks of 64, a /27 in blocks of 32, and a /30 in blocks of 4. Start each subnet on a matching boundary. The network address identifies the wing; the broadcast address reaches the whole wing. Neither is an ordinary host address.</p>
+  <table class="compare-table" id="vlsm-allocation">
+    <thead><tr><th>Requirement</th><th>Network/prefix</th><th>Usable range</th><th>Broadcast</th><th>Capacity</th></tr></thead>
+    <tbody>
+      <tr><td>50 hosts</td><td>10.0.1.0/26</td><td>10.0.1.1 to 10.0.1.62</td><td>10.0.1.63</td><td>62</td></tr>
+      <tr><td>25 hosts</td><td>10.0.1.64/27</td><td>10.0.1.65 to 10.0.1.94</td><td>10.0.1.95</td><td>30</td></tr>
+      <tr><td>2 hosts</td><td>10.0.1.96/30</td><td>10.0.1.97 to 10.0.1.98</td><td>10.0.1.99</td><td>2</td></tr>
+    </tbody>
+  </table>
+  <p>The allocation consumes 100 of the parent's 256 addresses, leaving 156 unallocated. The remainder is not one CIDR subnet: <code>10.0.1.100/30</code>, <code>10.0.1.104/29</code>, <code>10.0.1.112/28</code>, and <code>10.0.1.128/25</code> cover it without overlaps. A new /27 cannot start at .100; its next aligned start is .128.</p>
+
+  <h2 id="check-a-host">Check one host's configuration</h2>
+  <p>For <code>10.0.1.70/27</code>, the last mask byte is <code>224</code>. Bitwise AND gives <code>70 &amp; 224 = 64</code>, so the host belongs to <code>10.0.1.64/27</code>. Its ordinary usable range is .65 through .94. A default gateway of .65 fits; .97 belongs to the router-link subnet instead.</p>
+  <table class="compare-table">
+    <thead><tr><th>Symptom</th><th>Check</th><th>Interpretation</th></tr></thead>
+    <tbody>
+      <tr><td>A host can reach some neighbors but not others</td><td>Compare address, prefix, and gateway on both hosts</td><td>A mismatched mask changes which destinations are treated as on-link. It is one possible cause, not proof by itself.</td></tr>
+      <tr><td>A proposed subnet overlaps another</td><td>Calculate each network through broadcast range</td><td>Disjoint ranges, not different-looking prefix labels, establish separate allocations.</td></tr>
+    </tbody>
+  </table>
+
   <div class="callout">
     <span class="callout-label">THE RULE THAT TRIPS PEOPLE UP</span>
-    <p>Every subnet loses two usable addresses: the first (the network address itself) and the last (the broadcast address). A /30 has 4 total addresses but only 2 usable, which is exactly why point-to-point router links use /30 (or an even tighter /31, a special case designed for exactly this) instead of anything bigger.</p>
+    <p>Ordinary IPv4 subnets reserve the first address for the network and the last for broadcast. A /30 therefore has 4 total addresses and 2 usable. Two exceptions matter: a /31 on a supported point-to-point link uses both addresses as endpoints (RFC 3021), and a /32 identifies one address, often as a host route or loopback address. Do not apply the "subtract two" rule blindly to these prefixes.</p>
   </div>
+
+  <h2 id="related-and-sources">Related topics and sources</h2>
+  <p>Continue with <a href="routing-tables-lpm.html">longest prefix match</a>, <a href="arp.html">ARP and on-link delivery</a>, or <a href="inter-vlan-routing.html">inter-VLAN routing</a>.</p>
+  <ul>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc4632.html">RFC 4632: Classless Inter-Domain Routing</a></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc3021.html">RFC 3021: 31-bit prefixes on IPv4 point-to-point links</a></li>
+  </ul>
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="port-security.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Switch Port Security
-  </a>
-  <a href="ipv4-header.html">
-    <span class="nav-label">NEXT →</span>
-    IPv4 Header Structure
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="port-security.html"><span class="nav-label">&#8592; PREVIOUS</span>Switch Port Security</a>
+<a href="ipv4-header.html"><span class="nav-label">NEXT &#8594;</span>IPv4 Header Structure</a>
 </nav>
 
 <footer class="site-footer">

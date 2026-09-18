@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/dhcp-dora.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="DHCP Process (DORA) · netskillup">
+<meta property="og:description" content="How a device with no IP address yet gets one automatically: Discover, Offer, Request, Acknowledge, and why two of those four steps are broadcasts.">
+<meta property="og:url" content="https://netskillup.com/topics/dhcp-dora.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DHCP Process (DORA) · netskillup">
+<meta name="twitter:description" content="How a device with no IP address yet gets one automatically: Discover, Offer, Request, Acknowledge, and why two of those four steps are broadcasts.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--app);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 05 · Application Layer & Name Resolution</a>
+    <a class="breadcrumb" href="../index.html#module-app-naming">&#8592; Module 05 &middot; Application Layer &amp; Name Resolution</a>
     <h1>DHCP Process (DORA)</h1>
     <p class="topic-dek">How a device with no IP (Internet Protocol) address yet gets one automatically, in exactly four steps, most of them broadcasts.</p>
   </div>
@@ -32,10 +44,10 @@
 
 <article class="topic-body wrap">
 
-  <h2>A walk-in guest with no reservation</h2>
+  <h2 id="a-walk-in-guest-with-no-reservation">A walk-in guest with no reservation</h2>
   <p>Picture a traveler arriving at a row of hotels with no reservation, asking loudly enough for every hotel on the street to hear: "does anyone have a room?" That's DHCP's (Dynamic Host Configuration Protocol's) entire opening move, and it has to be shouted, since the device doesn't have an IP address yet and can't address a single specific server directly. One hotel calls back: "yes, room 204 is free, here are the house rules." The traveler shouts their acceptance loud enough for every other hotel to hear too, in case more than one offered a room, so the others know to stop holding theirs. The chosen hotel confirms: checked in.</p>
 
-  <h2>DORA: Discover, Offer, Request, Acknowledge</h2>
+  <h2 id="dora-discover-offer-request-acknowledge">DORA: Discover, Offer, Request, Acknowledge</h2>
   <figure class="diagram-block">
     <svg viewBox="0 0 640 195" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Animated diagram of the DHCP DORA process: client broadcasts Discover, a server broadcasts an Offer, the client broadcasts a Request accepting it, and the server broadcasts an Acknowledgment">
       <text x="320" y="20" text-anchor="middle" font-size="10" fill="#8d9bb3">LOCAL SEGMENT (broadcast domain)</text>
@@ -123,7 +135,7 @@
     </tbody>
   </table>
 
-  <h2>DHCP on the wire: Ethernet, IP, and UDP headers</h2>
+  <h2 id="dhcp-on-the-wire-ethernet-ip-and-udp-headers">DHCP on the wire: Ethernet, IP, and UDP headers</h2>
   <p>A Discover message can't be addressed to anyone specific, so that shows up at every single layer wrapped around it. Here's exactly what a Discover packet's headers look like, stacked from the bottom up.</p>
 
   <figure class="diagram-block">
@@ -166,7 +178,7 @@
     <p>Almost everything else on this site, DNS included, has a client pick a random ephemeral source port (see <a href="ports-sockets.html">Ports & Sockets</a>) and send to a server's well-known port. DHCP can't quite do that: before an address is assigned, there's no real socket to speak of yet, and a broadcast reply has to reach every listening client on the segment, not one specific socket. Both sides use fixed, well-known ports instead, 67 and 68, so any DHCP client and server can find each other's traffic without needing a socket already set up.</p>
   </div>
 
-  <h2>Three roles: Client, server, and relay</h2>
+  <h2 id="three-roles-client-server-and-relay">Three roles: Client, server, and relay</h2>
   <p>Everything above assumes the client and server share the same local segment. Broadcasts don't cross routers (see <a href="broadcast-vs-collision-domain.html">Collision Domain vs Broadcast Domain</a>), so a DHCP server living on a different subnet would never hear a client's Discover at all, unless a third role bridges the gap.</p>
   <ul>
     <li><strong>DHCP client:</strong> the device requesting an address. It has no idea, and doesn't need to know, whether it's talking to a server on its own segment or one several hops away.</li>
@@ -237,15 +249,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="dns-resolution-flow.html">
-    <span class="nav-label">← PREVIOUS</span>
-    DNS Resolution Flow
-  </a>
-  <a href="http-https-versions.html">
-    <span class="nav-label">NEXT →</span>
-    HTTP/HTTPS: 1.1 vs 2 vs 3
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="dns-resolution-flow.html"><span class="nav-label">&#8592; PREVIOUS</span>DNS Resolution Flow</a>
+<a href="http-https-versions.html"><span class="nav-label">NEXT &#8594;</span>HTTP/HTTPS: 1.1 vs 2 vs 3</a>
 </nav>
 
 <footer class="site-footer">

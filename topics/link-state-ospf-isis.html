@@ -10,6 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/topics/link-state-ospf-isis.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Link-State Routing (OSPF, IS-IS) · netskillup">
+<meta property="og:description" content="How link-state protocols give every router the full topology map and let each one compute its own shortest paths, and how OSPF and IS-IS split that map into areas.">
+<meta property="og:url" content="https://netskillup.com/topics/link-state-ospf-isis.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Link-State Routing (OSPF, IS-IS) · netskillup">
+<meta name="twitter:description" content="How link-state protocols give every router the full topology map and let each one compute its own shortest paths, and how OSPF and IS-IS split that map into areas.">
+<!-- site:metadata:end -->
 </head>
 <body>
 
@@ -19,12 +30,13 @@
       <span class="dot" aria-hidden="true"></span>
       netskillup
     </a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search networking topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
   </div>
 </header>
 
 <div class="topic-header" style="--module-color: var(--l3);">
   <div class="wrap">
-    <a class="breadcrumb" href="../index.html#modules">← Module 03 · Layer 3: Network</a>
+    <a class="breadcrumb" href="../index.html#module-layer3">&#8592; Module 03 &middot; Layer 3: Network</a>
     <h1>Link-State Routing (OSPF, IS-IS)</h1>
     <p class="topic-dek">Instead of trusting a neighbor's secondhand distance, every router gets the same full map and draws its own route across it.</p>
   </div>
@@ -32,7 +44,7 @@
 
 <article class="topic-body wrap">
 
-  <h2>Everyone gets the same map</h2>
+  <h2 id="everyone-gets-the-same-map">Everyone gets the same map</h2>
   <p>The previous topic's distance-vector routers only know direction and distance, secondhand, from their neighbors. A <strong>link-state</strong> router does something fundamentally different: it floods a small description of its own directly-connected links (an LSA, Link-State Advertisement) to the entire routing domain, and receives everyone else's in return. Every router ends up holding an identical, complete map of the topology, and independently runs <strong>Dijkstra's shortest path algorithm</strong> on that map to compute its own best route to everywhere.</p>
   <p>Nobody is trusting a rumor anymore. Every router has the actual map and draws its own path, the way two people using the same detailed city map might still choose different routes depending on where they're each starting from.</p>
 
@@ -69,10 +81,10 @@
     <figcaption>Link-state flooding: everyone eventually holds the same map of the whole topology, not just their own neighbors' opinions.</figcaption>
   </figure>
 
-  <h2>OSPF and areas</h2>
+  <h2 id="ospf-and-areas">OSPF and areas</h2>
   <p>Flooding the entire topology to every router works fine on a small network, but scales badly for the same reason a single giant broadcast domain does: too much update traffic, too much CPU (Central Processing Unit) spent recomputing paths every time anything, anywhere, changes. OSPF's (Open Shortest Path First) fix is <strong>areas</strong>: the topology gets split into Area 0 (the mandatory "backbone") plus additional numbered areas connected to it. Full LSA flooding only happens <em>within</em> an area; between areas, routers exchange summarized reachability information instead of the raw topology. OSPF's cost metric itself is based on interface bandwidth: lower cost for faster links.</p>
 
-  <h2>Why multi-access segments elect a DR and BDR</h2>
+  <h2 id="why-multi-access-segments-elect-a-dr-and-bdr">Why multi-access segments elect a DR and BDR</h2>
   <p>On a point-to-point link, two routers just become neighbors directly, nothing else to coordinate. On a shared multi-access segment, like five routers plugged into the same Ethernet VLAN, letting every router form a full-mesh adjacency with every other router means the same LSA gets flooded and re-flooded redundantly across every link, and the number of adjacencies grows roughly with the square of the router count. At 10 routers on one segment, that's 45 pairwise adjacencies to maintain.</p>
   <p>OSPF avoids that by electing one <strong>Designated Router (DR)</strong> and one <strong>Backup Designated Router (BDR)</strong> for the segment. Every other router, a <strong>DROTHER</strong>, forms an adjacency with only the DR and the BDR, never with each other, and the DR does the actual work of flooding LSAs out to the rest of the segment on everyone's behalf. The BDR just shadows the DR, ready to take over instantly if it fails. Election is priority-based: highest configured OSPF priority becomes DR, second-highest becomes BDR, and a tie is broken by the highest Router ID. Setting a router's priority to <code>0</code> removes it from the election entirely.</p>
 
@@ -128,7 +140,7 @@
     <figcaption>Same four routers, same segment. On the right, R3 and R4 (DROTHERs) only exchange LSAs through the DR and BDR, never with each other, which is the difference that actually matters as the segment grows.</figcaption>
   </figure>
 
-  <h2>How routes cross from one area into another</h2>
+  <h2 id="how-routes-cross-from-one-area-into-another">How routes cross from one area into another</h2>
   <p>Full LSA flooding never leaves its own area; a router in Area 2 never sees Area 1's raw Router and Network LSAs directly. Instead, the <strong>Area Border Router (ABR)</strong> sitting on the boundary between Area 1 and the backbone takes everything it learned inside Area 1, collapses it down to a list of reachable subnets and their cost, and injects that as a <strong>Type 3 Summary LSA</strong> into Area 0. Any other ABR attached to the backbone can then re-advertise that same summary into whatever area it borders, one hop of summarization at a time. The far side of the network never has to know Area 1's actual internal topology, just which subnets live there and roughly how far away they are.</p>
 
   <figure class="diagram-block">
@@ -187,7 +199,7 @@
     <p>Because an inter-area route only ever carries a summarized cost, not the real path, a router outside Area 1 can't tell whether that cost went up because of an actual link failure inside Area 1 or just a naturally longer internal detour. All it sees is the number ABR1 advertised. This is also exactly why OSPF's SPF recalculation stays contained: a link flapping inside Area 1 only triggers a fresh Dijkstra run for routers inside Area 1, not the whole network.</p>
   </div>
 
-  <h2>IS-IS: The same idea, a different lineage</h2>
+  <h2 id="is-is-the-same-idea-a-different-lineage">IS-IS: The same idea, a different lineage</h2>
   <p>IS-IS (Intermediate System to Intermediate System) is conceptually very close to OSPF, link-state, Dijkstra, the works, but comes from the OSI (Open Systems Interconnection) protocol suite rather than the IP (Internet Protocol) world, and organizes its hierarchy into <strong>Level 1</strong> and <strong>Level 2</strong> routers instead of numbered areas. It's less common in enterprise networks than OSPF, but it's the backbone protocol of choice inside many large service-provider networks.</p>
 
   <table class="compare-table">
@@ -208,15 +220,9 @@
 
 </article>
 
-<nav class="topic-nav wrap">
-  <a href="distance-vector-rip-eigrp.html">
-    <span class="nav-label">← PREVIOUS</span>
-    Distance-Vector Routing (RIP, EIGRP)
-  </a>
-  <a href="bgp-basics.html">
-    <span class="nav-label">NEXT →</span>
-    BGP Basics
-  </a>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="distance-vector-rip-eigrp.html"><span class="nav-label">&#8592; PREVIOUS</span>Distance-Vector Routing (RIP, EIGRP)</a>
+<a href="bgp-basics.html"><span class="nav-label">NEXT &#8594;</span>BGP Basics</a>
 </nav>
 
 <footer class="site-footer">
