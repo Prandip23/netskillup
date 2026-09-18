@@ -189,10 +189,21 @@
     dialog.append(close, canvas, caption);
     document.body.appendChild(dialog);
     let restore;
-    close.addEventListener("click", () => dialog.close());
-    dialog.addEventListener("close", () => {
+    function restoreDiagram() {
       restore?.();
       restore = undefined;
+    }
+    close.addEventListener("click", () => {
+      restoreDiagram();
+      dialog.close();
+    });
+    dialog.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      restoreDiagram();
+      dialog.close();
+    });
+    dialog.addEventListener("close", () => {
+      restoreDiagram();
     });
     figures.forEach((figure) => {
       const diagram = figure.querySelector("svg");
