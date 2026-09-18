@@ -129,6 +129,7 @@ test("reference browser workflows", async (suite) => {
       await page.waitForFunction(() => document.querySelector(".diagram-canvas").scrollLeft > 0);
       await page.keyboard.press("Escape");
       await page.waitForFunction(() => !document.querySelector("dialog").open);
+      await page.locator("figure svg").waitFor({ state: "attached" });
       assert.equal(await expand.evaluate((node) => node === document.activeElement), true);
       assert.equal(await page.locator("figure svg").count(), 1);
       await page.setViewportSize({ width: 1280, height: 450 });
