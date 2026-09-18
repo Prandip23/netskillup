@@ -76,7 +76,7 @@ does on this site:
    Pattern reference: `index.html`'s hero SVG, and the flood/forwarding
    animations in `topics/broadcast-vs-collision-domain.html` and
    `topics/hubs-switches-routers.html`.
-2. **Draw-in once** (plays on load, then rests): for a static
+2. **Draw-in once** (starts on first viewport entry, then rests): for a static
    relationship/mapping diagram (boxes and connectors) where you just want
    the eye guided through it once, not looping forever while someone reads.
    Animate `stroke-dashoffset` from the line's length to `0`, `fill="freeze"`,
