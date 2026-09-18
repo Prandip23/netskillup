@@ -1,17 +1,24 @@
 :root {
-  --bg: #0b1220;
-  --bg-raised: #111a2c;
-  --bg-raised-hover: #16223a;
-  --border: #24304a;
-  --border-soft: #1a2438;
-  --text: #e7ecf3;
-  --text-muted: #8d9bb3;
-  --text-faint: #5b6a86;
+  /* Surfaces */
+  --bg: #111415;
+  --bg-raised: #181d1e;
+  --bg-raised-hover: #202728;
 
+  /* Borders */
+  --border: #344041;
+  --border-soft: #283031;
+
+  /* Text */
+  --text: #eef2ef;
+  --text-muted: #b1bdba;
+  --text-faint: #7f908b;
+
+  /* Typography */
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   --display: "Space Grotesk", var(--sans);
 
+  /* Module identity */
   --fund: #9aa5bd;
   --l2: #4fd1c5;
   --l3: #f2a93b;
@@ -19,7 +26,12 @@
   --app: #f1789c;
   --sec: #5b9df9;
 
+  /* Shape */
   --radius: 3px;
+
+  /* Effects */
+  --shadow: 0 18px 48px rgba(0, 0, 0, 0.2);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 * {
@@ -640,19 +652,6 @@ a.topic-row:hover {
 }
 
 /* ---------- UI refresh ---------- */
-
-:root {
-  --bg: #111415;
-  --bg-raised: #181d1e;
-  --bg-raised-hover: #202728;
-  --border: #344041;
-  --border-soft: #283031;
-  --text: #eef2ef;
-  --text-muted: #b1bdba;
-  --text-faint: #7f908b;
-  --shadow: 0 18px 48px rgba(0, 0, 0, 0.2);
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-}
 
 html {
   background: var(--bg);
