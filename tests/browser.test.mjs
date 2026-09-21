@@ -150,6 +150,14 @@ test("reference browser workflows", async (suite) => {
             return diagram.width <= figure.clientWidth;
           })), `${width}: ${file} clipped diagram overview`);
           assert.equal(await page.locator("h1").count(), 1);
+          if (file === "ai/index.html") {
+            assert.ok(await page.locator(".ai-hero .hero-art").evaluate((diagram) => {
+              const bounds = diagram.getBoundingClientRect();
+              const copy = document.querySelector(".ai-hero .hero-copy").getBoundingClientRect();
+              return bounds.width > 0 && bounds.left >= 0 && bounds.right <= innerWidth && (bounds.left >= copy.right || bounds.top >= copy.bottom);
+            }), `${width}: AI hero overlaps or clips`);
+            assert.ok(await page.locator(".ai-hero animate, .ai-hero animateMotion").evaluateAll((animations) => animations.every((animation) => animation.getAttribute("dur") === "999999s")), "AI hero respects reduced motion");
+          }
           assert.ok(await page.locator(".site-header .wrap").evaluate((header) => {
             const children = [...header.children].filter((node) => node.getBoundingClientRect().width > 0);
             return children.every((node, index) => children.slice(index + 1).every((other) => {
@@ -220,6 +228,11 @@ test("reference browser workflows", async (suite) => {
     await suite.test("AI search, history, track navigation, and reading order", async () => {
       const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
       await page.goto(`${base}ai/index.html`);
+      await page.getByRole("link", { name: "Browse the curriculum", exact: true }).click();
+      assert.ok(page.url().endsWith("ai/index.html#modules"));
+      await page.getByRole("link", { name: "Start reading", exact: false }).click();
+      await page.waitForURL("**/ai/topics/ai-llm-foundations.html");
+      await page.goBack();
       assert.equal(await page.locator(".topic-row:visible").count(), 5);
       for (const [query, slug] of [["LOCAL VRAM", "local-ai-hardware"], ["Ollama Windows", "run-first-local-model"], ["BM25", "rag-explained"], ["tokenizer", "tokens-context-prompting"]]) {
         await page.locator("#topic-search").fill(query);
@@ -250,10 +263,19 @@ test("reference browser workflows", async (suite) => {
       await page.close();
     });
 
-    await suite.test("animated diagrams start on viewport entry", async () => {
+    await suite.test("AI hero motion and article animation on viewport entry", async () => {
       const context = await browser.newContext({ reducedMotion: "no-preference" });
       const page = await context.newPage();
       try {
+        await page.goto(`${base}ai/index.html`);
+        const initialPosition = await page.locator(".ai-hero svg > rect").first().evaluate((token) => {
+          const matrix = token.getCTM();
+          return { x: matrix.e, y: matrix.f };
+        });
+        await page.waitForFunction((initial) => {
+          const matrix = document.querySelector(".ai-hero svg > rect").getCTM();
+          return Math.hypot(matrix.e - initial.x, matrix.f - initial.y) > 5;
+        }, initialPosition);
         await page.goto(`${base}topics/arp.html`);
         await page.locator("figure svg").scrollIntoViewIfNeeded();
         await page.waitForFunction(() => {

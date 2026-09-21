@@ -31,10 +31,72 @@
   </form>
 </div></header>
 <main id="main-content">
-  <section class="reference-intro"><div class="wrap">
-    <h1>AI &amp; LLMs</h1>
-    <p>What a model learns, what fits in its context, and what your machine needs to run it. From a first local request to an answer grounded in the right evidence.</p>
-  </div></section>
+  <section class="hero ai-hero" aria-labelledby="ai-heading">
+    <div class="wrap">
+      <div class="hero-copy">
+        <h1 id="ai-heading">AI &amp; LLMs</h1>
+        <p class="lede">From the first token to an answer you can verify. Models, prompts, local inference, and retrieval, connected one mechanism at a time.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="topics/ai-llm-foundations.html">Start reading &#8594;</a>
+          <a class="btn btn-secondary" href="#modules">Browse the curriculum</a>
+        </div>
+      </div>
+      <svg class="hero-art" viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Conceptual illustration of context tokens passing through a model to generate an output token, which joins the context for the next generation step.">
+        <defs>
+          <path id="ai-token-flow" d="M86 164H144C176 164 178 114 214 114L278 164L342 214C382 214 388 164 422 164H592"/>
+          <path id="ai-token-feedback" d="M592 180V254Q592 286 560 286H158Q126 286 126 254V206Q126 164 158 164H180"/>
+        </defs>
+        <g font-family="monospace" font-size="12" fill="#b1bdba" text-anchor="middle">
+          <text x="68" y="62">CONTEXT</text>
+          <text x="278" y="62">MODEL</text>
+          <text x="524" y="62">NEXT TOKEN</text>
+        </g>
+        <g fill="none" stroke="#a8d477" stroke-width="1.4">
+          <rect x="24" y="98" width="62" height="30" rx="3" opacity="0.55"/>
+          <rect x="24" y="149" width="62" height="30" rx="3" opacity="0.85"/>
+          <rect x="24" y="200" width="62" height="30" rx="3" opacity="0.4"/>
+          <path d="M86 113H122Q144 113 160 138L180 164M86 164H180M86 215H122Q144 215 160 190L180 164" opacity="0.3"/>
+        </g>
+        <g stroke="#a8d477" stroke-width="2" opacity="0.65">
+          <path d="M38 113H68M38 164H58M38 215H70"/>
+        </g>
+        <g fill="none" stroke="#7bc7d6">
+          <path d="M180 164L214 114L278 164L342 214L390 164M180 164H214L278 114L342 164H390M180 164L214 214L278 164L342 114L390 164" opacity="0.35"/>
+          <path d="M214 114H278L342 164M214 164H278L342 114M214 214H278L342 164M214 114L278 214H342M214 214L278 114H342" opacity="0.16"/>
+          <path d="M390 164H454" opacity="0.5"/>
+          <g fill="#111415" stroke-width="1.5">
+            <circle cx="214" cy="114" r="5"/><circle cx="214" cy="164" r="5"/><circle cx="214" cy="214" r="5"/>
+            <circle cx="278" cy="114" r="5"/><circle cx="278" cy="164" r="5"/><circle cx="278" cy="214" r="5"/>
+            <circle cx="342" cy="114" r="5"/><circle cx="342" cy="164" r="5"/><circle cx="342" cy="214" r="5"/>
+          </g>
+        </g>
+        <g fill="#f2a93b">
+          <rect x="454" y="149" width="42" height="30" rx="3" opacity="0.25"/>
+          <rect x="506" y="149" width="34" height="30" rx="3" opacity="0.45"/>
+          <rect x="550" y="149" width="42" height="30" rx="3" opacity="0.8">
+            <animate attributeName="opacity" values="0.2;0.2;0.9;0.9;0.2" keyTimes="0;0.4;0.5;0.85;1" dur="8s" repeatCount="indefinite"/>
+          </rect>
+        </g>
+        <use href="#ai-token-feedback" fill="none" stroke="#f2a93b" stroke-width="1.2" opacity="0.2"/>
+        <path d="M170 157L180 164L170 171" fill="none" stroke="#f2a93b" opacity="0.45"/>
+        <rect x="-3" y="-3" width="6" height="6" rx="1" fill="#a8d477">
+          <animateMotion dur="8s" keyPoints="0;1;1" keyTimes="0;0.5;1" calcMode="linear" repeatCount="indefinite"><mpath href="#ai-token-flow"/></animateMotion>
+          <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.48;0.5;1" dur="8s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="-3" y="-3" width="6" height="6" rx="1" fill="#f2a93b">
+          <animateMotion dur="8s" keyPoints="0;0;1" keyTimes="0;0.5;1" calcMode="linear" repeatCount="indefinite"><mpath href="#ai-token-feedback"/></animateMotion>
+          <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.49;0.5;1" dur="8s" repeatCount="indefinite"/>
+        </rect>
+        <script type="text/javascript"><![CDATA[
+          if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.currentScript.closest('svg').querySelectorAll('animateMotion, animate').forEach(function (animation) {
+              animation.setAttribute('dur', '999999s');
+            });
+          }
+        ]]></script>
+      </svg>
+    </div>
+  </section>
   <section class="ai-catalog wrap" id="modules" aria-labelledby="curriculum-heading">
     <div class="curriculum-intro">
       <div><p class="section-label">AI REFERENCE</p><h2 id="curriculum-heading">Models, context, evidence.</h2></div>
