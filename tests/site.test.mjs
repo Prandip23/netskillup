@@ -271,6 +271,43 @@ test("AI worked budgets and retrieved evidence remain internally consistent", ()
   assert.ok(!prompt.includes("[D]"));
 });
 
+test("BGP examples preserve policy ordering, origin-validation scope, and article anchors", () => {
+  const allNodes = document(read("topics/bgp-basics.html"));
+  const ids = allNodes.map((node) => attribute(node, "id")).filter(Boolean);
+  for (const id of [
+    "autonomous-systems-the-internet-s-real-networks", "ebgp-vs-ibgp", "best-isn-t-just-shortest",
+    "the-path-attributes-and-where-each-one-lives", "the-order-bgp-actually-checks-them-in",
+    "short-answer", "session-establishment", "ibgp-propagation", "next-hop-reachability",
+    "route-lifecycle", "worked-two-providers", "policy-safeguards", "communities",
+    "rpki-origin-validation", "troubleshooting", "related-topics", "sources",
+  ]) assert.ok(ids.includes(id), id);
+  const rowsOf = (id) => allNodes.find((node) => attribute(node, "id") === id).childNodes
+    .find((node) => node.tagName === "tbody").childNodes.filter((node) => node.tagName === "tr")
+    .map((row) => row.childNodes.filter((node) => node.tagName === "td").map(text));
+  const candidates = rowsOf("bgp-candidates").map(([route, prefix, asPath, weight, localPref, eligible]) => ({
+    route, prefix, path: asPath.split(" "), weight: Number(weight), localPref: Number(localPref), eligible,
+  }));
+  assert.equal(candidates.length, 2);
+  const [routeA, routeB] = candidates;
+  assert.deepEqual(candidates.map((route) => [route.prefix, route.path.at(-1), route.weight, route.eligible]), [
+    ["203.0.113.0/24", "64500", 0, "Yes"], ["203.0.113.0/24", "64500", 0, "Yes"],
+  ]);
+  assert.deepEqual(candidates.map((route) => [route.route, route.localPref, route.path.length]), [["A", 200, 3], ["B", 100, 2]]);
+  assert.ok(routeA.localPref > routeB.localPref);
+  assert.ok(routeB.path.length < routeA.path.length);
+  assert.deepEqual(rowsOf("bgp-origin-validation").map((row) => row.slice(0, 3)), [
+    ["203.0.113.0/24", "64500", "Valid"],
+    ["203.0.113.0/25", "64500", "Invalid"],
+    ["203.0.113.0/24", "64499", "Invalid"],
+    ["198.51.100.0/24", "64500", "NotFound"],
+  ]);
+  assert.deepEqual(rowsOf("bgp-session-states").map((row) => row[0]), ["Idle", "Connect", "Active", "OpenSent", "OpenConfirm", "Established"]);
+  for (const block of allNodes.filter((node) => node.tagName === "pre")) {
+    assert.equal(attribute(block, "tabindex"), "0");
+    assert.ok(attribute(block, "aria-label"));
+  }
+});
+
 test("published prerequisite graph contains no cycles", () => {
   const byId = new Map(publishedTopics(loadCatalog()).map((topic) => [topic.id, topic]));
   const visited = new Set();

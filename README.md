@@ -117,7 +117,7 @@ heading IDs and does not reserialize article bodies or SVG. Preserve existing
 IDs when changing heading wording so old deep links keep working.
 
 The richer reference pattern is piloted on subnetting, ARP, DNS resolution,
-TCP flow/congestion control, and TLS, and used throughout the eight-topic
+TCP flow/congestion control, TLS, and BGP, and used throughout the eight-topic
 networking expansion:
 
 - Fundamentals: copper/fiber/transceivers/PoE and performance measurements.
@@ -129,7 +129,9 @@ These articles include worked examples, diagram descriptions, troubleshooting
 guidance, and standards/vendor references. Calculations and traces are synthetic,
 not hardware benchmarks. Command examples require the named OS, installed tools,
 and approved targets; automated site tests do not validate physical networks.
-Browser coverage includes all eight new articles at five viewport widths.
+Browser coverage includes all eight new articles and the upgraded BGP reference
+at five viewport widths. BGP covers sessions, iBGP propagation and next-hop
+reachability, a two-provider example, policy safeguards, RPKI, and diagnostics.
 
 ## AI reference
 
@@ -148,7 +150,7 @@ responses. The walkthrough deliberately uses a small local model, bounded
 generation, non-sensitive text, and a loopback endpoint. It requires no cloud
 account, application backend, or new runtime dependency for this website.
 
-Validation covers 17 unit tests and five browser workflows, including both
+Validation covers 18 unit tests and five browser workflows, including both
 catalogs and all five AI articles at five viewport widths. The PowerShell
 examples were syntax-parsed without executing installation, downloads,
 configuration changes, or generation. The available Ollama server's version

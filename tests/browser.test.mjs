@@ -21,6 +21,7 @@ const expansionPages = [
   "topics/network-troubleshooting-tools.html",
   "topics/packet-capture-wireshark-tcpdump.html",
 ];
+const referencePages = [...expansionPages, "topics/bgp-basics.html", ...aiPages];
 
 test("reference browser workflows", async (suite) => {
   const server = createServer(async (request, response) => {
@@ -75,6 +76,8 @@ test("reference browser workflows", async (suite) => {
         ["wireless SAE", expansionPages[3]],
         ["ENT FHRP", expansionPages[5]],
         ["OPS pcap", expansionPages[7]],
+        ["L3 RPKI", "topics/bgp-basics.html"],
+        ["route reflector", "topics/bgp-basics.html"],
       ]) {
         await page.locator("#topic-search").fill(query);
         assert.equal(await page.locator(".topic-row:visible").count(), 1, query);
@@ -102,7 +105,7 @@ test("reference browser workflows", async (suite) => {
       assert.equal(await page.locator("#module-jump a").count(), 3);
       await page.locator('.topic-row').first().click();
       assert.equal(await page.locator("h1").textContent(), "AI & LLM Foundations");
-      for (const file of [...expansionPages, ...aiPages]) {
+      for (const file of referencePages) {
         await page.goto(`${base}${file}`);
         assert.equal(await page.locator("h1").count(), 1, file);
         assert.equal(await page.locator("#sources").count(), 1, file);
@@ -132,6 +135,7 @@ test("reference browser workflows", async (suite) => {
         "topics/dns-resolution-flow.html",
         "topics/http-https-versions.html",
         "topics/tls-handshake.html",
+        "topics/bgp-basics.html",
         ...expansionPages,
         "ai/index.html",
         ...aiPages,
@@ -179,7 +183,7 @@ test("reference browser workflows", async (suite) => {
               return bounds.left >= row.left && bounds.right <= row.right && item.scrollWidth <= item.clientWidth + 1;
             })), `${width}: catalog text clipped internally`);
           }
-          if ([...expansionPages, ...aiPages].includes(file)) {
+          if (referencePages.includes(file)) {
             assert.ok(await page.locator("figure svg text").evaluateAll((labels) => labels.every((label) => {
               const bounds = label.getBBox();
               const canvas = label.ownerSVGElement.viewBox.baseVal;
@@ -192,9 +196,13 @@ test("reference browser workflows", async (suite) => {
           }
           const screenshotName = file === "ai/index.html" ? "ai-index" : path.basename(file, ".html");
           if ([390, 1280].includes(width)) await page.screenshot({ path: path.join(root, "test-results", `${screenshotName}-${width}.png`), fullPage: true });
-          if ([390, 1280].includes(width) && [...expansionPages, ...aiPages].includes(file)) {
+          if ([390, 1280].includes(width) && referencePages.includes(file)) {
             await page.screenshot({ path: path.join(root, "test-results", `${path.basename(file, ".html")}-header-${width}.png`) });
             await page.locator("figure").first().screenshot({ path: path.join(root, "test-results", `${path.basename(file, ".html")}-diagram-${width}.png`) });
+          }
+          if (file === "topics/bgp-basics.html") {
+            assert.ok(await page.locator("#bgp-best-path animate").evaluateAll((animations) => animations.every((animation) => animation.getAttribute("dur") === "0.01s" && animation.getAttribute("begin") === "0s")), "BGP draw-in respects reduced motion");
+            if ([390, 1280].includes(width)) await page.locator("figure:has(#bgp-best-path)").screenshot({ path: path.join(root, "test-results", `bgp-best-path-${width}.png`) });
           }
         }
       }
@@ -284,6 +292,25 @@ test("reference browser workflows", async (suite) => {
           const diagram = document.querySelector("figure svg");
           return !diagram.animationsPaused() && diagram.getCurrentTime() > 0.1;
         });
+        await page.goto(`${base}topics/bgp-basics.html`);
+        const bestPath = page.locator("#bgp-best-path");
+        assert.equal(await bestPath.evaluate((diagram) => diagram.animationsPaused()), true);
+        await bestPath.scrollIntoViewIfNeeded();
+        await page.waitForFunction(() => {
+          const diagram = document.querySelector("#bgp-best-path");
+          return !diagram.animationsPaused() && diagram.getCurrentTime() > 0.1;
+        });
+        const offsets = await bestPath.evaluate((diagram) => {
+          diagram.pauseAnimations();
+          const outline = diagram.querySelector("animate").parentElement;
+          return [1, 2, 10].map((seconds) => {
+            diagram.setCurrentTime(seconds);
+            return Number.parseFloat(getComputedStyle(outline).strokeDashoffset);
+          });
+        });
+        assert.ok(offsets[0] > 0 && offsets[0] < 100, "BGP outline draws once");
+        assert.deepEqual(offsets.slice(1), [0, 0], "BGP outline remains complete");
+        assert.ok(await bestPath.locator("text").evaluateAll((labels) => labels.every((label) => getComputedStyle(label).opacity === "1")), "BGP comparison stays readable");
       } finally {
         await context.close();
       }
