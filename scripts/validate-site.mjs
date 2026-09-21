@@ -1,13 +1,13 @@
 import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { root, read, document, attribute, loadCatalog, publishedTopics, catalogErrors } from "./site-lib.mjs";
+import { root, read, document, attribute, loadCatalog, publishedTopics, catalogErrors, catalogPages } from "./site-lib.mjs";
 
 export function validateSite() {
   const catalog = loadCatalog();
   const errors = catalogErrors(catalog);
   const topics = publishedTopics(catalog);
-  const files = ["index.html", ...topics.map((topic) => topic.file)];
+  const files = [...catalogPages(catalog), ...topics.map((topic) => topic.file)];
   const documents = new Map();
   const idsByFile = new Map();
   for (const file of files) {

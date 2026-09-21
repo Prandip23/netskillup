@@ -1,10 +1,11 @@
-# netskillup: on-prem networking reference
+# netskillup: networking and AI references
 
 A static, GitHub Pages-ready learning site covering on-prem networking:
 cabling and PoE, switching, routing, TCP/UDP, DNS, security, Wi-Fi, campus
-design, and practical troubleshooting. The current catalog has 53 published
-topics across nine modules. Cloud
-networking is intentionally out of scope for this segment.
+design, and practical troubleshooting. Networking has 53 published topics
+across nine modules. A separate AI & LLMs reference has five articles across
+three modules, for 58 published articles in total. Cloud networking is
+intentionally out of scope for the networking segment.
 
 The browser needs only HTML, CSS, and JavaScript. There is no application
 server or deployment build. Node.js tools are used locally to synchronize
@@ -14,6 +15,8 @@ checked-in navigation and metadata, and to validate changes before publishing.
 
 ```text
 index.html                  static networking catalog, enhanced with search
+ai/index.html               separate AI & LLMs catalog using the same search
+ai/topics/*.html            AI foundations, local inference, and RAG articles
 css/style.css               shared layout, reading, responsive, and print styles
 js/site-data.js             curriculum order, status, and search metadata
 js/main.js                  catalog search, difficulty filter, and URL state
@@ -42,6 +45,7 @@ py -3 -m http.server 4173 --bind 127.0.0.1
 
 Open http://localhost:4173. If the port is occupied, choose another port.
 On macOS/Linux, use `python3` instead of `py -3`. Stop the server with Ctrl+C.
+The AI catalog also opens directly from [ai/index.html](ai/index.html).
 
 ## Authoring and checks
 
@@ -53,7 +57,7 @@ npm run sync
 npm run check
 ```
 
-- `npm run sync` writes the static homepage catalog/module links, topic
+- `npm run sync` writes each static track catalog/module links, track navigation, topic
   breadcrumbs and adjacent navigation, missing heading IDs, article search
   forms, canonical/social metadata, sitemap, and robots file.
 - `npm run check` runs unit tests, validates catalog references and local
@@ -102,6 +106,10 @@ Check diagram labels and print output, not just page-level overflow.
 Keep module IDs and existing article URLs stable. Module objects own `track`,
 `path`, and the CSS `color` token. Previous/next navigation stays within a track.
 Planned topics are excluded from the public catalog and sitemap.
+Networking keeps the root catalog and `topics/` URLs. AI uses `track: "ai"`,
+`path: "ai/topics"`, and references such as `ai:tokens-context-prompting`.
+Module numbers restart within a track; module IDs remain globally unique.
+Track indexes are generated and validated alongside published articles.
 
 Edit catalog text in the catalog source, not its generated HTML. Sync owns
 the marked metadata blocks and navigation regions. It preserves existing
@@ -122,7 +130,33 @@ guidance, and standards/vendor references. Calculations and traces are synthetic
 not hardware benchmarks. Command examples require the named OS, installed tools,
 and approved targets; automated site tests do not validate physical networks.
 Browser coverage includes all eight new articles at five viewport widths.
-A separate AI reference remains planned; no AI section is published yet.
+
+## AI reference
+
+The first AI sequence is complete:
+
+1. AI & LLM Foundations: model, runtime, application, training, and inference.
+2. Tokens, Context & Prompting: input budgets, evidence boundaries, and evaluation.
+3. Local AI Hardware: weights, quantization, KV cache, and measurement limits.
+4. Run Your First Local Model: a Windows-first Ollama and PowerShell walkthrough.
+5. RAG Explained: ingestion, retrieval, permissions, grounding, and citations.
+
+All five use the shared reference components and include inline SVG diagrams,
+worked examples, troubleshooting guidance, and primary sources. Estimates and
+answer keys are labeled; they are not hardware benchmarks or captured model
+responses. The walkthrough deliberately uses a small local model, bounded
+generation, non-sensitive text, and a loopback endpoint. It requires no cloud
+account, application backend, or new runtime dependency for this website.
+
+Validation covers 17 unit tests and five browser workflows, including both
+catalogs and all five AI articles at five viewport widths. The PowerShell
+examples were syntax-parsed without executing installation, downloads,
+configuration changes, or generation. The available Ollama server's version
+endpoint responded, but the walkthrough model was not downloaded or run.
+Manual screen-reader and true 200% browser-zoom reviews remain pre-publication
+checks. No local hardware performance claims were measured.
+
+Agents, MCP, skills, Foundry, and project case studies remain later batches.
 
 ## Publishing on GitHub Pages
 

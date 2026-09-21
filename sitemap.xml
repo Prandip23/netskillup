@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://netskillup.com/</loc></url>
+  <url><loc>https://netskillup.com/ai/</loc></url>
   <url><loc>https://netskillup.com/topics/osi-vs-tcpip.html</loc></url>
   <url><loc>https://netskillup.com/topics/network-topologies.html</loc></url>
   <url><loc>https://netskillup.com/topics/broadcast-vs-collision-domain.html</loc></url>
@@ -54,4 +55,9 @@
   <url><loc>https://netskillup.com/topics/gateway-redundancy-vrrp-hsrp.html</loc></url>
   <url><loc>https://netskillup.com/topics/network-troubleshooting-tools.html</loc></url>
   <url><loc>https://netskillup.com/topics/packet-capture-wireshark-tcpdump.html</loc></url>
+  <url><loc>https://netskillup.com/ai/topics/ai-llm-foundations.html</loc></url>
+  <url><loc>https://netskillup.com/ai/topics/tokens-context-prompting.html</loc></url>
+  <url><loc>https://netskillup.com/ai/topics/local-ai-hardware.html</loc></url>
+  <url><loc>https://netskillup.com/ai/topics/run-first-local-model.html</loc></url>
+  <url><loc>https://netskillup.com/ai/topics/rag-explained.html</loc></url>
 </urlset>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Run Your First Local Model on Windows &middot; netskillup</title>
+<meta name="description" content="A Windows-first Ollama walkthrough with a small local model, bounded PowerShell requests, explicit verification, troubleshooting, and loopback-only safety.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/style.css"><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/ai/topics/run-first-local-model.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Run Your First Local Model on Windows · netskillup">
+<meta property="og:description" content="A Windows-first Ollama walkthrough with a small local model, bounded PowerShell requests, explicit verification, troubleshooting, and loopback-only safety.">
+<meta property="og:url" content="https://netskillup.com/ai/topics/run-first-local-model.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Run Your First Local Model on Windows · netskillup">
+<meta name="twitter:description" content="A Windows-first Ollama walkthrough with a small local model, bounded PowerShell requests, explicit verification, troubleshooting, and loopback-only safety.">
+<!-- site:metadata:end -->
+</head>
+<body>
+<header class="site-header"><div class="wrap"><a href="../../index.html" class="site-mark"><span class="dot" aria-hidden="true"></span>netskillup</a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search AI &amp; LLMs topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
+<nav class="track-nav" aria-label="Reference tracks"><a href="../../index.html">Networking</a><a href="../index.html" aria-current="true">AI &amp; LLMs</a></nav></div></header>
+<div class="topic-header" style="--module-color: var(--ai-local);"><div class="wrap">
+  <a class="breadcrumb" href="../index.html#module-ai-local">&#8592; Module 02 &middot; Local Inference</a>
+  <h1>Run Your First Local Model</h1>
+  <p class="topic-dek">Install the runtime, identify the model, send one bounded request, and check the evidence at each step.</p>
+</div></div>
+<article class="topic-body wrap">
+  <p class="topic-answer"><strong>Short answer:</strong> on a supported Windows PC, install Ollama from its official site, download a small local instruction model, and call its loopback API from PowerShell. A completed response proves that this request ran; checking its content is a separate step. Keep the service local and use non-sensitive sample text.</p>
+  <p class="topic-prerequisites">Read <a href="local-ai-hardware.html">Local AI Hardware</a> and <a href="tokens-context-prompting.html">Tokens, Context &amp; Prompting</a>. You need permission to install software, internet access for the installer/model, and enough free disk and working memory.</p>
+  <h2 id="a-home-cinema">A home cinema, one component at a time</h2>
+  <p>A home cinema needs a player, a film, and a working connection to the display. Installing the player doesn't download every film. A film appearing in the library doesn't prove it can play. A picture on screen doesn't prove it is the film you intended.</p>
+  <p>Here, Ollama is the player and local server, the downloaded model is the film, and PowerShell is the remote control. We will check the remote, the server connection, the model library, and finally generation. This separation makes an error actionable instead of turning every failure into "AI doesn't work."</p>
+  <h2 id="before-installing">1. Check the platform and choose the model</h2>
+  <p>The official Windows guide lists Windows 10 22H2 or newer and separate GPU/driver requirements. Prefer a currently supported Windows release. Ollama can use supported CPU or GPU backends; a dedicated GPU is not required for this small example. Check the current <a href="https://docs.ollama.com/windows">Windows guide</a> and <a href="https://docs.ollama.com/gpu">hardware matrix</a> for your exact machine.</p>
+  <p>This walkthrough uses <code>qwen2.5:0.5b</code>, a small instruction-tuned text model. The Ollama library entry reviewed for this article lists roughly 398 MB and <code>Q4_K_M</code> quantization. That is an artifact size, not the installer size or total runtime memory requirement. It is chosen to make a first download manageable, not as a recommendation for the strongest current model.</p>
+  <p>The specific Qwen2.5-0.5B-Instruct model card specifies a 32,768-token context, despite broader family descriptions advertising larger limits. We will request only 2,048. Model tags can change: record the ID shown by your installation and inspect <code>ollama show</code>. Check the model's license before reuse or redistribution.</p>
+  <h2 id="install-and-verify">2. Install and verify the runtime</h2>
+  <p>Download the Windows installer from <a href="https://ollama.com/download/windows">Ollama's official download page</a>, run it under your organization's software policy, and open a new PowerShell window. The standard installer runs under your user account and starts a background application. Reserve space for the runtime as well as models; the Windows guide currently calls for at least 4 GB for the binary installation.</p>
+  <pre tabindex="0" role="region" aria-label="Inspect Ollama CLI and local server"><code>Get-Command ollama
+ollama --version
+Invoke-RestMethod -Uri 'http://127.0.0.1:11434/api/version' -TimeoutSec 10
+ollama list</code></pre>
+  <p><code>Get-Command</code> should locate the executable. The version command reports the installed CLI, while <code>/api/version</code> checks the server and returns a version field. <code>ollama list</code> lists downloaded models; an empty list is normal on a fresh install. None of these checks proves generation works yet.</p>
+  <p>If the server is unavailable, launch Ollama from the Start menu. Don't start another <code>ollama serve</code> process while the tray application's server already owns port <code>11434</code>. A "port in use" error is a server-start problem, not evidence that a model is too large.</p>
+  <h2 id="local-boundary">3. Keep the request local</h2>
+  <p>Ollama binds to <code>127.0.0.1:11434</code> by default. A previous installation may have changed that. Check the listener before entering private material:</p>
+  <pre tabindex="0" role="region" aria-label="Inspect the local inference listener"><code>Get-NetTCPConnection -State Listen -LocalPort 11434 |
+  Select-Object LocalAddress, LocalPort, OwningProcess</code></pre>
+  <p>Loopback addresses <code>127.0.0.1</code> and <code>::1</code> stay on the host. <code>0.0.0.0</code>, <code>::</code>, or a LAN address indicates a broader binding. For this exercise, keep the configured host at <code>127.0.0.1:11434</code>; don't add firewall exceptions, public tunnels, or wildcard browser origins. The local API does not require authentication. Loopback narrows exposure but is not a boundary against other processes on your computer.</p>
+  <p>For Ollama's local-only mode, set the user environment variable <code>OLLAMA_NO_CLOUD</code> to <code>1</code> through Windows Environment Variables, then quit and restart the Ollama application. The official FAQ documents this control for cloud models and web search. It doesn't block installer updates, model downloads, or network activity from a separate chat application. Use the local model tag below, and verify your application's full data path before handling sensitive information.</p>
+  <h2 id="download-the-model">4. Download and inspect one model</h2>
+  <p>The next command downloads model data and consumes disk space. On a metered connection, check the current library size first. No cloud account is needed for this public local model.</p>
+  <pre tabindex="0" role="region" aria-label="Download and inspect the local model"><code>ollama pull qwen2.5:0.5b
+ollama list
+ollama show qwen2.5:0.5b</code></pre>
+  <p>Confirm that the model appears in the local list and that the shown architecture, parameters, and quantization match your intended artifact. Ollama's usual Windows model location is <code>%USERPROFILE%\.ollama\models</code>, unless <code>OLLAMA_MODELS</code> changes it. The cinema now has a film in its library; playback remains the next test.</p>
+  <figure class="diagram-block">
+    <svg viewBox="0 0 680 275" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Installation and model downloads need the internet. A generation request travels from PowerShell to the Ollama server at 127.0.0.1 port 11434, which loads a local model into RAM or VRAM and returns text.">
+      <defs><marker id="local-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10" fill="#b1bdba"/></marker></defs>
+      <g font-family="sans-serif" font-size="14" text-anchor="middle">
+        <text x="340" y="25" fill="#b1bdba">SETUP: INTERNET DOWNLOADS</text>
+        <text x="130" y="64" fill="#eef2ef">Official model registry</text><text x="540" y="64" fill="#eef2ef">Local model files</text>
+        <path d="M230 60H442" fill="none" stroke="#b1bdba" marker-end="url(#local-arrow)"/>
+        <rect x="15" y="100" width="650" height="160" rx="3" fill="none" stroke="#344041"/>
+        <text x="340" y="126" fill="#a8d477">GENERATION: THIS COMPUTER</text>
+        <g fill="none" stroke="#7bc7d6"><rect x="30" y="150" width="170" height="65" rx="3"/><rect x="250" y="150" width="200" height="65" rx="3"/><rect x="500" y="150" width="150" height="65" rx="3"/></g>
+        <g fill="#eef2ef"><text x="115" y="178">PowerShell</text><text x="350" y="175">Ollama server</text><text x="575" y="175">Loaded model</text></g>
+        <g fill="#b1bdba" font-size="12"><text x="115" y="199">Request / response</text><text x="350" y="199">127.0.0.1:11434</text><text x="575" y="199">RAM / VRAM</text></g>
+        <g fill="none" stroke="#b1bdba" marker-start="url(#local-arrow)" marker-end="url(#local-arrow)"><path d="M205 182H245"/><path d="M455 182H495"/></g>
+        <text x="340" y="245" fill="#b1bdba">No cloud model or web-search step in this request</text>
+      </g>
+    </svg>
+    <figcaption>The data path for this specific local request. A different model, frontend, or integration can introduce other network destinations.</figcaption>
+  </figure>
+  <h2 id="first-request">5. Send a bounded PowerShell request</h2>
+  <p>This example uses <code>/api/generate</code>, constructs JSON with PowerShell's serializer, and disables streaming so the response is one JSON object. It doesn't attach files, access websites, or execute generated text.</p>
+  <pre tabindex="0" role="region" aria-label="Generate a short answer using the local Ollama API"><code>$body = @{
+  model = 'qwen2.5:0.5b'
+  prompt = 'Note: The cabinet has 3 shelves. How many shelves does it have? Reply with the number only.'
+  stream = $false
+  keep_alive = '2m'
+  options = @{
+    num_ctx = 2048
+    num_predict = 32
+    temperature = 0
+  }
+} | ConvertTo-Json -Depth 4
+
+$result = Invoke-RestMethod -Method Post `
+  -Uri 'http://127.0.0.1:11434/api/generate' `
+  -ContentType 'application/json' -Body $body -TimeoutSec 120
+
+$result.response
+$result | Select-Object model, done, done_reason, prompt_eval_count, eval_count
+ollama ps</code></pre>
+  <p>The backtick at the end of each continued PowerShell line must be its final character. Run the block in the same PowerShell session. The configured timeout limits how long the client waits; it is not a guaranteed deadline for server-side cleanup.</p>
+  <p>The answer key is <code>3</code>. This is a check to perform, not a claim that every run of this small model returns exactly that string. <code>done: true</code> means generation completed, not that the answer passed the check. A length-related stop may mean the output cap was reached. <code>eval_count</code> counts generated tokens; it need not equal the character or word count.</p>
+  <p><code>ollama ps</code> should show the loaded model while its keep-alive period remains active, along with placement information. That is the cinema actually playing the film, rather than merely listing it. If the model unloads before inspection, repeat the short request instead of assuming the earlier run failed.</p>
+  <h2 id="a-second-check">6. Test a missing fact</h2>
+  <p>Replace the prompt with: <code>Note: The cabinet has 3 shelves. What color is it? Use only the note. If absent, reply &quot;not stated&quot;.</code> Rebuild <code>$body</code> and repeat the request. The answer key is <code>not stated</code>. Inventing a color is a grounding failure even if the endpoint returns HTTP 200.</p>
+  <p>Then try the <a href="tokens-context-prompting.html#a-prompt-with-an-answer-key">incident-summary prompt</a> with a larger output cap such as <code>num_predict = 192</code>. Check every factual claim. This tiny model may struggle with multiple constraints; that is evidence about the model/task combination, not automatically an installation defect. Each <code>/api/generate</code> request here supplies its own prompt; it doesn't implicitly include earlier requests.</p>
+  <h2 id="troubleshooting">Locate the failed boundary</h2>
+  <table class="compare-table">
+    <thead><tr><th>Symptom</th><th>Check</th><th>Interpretation / next step</th></tr></thead>
+    <tbody>
+      <tr><td><code>ollama</code> not recognized</td><td><code>Get-Command ollama</code>; installer completion</td><td>Open a new terminal after installation. This is executable discovery, not model generation.</td></tr>
+      <tr><td>Connection refused</td><td>Tray app, <code>/api/version</code>, listener on 11434</td><td>Start the local application. Don't solve a local failure by exposing the server to the LAN.</td></tr>
+      <tr><td>Model not found</td><td><code>ollama list</code> and exact tag spelling</td><td>Pull the intended model and use that full tag in the request</td></tr>
+      <tr><td>Download or certificate error</td><td>Connectivity, approved proxy, disk space</td><td>Follow organizational proxy/trust setup; don't disable certificate validation</td></tr>
+      <tr><td>Load failure or very slow request</td><td>Available memory, backend logs, <code>ollama ps</code></td><td>Keep context small; investigate placement and compatibility before increasing the timeout</td></tr>
+      <tr><td>JSON lines instead of one object</td><td><code>stream</code> setting</td><td>Default streaming returns incremental events; this example requires <code>false</code></td></tr>
+      <tr><td>Wrong or invented answer</td><td>Exact prompt, model ID, answer key, stop reason</td><td>Separate quality failures from transport or installation failures</td></tr>
+    </tbody>
+  </table>
+  <p>On Windows, logs are under <code>%LOCALAPPDATA%\Ollama</code>, including <code>server.log</code>. Inspect locally first; remove sensitive paths, prompts, and identifiers before sharing diagnostics. Record both client and server versions when investigating mismatches.</p>
+  <h2 id="stop-and-clean-up">Stop and clean up deliberately</h2>
+  <pre tabindex="0" role="region" aria-label="Unload the demonstration model"><code>ollama stop qwen2.5:0.5b
+ollama ps</code></pre>
+  <p><code>stop</code> unloads the model from working memory; it doesn't delete the download or stop the Ollama server. Quit the tray application to stop the background application when you are finished. To remove this model's local entry and unneeded data, use <code>ollama rm qwen2.5:0.5b</code> only when you no longer need it. Shared model data may remain for other installed models.</p>
+  <div class="callout"><span class="callout-label">DEFINE SUCCESS TWICE</span><p>First, verify that the chosen local model completed the request. Second, compare the answer with the supplied evidence. A functioning inference server is not a factual guarantee.</p></div>
+  <h2 id="related-topics">Continue reading</h2>
+  <p>Next: <a href="rag-explained.html">RAG Explained</a>, for choosing source passages before generation. Revisit <a href="local-ai-hardware.html">memory planning</a> before trying larger models or longer contexts.</p>
+  <h2 id="sources">Primary sources</h2>
+  <ul><li><a href="https://docs.ollama.com/windows">Ollama: Windows installation and logs</a></li><li><a href="https://docs.ollama.com/cli">Ollama CLI reference</a></li><li><a href="https://docs.ollama.com/api/generate">Ollama generate API</a></li><li><a href="https://docs.ollama.com/faq">Ollama FAQ: loopback, local-only mode, model storage, and keep-alive</a></li><li><a href="https://ollama.com/library/qwen2.5:0.5b">Ollama's qwen2.5:0.5b artifact</a></li><li><a href="https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct">Qwen's specific 0.5B-Instruct model card and license</a></li></ul>
+</article>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="local-ai-hardware.html"><span class="nav-label">&#8592; PREVIOUS</span>Local AI Hardware</a>
+<a href="rag-explained.html"><span class="nav-label">NEXT &#8594;</span>RAG Explained</a>
+</nav>
+<footer class="site-footer"><div class="wrap"><span>netskillup</span><span>Understand the mechanism. Check the evidence.</span></div></footer>
+<script src="../../js/topic-page.js?v=2"></script>
+</body>
+</html>

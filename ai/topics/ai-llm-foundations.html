@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI &amp; LLM Foundations &middot; netskillup</title>
+<meta name="description" content="Understand AI, machine learning, language models, training and inference, and the difference between a model, a runtime, and a chat application.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/style.css"><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/ai/topics/ai-llm-foundations.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="AI &amp; LLM Foundations · netskillup">
+<meta property="og:description" content="Understand AI, machine learning, language models, training and inference, and the difference between a model, a runtime, and a chat application.">
+<meta property="og:url" content="https://netskillup.com/ai/topics/ai-llm-foundations.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AI &amp; LLM Foundations · netskillup">
+<meta name="twitter:description" content="Understand AI, machine learning, language models, training and inference, and the difference between a model, a runtime, and a chat application.">
+<!-- site:metadata:end -->
+</head>
+<body>
+<header class="site-header"><div class="wrap"><a href="../../index.html" class="site-mark"><span class="dot" aria-hidden="true"></span>netskillup</a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search AI &amp; LLMs topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
+<nav class="track-nav" aria-label="Reference tracks"><a href="../../index.html">Networking</a><a href="../index.html" aria-current="true">AI &amp; LLMs</a></nav></div></header>
+<div class="topic-header" style="--module-color: var(--ai-fund);"><div class="wrap">
+  <a class="breadcrumb" href="../index.html#module-ai-foundations">&#8592; Module 01 &middot; AI Foundations</a>
+  <h1>AI &amp; LLM Foundations</h1>
+  <p class="topic-dek">A model, the software running it, and the chat window are three different things. Start there, and the rest gets easier to reason about.</p>
+</div></div>
+<article class="topic-body wrap">
+  <p class="topic-answer"><strong>Short answer:</strong> a large language model (LLM) is a learned numerical model of language. A typical text-generating LLM predicts tokens using the input and the tokens already generated. Training changes its learned parameters; inference uses them. A useful AI application adds software around that model, such as conversation storage, retrieval, tools, permissions, and a user interface.</p>
+  <p class="topic-prerequisites">Start here. No programming, machine learning, or networking background is required.</p>
+  <h2 id="the-dubbing-studio">Think of a dubbing studio</h2>
+  <p>A dubbing studio needs a performer, recording equipment, a script, and an editor. Rehearsing a large range of material changes what the performer can do. Recording a particular scene uses those abilities with today's script. The editor chooses what reaches the audience.</p>
+  <p>Use that separation for AI: training is the rehearsal, the trained model supplies learned patterns, the inference runtime is the equipment doing the computation, and the application assembles the script and presents the result. The analogy stops at human understanding. A transformer calculates with arrays of numbers; it doesn't acquire a performer's lived experience or guarantee that its lines are true.</p>
+  <h2 id="ai-ml-and-generative-ai">AI, machine learning, and generative AI</h2>
+  <table class="compare-table">
+    <thead><tr><th>Term</th><th>What it means here</th><th>Concrete example</th></tr></thead>
+    <tbody>
+      <tr><td>Artificial intelligence (AI)</td><td>The broad field of building systems that perform tasks associated with intelligence. Not every approach learns from data.</td><td>A rule-based planning system can use explicitly written rules</td></tr>
+      <tr><td>Machine learning (ML)</td><td>Learning patterns from examples instead of writing every decision rule</td><td>A classifier learns to label messages as spam or not spam</td></tr>
+      <tr><td>Deep learning</td><td>ML using neural networks with many processing layers</td><td>A transformer processes token representations through attention and feed-forward layers</td></tr>
+      <tr><td>Generative AI</td><td>Models that produce content, such as text, images, or audio</td><td>A diffusion model generates an image; a causal language model generates text</td></tr>
+      <tr><td>Large language model</td><td>A language model trained at substantial scale. There is no universal parameter-count threshold for "large."</td><td>The Qwen2.5 family includes several model sizes and instruction-tuned variants</td></tr>
+    </tbody>
+  </table>
+  <p>The studio can classify a recording, transcribe it, or create a new performance. Those are different jobs. Likewise, not every AI task needs a chat model: a classifier, search engine, calculator, or ordinary rule may be more reliable and cheaper for a narrowly defined task.</p>
+  <h2 id="training-and-inference">Training changes the model; inference uses it</h2>
+  <p><strong>Parameters</strong>, often called weights, are learned numbers inside the model. During causal-language-model pretraining, the system predicts subsequent tokens in training text. A loss function measures prediction error, and an optimizer updates weights to reduce that error across examples. This is not the same as building a searchable folder of every training document, although models can memorize and reproduce some training material.</p>
+  <p><strong>Post-training</strong> adapts the pretrained model, for example with instruction-and-response examples or preference-based training. An instruction-tuned checkpoint is usually more suitable for a beginner's chat task than its base-model counterpart. Fine-tuning changes weights or trained adapter parameters. It isn't just adding a sentence to the prompt.</p>
+  <p><strong>Inference</strong> loads a checkpoint and computes an output. In an ordinary chat request, the weights stay fixed. Providing an example in the current context can change the answer without changing those weights. Think of handing the performer a new script, not sending them through another rehearsal program.</p>
+  <figure class="diagram-block">
+    <svg viewBox="0 0 680 295" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Training uses examples and an optimizer to update weights. Inference loads those weights into a runtime and combines them with a prompt to generate an answer, without a weight-update step.">
+      <defs><marker id="foundations-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10" fill="#b1bdba"/></marker></defs>
+      <g font-family="sans-serif" font-size="14" text-anchor="middle">
+        <text x="340" y="25" fill="#a8d477">TRAINING: UPDATE THE LEARNED NUMBERS</text>
+        <g fill="none" stroke="#a8d477"><rect x="20" y="45" width="180" height="55" rx="3"/><rect x="250" y="45" width="180" height="55" rx="3"/><rect x="480" y="45" width="180" height="55" rx="3"/></g>
+        <g fill="#eef2ef"><text x="110" y="78">Training examples</text><text x="340" y="78">Loss + optimizer</text><text x="570" y="78">Updated weights</text></g>
+        <g fill="none" stroke="#b1bdba" marker-end="url(#foundations-arrow)"><path d="M200 72H246"/><path d="M430 72H476"/><path d="M570 100V163"/></g>
+        <text x="260" y="143" fill="#7bc7d6">INFERENCE: USE THE LEARNED NUMBERS</text>
+        <g fill="none" stroke="#7bc7d6"><rect x="20" y="170" width="180" height="55" rx="3"/><rect x="250" y="170" width="410" height="55" rx="3"/></g>
+        <g fill="#eef2ef"><text x="110" y="203">Prompt tokens</text><text x="455" y="203">Runtime + loaded model</text></g>
+        <g fill="none" stroke="#b1bdba" marker-end="url(#foundations-arrow)"><path d="M200 197H246"/><path d="M455 225V252"/></g>
+        <text x="455" y="276" fill="#eef2ef">Generated tokens, decoded into text</text>
+      </g>
+    </svg>
+    <figcaption>Two different activities. A chat app may separately retain conversations or use them in a later training process according to its policies; ordinary inference itself isn't that training process.</figcaption>
+  </figure>
+  <h2 id="one-answer-token-by-token">How one answer is produced</h2>
+  <ol>
+    <li><strong>Prepare input:</strong> the application assembles instructions, the current question, and selected conversation history. A chat template encodes role boundaries in the model's expected format.</li>
+    <li><strong>Tokenize:</strong> a tokenizer converts text to token IDs. A token may represent a word, a word fragment, punctuation, or bytes. It is not necessarily one word.</li>
+    <li><strong>Process context:</strong> in a typical decoder-only transformer, causal attention combines information from permitted earlier positions. Feed-forward layers also transform the representations. Attention is a numerical operation, not a truth checker.</li>
+    <li><strong>Select a next token:</strong> the model produces scores called logits. The runtime applies the decoding strategy, such as greedy selection or sampling.</li>
+    <li><strong>Continue:</strong> the selected token becomes part of the sequence for the next step. Generation stops on an end token, a configured stop condition, or a limit. The tokenizer decodes the output into text.</li>
+  </ol>
+  <p>The studio records a line using the script available at that moment. The model similarly works from the input it actually receives, not from every conversation ever shown in an application's sidebar. A runtime commonly uses a <strong>key/value (KV) cache</strong> to reuse intermediate attention data while generating; that cache is not a permanent update to the model's weights.</p>
+  <h2 id="model-runtime-application">Model, runtime, application</h2>
+  <table class="compare-table">
+    <thead><tr><th>Layer</th><th>Responsibility</th><th>Example and limit</th></tr></thead>
+    <tbody>
+      <tr><td>Model package</td><td>Weights, architecture metadata, tokenizer, and often a chat template</td><td><code>Qwen2.5-0.5B-Instruct</code> identifies a particular instruction-tuned model, not a chat website</td></tr>
+      <tr><td>Inference runtime / serving software</td><td>Load a compatible model, allocate memory, execute generation, expose an interface</td><td><code>llama.cpp</code> is an inference engine; Ollama packages model management and serving around inference backends</td></tr>
+      <tr><td>Application</td><td>Collect input, manage history, authorize tools/retrieval, display output</td><td>A chat interface might call Ollama's <code>/api/chat</code>. The interface's history policy is not a model capability.</td></tr>
+    </tbody>
+  </table>
+  <p>The same performer sounds different with a different script or edit. The same model can answer differently because an application changes its system instructions, truncates history, retrieves documents, or uses different sampling settings. Troubleshooting starts by identifying which layer changed.</p>
+  <h2 id="a-checkable-first-task">Choose a task you can check</h2>
+  <p>Give a model this synthetic note: <code>Maintenance starts at 09:00 UTC and lasts 30 minutes.</code> Ask it to extract the start time and duration. You can verify both values directly. An answer that adds a date, location, or service name has introduced information the note never supplied.</p>
+  <p>Now ask, "Is tomorrow's maintenance approved?" The note cannot answer that. A confident yes is a <strong>hallucination</strong>: plausible output unsupported by the available evidence. Fluency and token probability are not factual confidence. Adding "be accurate" doesn't give the model access to the approval system.</p>
+  <p>For high-impact claims, check authoritative evidence or use a deterministic tool. For an exact sum, calculate it. For a current policy, retrieve the current policy and verify the cited passage. Never execute generated shell commands merely because they look familiar; inspect their targets, permissions, and side effects first.</p>
+  <h2 id="local-and-hosted">Local and hosted describe where computation runs</h2>
+  <p>A local runtime uses your machine's RAM, processor, and possibly GPU. A hosted endpoint runs elsewhere and introduces a service's pricing, retention, identity, and network boundaries. Neither is automatically more accurate. Both consume resources during inference, even when no per-request bill appears.</p>
+  <p>A studio in your house can still upload recordings. Likewise, a local chat application can use a cloud model, remote embedding service, web search, synchronization, or telemetry. Verify the complete data path before using sensitive material. Downloadable weights also do not automatically mean unrestricted licensing or fully open training data.</p>
+  <div class="callout"><span class="callout-label">LOCATE THE RESPONSIBILITY</span><p>Wrong facts, lost history, and a failed model load are different problems. Check evidence for the first, the application's submitted context for the second, and runtime compatibility and memory for the third.</p></div>
+  <h2 id="related-topics">Continue reading</h2>
+  <p>Next: <a href="tokens-context-prompting.html">Tokens, Context &amp; Prompting</a>. Then connect the computation to <a href="local-ai-hardware.html">local hardware</a>, or see how <a href="rag-explained.html">RAG supplies external evidence</a>.</p>
+  <h2 id="sources">Primary sources</h2>
+  <ul><li><a href="https://huggingface.co/learn/llm-course/chapter1/4">Hugging Face LLM course: transformers, training, and checkpoints</a></li><li><a href="https://huggingface.co/docs/transformers/llm_tutorial">Transformers: generation, decoding, and prompt formatting</a></li><li><a href="https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct">Qwen2.5-0.5B-Instruct model card</a></li><li><a href="https://docs.ollama.com/faq">Ollama FAQ: local operation and cloud features</a></li></ul>
+</article>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="../index.html"><span class="nav-label">&#8592; PREVIOUS</span>All topics</a>
+<a href="tokens-context-prompting.html"><span class="nav-label">NEXT &#8594;</span>Tokens, Context &amp; Prompting</a>
+</nav>
+<footer class="site-footer"><div class="wrap"><span>netskillup</span><span>Understand the mechanism. Check the evidence.</span></div></footer>
+<script src="../../js/topic-page.js?v=2"></script>
+</body>
+</html>

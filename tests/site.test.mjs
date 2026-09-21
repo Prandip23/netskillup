@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
-import { loadCatalog, catalogErrors, publishedTopics, read, document, attribute, text, relativeLink } from "../scripts/site-lib.mjs";
+import { loadCatalog, catalogErrors, publishedTopics, read, document, attribute, text, relativeLink, catalogPages } from "../scripts/site-lib.mjs";
 import { syncHTML, renderCatalog } from "../scripts/sync-site.mjs";
 
 const mainSource = readFileSync(new URL("../js/main.js", import.meta.url), "utf8");
@@ -69,8 +69,10 @@ test("Escape and clear restore all topics; clear returns focus to search", () =>
 
 test("classic-script adapter loads all published topics and valid references", () => {
   const catalog = loadCatalog();
-  assert.equal(publishedTopics(catalog).length, 53);
-  assert.equal(catalog.length, 9);
+  assert.equal(publishedTopics(catalog).length, 58);
+  assert.equal(publishedTopics(catalog).filter((topic) => topic.module.track === "networking").length, 53);
+  assert.equal(publishedTopics(catalog).filter((topic) => topic.module.track === "ai").length, 5);
+  assert.equal(catalog.length, 12);
   for (const module of catalog) assert.ok(read("css/style.css").includes(`--${module.color}:`), module.id);
   assert.deepEqual(catalogErrors(catalog), []);
   catalog[0].topics[0].related = ["networking:missing"];
@@ -79,7 +81,7 @@ test("classic-script adapter loads all published topics and valid references", (
 
 test("sync is idempotent on every page and leaves SVG content unchanged", () => {
   const catalog = loadCatalog();
-  for (const file of ["index.html", ...publishedTopics(catalog).map((topic) => topic.file)]) {
+  for (const file of [...catalogPages(catalog), ...publishedTopics(catalog).map((topic) => topic.file)]) {
     const source = read(file);
     const output = syncHTML(source, file, catalog, "https://netskillup.com");
     assert.equal(syncHTML(output, file, catalog, "https://netskillup.com"), output, file);
@@ -205,4 +207,78 @@ test("VRRP timer example includes the backup priority skew", () => {
   const [priority, interval, skew, activeDown] = row.childNodes.filter((node) => node.tagName === "td").map((node) => Number(text(node)));
   assert.equal((256 - priority) / 256 * interval, skew);
   assert.equal(3 * interval + skew, activeDown);
+});
+
+test("catalogs, metadata, search and adjacent navigation stay within their track", () => {
+  const catalog = loadCatalog().filter((module) => module.track === "networking");
+  catalog.push({ ...catalog[0], id: "ai-fixture", track: "ai", path: "ai/topics", topics: [{ ...catalog[0].topics[0], slug: "fixture" }] });
+  assert.deepEqual(catalogPages(catalog), ["index.html", "ai/index.html"]);
+  const listing = renderCatalog(catalog, "ai", "ai/index.html");
+  assert.equal(document(listing).filter((node) => attribute(node, "class") === "topic-row").length, 1);
+  assert.ok(listing.includes('href="topics/fixture.html"'));
+  const index = syncHTML(read("index.html"), "ai/index.html", catalog, "https://example.test/project");
+  assert.ok(index.includes('href="https://example.test/project/ai/"'));
+  assert.ok(index.includes('property="og:type" content="website"'));
+  assert.ok(index.includes('href="../index.html"'));
+  assert.ok(index.includes("1 topic across 1 module"));
+  const article = syncHTML(read("topics/arp.html"), "ai/topics/fixture.html", catalog, "https://example.test");
+  const allNodes = document(article);
+  assert.equal(attribute(allNodes.find((node) => attribute(node, "id") === "reference-search"), "action"), "../index.html");
+  assert.ok(article.includes('aria-label="Search AI &amp; LLMs topics"'));
+  const navigation = allNodes.find((node) => attribute(node, "class") === "topic-nav wrap");
+  assert.ok(navigation.childNodes.filter((node) => node.tagName === "a").every((node) => attribute(node, "href") === "../index.html"));
+  assert.equal(syncHTML(article, "ai/topics/fixture.html", catalog, "https://example.test"), article);
+});
+
+test("AI articles retain complete reference structure and bounded examples", () => {
+  for (const topic of publishedTopics(loadCatalog()).filter((item) => item.module.track === "ai")) {
+    const source = read(topic.file), allNodes = document(source);
+    const ids = allNodes.map((node) => attribute(node, "id")).filter(Boolean);
+    assert.equal(new Set(ids).size, ids.length, topic.file);
+    assert.equal(allNodes.filter((node) => node.tagName === "h1").length, 1);
+    for (const id of ["sources", "related-topics"]) assert.ok(ids.includes(id), topic.file);
+    for (const name of ["topic-answer", "topic-prerequisites", "callout"]) assert.ok(allNodes.some((node) => (attribute(node, "class") || "").split(/\s+/).includes(name)), topic.file);
+    assert.ok(!source.includes("\u2014"));
+    assert.ok(allNodes.some((node) => node.tagName === "svg" && attribute(node, "aria-label")));
+    for (const block of allNodes.filter((node) => node.tagName === "pre")) {
+      assert.equal(attribute(block, "tabindex"), "0");
+      assert.ok(attribute(block, "aria-label"));
+    }
+  }
+});
+
+test("AI worked budgets and retrieved evidence remain internally consistent", () => {
+  const rowsOf = (file, id) => document(read(file)).find((node) => attribute(node, "id") === id).childNodes
+    .find((node) => node.tagName === "tbody").childNodes.filter((node) => node.tagName === "tr")
+    .map((row) => row.childNodes.filter((node) => node.tagName === "td").map(text));
+  const context = rowsOf("ai/topics/tokens-context-prompting.html", "context-budget");
+  assert.equal(context.reduce((sum, row) => sum + Number(row[1]), 0), 4096);
+  for (const row of rowsOf("ai/topics/local-ai-hardware.html", "weight-budget")) {
+    const [parameters, bits, bytes, gigabytes, gibibytes] = row.map(Number);
+    assert.equal(parameters * bits / 8, bytes);
+    assert.equal(bytes / 1e9, gigabytes);
+    assert.equal(Number((bytes / 2 ** 30).toFixed(2)), gibibytes);
+  }
+  const hardware = document(read("ai/topics/local-ai-hardware.html"));
+  const cacheExample = text(hardware.find((node) => attribute(node, "aria-label") === "Synthetic KV cache calculation"));
+  const factors = cacheExample.match(/^(\d+(?: x \d+)+) = ([\d,]+) bytes$/m);
+  assert.ok(factors);
+  assert.equal(factors[1].split(" x ").reduce((product, value) => product * Number(value), 1), Number(factors[2].replaceAll(",", "")));
+  const evidence = rowsOf("ai/topics/rag-explained.html", "rag-evidence");
+  const prompt = text(document(read("ai/topics/rag-explained.html")).find((node) => node.tagName === "pre"));
+  assert.ok(prompt.includes(`[A] ${evidence[0][2]}`));
+  assert.ok(!prompt.includes(evidence[2][2]));
+  assert.ok(!prompt.includes("[D]"));
+});
+
+test("published prerequisite graph contains no cycles", () => {
+  const byId = new Map(publishedTopics(loadCatalog()).map((topic) => [topic.id, topic]));
+  const visited = new Set();
+  const visit = (id, active = new Set()) => {
+    assert.ok(!active.has(id), `Prerequisite cycle at ${id}`);
+    if (visited.has(id)) return;
+    for (const prerequisite of byId.get(id).prerequisites || []) visit(prerequisite, new Set([...active, id]));
+    visited.add(id);
+  };
+  for (const id of byId.keys()) visit(id);
 });

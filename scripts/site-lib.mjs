@@ -75,6 +75,14 @@ export function catalogErrors(catalog) {
   return errors;
 }
 
+export function trackHome(track) {
+  return track === "networking" ? "index.html" : `${track}/index.html`;
+}
+
+export function catalogPages(catalog) {
+  return [...new Set(publishedTopics(catalog).map((topic) => trackHome(topic.module.track)))];
+}
+
 export function relativeLink(from, to) {
   return path.posix.relative(path.posix.dirname(from), to) || path.posix.basename(to);
 }

@@ -8,7 +8,9 @@ import { chromium } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
 import { root, loadCatalog, publishedTopics } from "../scripts/site-lib.mjs";
 
-const topicCount = publishedTopics(loadCatalog()).length;
+const topics = publishedTopics(loadCatalog());
+const topicCount = topics.filter((topic) => topic.module.track === "networking").length;
+const aiPages = topics.filter((topic) => topic.module.track === "ai").map((topic) => topic.file);
 const expansionPages = [
   "topics/copper-fiber-transceivers-poe.html",
   "topics/bandwidth-throughput-latency.html",
@@ -93,7 +95,12 @@ test("reference browser workflows", async (suite) => {
       assert.equal(await page.locator("#worked-allocation").count(), 1);
       assert.equal(await page.locator(".topic-nav a").count(), 2);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
-      for (const file of expansionPages) {
+      await page.getByRole("navigation", { name: "Reference tracks" }).getByRole("link", { name: "AI & LLMs" }).click();
+      assert.equal(await page.locator(".topic-row:visible").count(), 5);
+      assert.equal(await page.locator("#module-jump a").count(), 3);
+      await page.locator('.topic-row').first().click();
+      assert.equal(await page.locator("h1").textContent(), "AI & LLM Foundations");
+      for (const file of [...expansionPages, ...aiPages]) {
         await page.goto(`${base}${file}`);
         assert.equal(await page.locator("h1").count(), 1, file);
         assert.equal(await page.locator("#sources").count(), 1, file);
@@ -124,6 +131,8 @@ test("reference browser workflows", async (suite) => {
         "topics/http-https-versions.html",
         "topics/tls-handshake.html",
         ...expansionPages,
+        "ai/index.html",
+        ...aiPages,
       ];
       for (const width of [360, 390, 768, 1280, 1440]) {
         await page.setViewportSize({ width, height: 900 });
@@ -141,7 +150,18 @@ test("reference browser workflows", async (suite) => {
             return diagram.width <= figure.clientWidth;
           })), `${width}: ${file} clipped diagram overview`);
           assert.equal(await page.locator("h1").count(), 1);
-          if (file === "index.html") {
+          assert.ok(await page.locator(".site-header .wrap").evaluate((header) => {
+            const children = [...header.children].filter((node) => node.getBoundingClientRect().width > 0);
+            return children.every((node, index) => children.slice(index + 1).every((other) => {
+              const first = node.getBoundingClientRect(), second = other.getBoundingClientRect();
+              return first.right <= second.left + 1 || second.right <= first.left + 1 || first.bottom <= second.top + 1 || second.bottom <= first.top + 1;
+            }));
+          }), `${width}: ${file} overlapping header`);
+          if (file.endsWith("index.html")) {
+            assert.ok(await page.locator(".ai-catalog .topic-list").evaluateAll((lists) => lists.every((list) => {
+              const last = list.lastElementChild.getBoundingClientRect();
+              return list.getBoundingClientRect().bottom - last.bottom <= 2;
+            })), `${width}: AI list has stretched empty space`);
             assert.ok(await page.locator(".topic-list").evaluateAll((lists) => lists.every((list) => list.scrollWidth <= list.clientWidth + 1)), `${width}: catalog list clipped internally`);
             assert.ok(await page.locator(".topic-info").evaluateAll((items) => items.every((item) => {
               const bounds = item.getBoundingClientRect();
@@ -149,7 +169,7 @@ test("reference browser workflows", async (suite) => {
               return bounds.left >= row.left && bounds.right <= row.right && item.scrollWidth <= item.clientWidth + 1;
             })), `${width}: catalog text clipped internally`);
           }
-          if (expansionPages.includes(file)) {
+          if ([...expansionPages, ...aiPages].includes(file)) {
             assert.ok(await page.locator("figure svg text").evaluateAll((labels) => labels.every((label) => {
               const bounds = label.getBBox();
               const canvas = label.ownerSVGElement.viewBox.baseVal;
@@ -160,8 +180,9 @@ test("reference browser workflows", async (suite) => {
             const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
             assert.deepEqual(result.violations.map((item) => `${item.id}: ${item.nodes.map((node) => node.target.join(" ")).join(", ")}`), [], `${width}: ${file}`);
           }
-          if ([390, 1280].includes(width)) await page.screenshot({ path: path.join(root, "test-results", `${path.basename(file, ".html")}-${width}.png`), fullPage: true });
-          if ([390, 1280].includes(width) && expansionPages.includes(file)) {
+          const screenshotName = file === "ai/index.html" ? "ai-index" : path.basename(file, ".html");
+          if ([390, 1280].includes(width)) await page.screenshot({ path: path.join(root, "test-results", `${screenshotName}-${width}.png`), fullPage: true });
+          if ([390, 1280].includes(width) && [...expansionPages, ...aiPages].includes(file)) {
             await page.screenshot({ path: path.join(root, "test-results", `${path.basename(file, ".html")}-header-${width}.png`) });
             await page.locator("figure").first().screenshot({ path: path.join(root, "test-results", `${path.basename(file, ".html")}-diagram-${width}.png`) });
           }
@@ -193,6 +214,39 @@ test("reference browser workflows", async (suite) => {
       assert.equal(await page.locator(".topic-contents").isVisible(), false);
       await page.pdf({ path: path.join(root, "test-results", "subnetting.pdf"), printBackground: true });
       assert.deepEqual(errors, []);
+      await page.close();
+    });
+
+    await suite.test("AI search, history, track navigation, and reading order", async () => {
+      const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+      await page.goto(`${base}ai/index.html`);
+      assert.equal(await page.locator(".topic-row:visible").count(), 5);
+      for (const [query, slug] of [["LOCAL VRAM", "local-ai-hardware"], ["Ollama Windows", "run-first-local-model"], ["BM25", "rag-explained"], ["tokenizer", "tokens-context-prompting"]]) {
+        await page.locator("#topic-search").fill(query);
+        assert.equal(await page.locator(".topic-row:visible").count(), 1, query);
+        assert.equal(await page.locator(".topic-row:visible").getAttribute("href"), `topics/${slug}.html`);
+      }
+      await page.locator(".topic-row:visible").click();
+      await page.goBack();
+      assert.equal(await page.locator("#topic-search").inputValue(), "tokenizer");
+      await page.locator("#topic-search").press("Escape");
+      await page.locator("#topic-level").selectOption("intermediate");
+      assert.equal(await page.locator(".topic-row:visible").count(), 1);
+      await page.locator(".topic-row:visible").click();
+      assert.equal(await page.locator(".topic-nav a").last().getAttribute("href"), "../index.html");
+      await page.locator("#reference-search input").fill("Qwen");
+      await page.locator("#reference-search input").press("Enter");
+      await page.waitForURL("**/ai/index.html?q=Qwen");
+      assert.equal(await page.locator(".topic-row:visible").count(), 1);
+      await page.getByRole("navigation", { name: "Reference tracks" }).getByRole("link", { name: "Networking", exact: true }).click();
+      assert.equal(await page.locator(".topic-row:visible").count(), 53);
+      await page.getByRole("navigation", { name: "Reference tracks" }).getByRole("link", { name: "AI & LLMs" }).click();
+      await page.locator(".topic-row").first().click();
+      for (const file of aiPages) {
+        assert.ok(page.url().endsWith(file));
+        await page.locator(".topic-nav a").last().click();
+      }
+      assert.ok(page.url().endsWith("ai/index.html"));
       await page.close();
     });
 

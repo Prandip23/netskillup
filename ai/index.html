@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI &amp; LLMs: From Models to Grounded Answers &middot; netskillup</title>
+<meta name="description" content="An AI reference covering language-model foundations, tokens and prompting, local hardware, a Windows Ollama walkthrough, and retrieval-augmented generation.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css"><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/ai/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="AI &amp; LLMs: From Models to Grounded Answers · netskillup">
+<meta property="og:description" content="An AI reference covering language-model foundations, tokens and prompting, local hardware, a Windows Ollama walkthrough, and retrieval-augmented generation.">
+<meta property="og:url" content="https://netskillup.com/ai/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AI &amp; LLMs: From Models to Grounded Answers · netskillup">
+<meta name="twitter:description" content="An AI reference covering language-model foundations, tokens and prompting, local hardware, a Windows Ollama walkthrough, and retrieval-augmented generation.">
+<!-- site:metadata:end -->
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to topics</a>
+<header class="site-header"><div class="wrap">
+  <a href="../index.html" class="site-mark"><span class="dot" aria-hidden="true"></span>netskillup</a>
+<nav class="track-nav" aria-label="Reference tracks"><a href="../index.html">Networking</a><a href="index.html" aria-current="true">AI &amp; LLMs</a></nav>
+  <form class="search-box" id="search-form" role="search" action="index.html" method="get" hidden>
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="topic-search" name="q" placeholder="Search AI topics" aria-label="Search AI topics" aria-controls="module-list" aria-describedby="search-results">
+    <button class="search-clear" id="clear-search" type="button" aria-label="Clear search" title="Clear search" hidden>&times;</button>
+  </form>
+</div></header>
+<main id="main-content">
+  <section class="reference-intro"><div class="wrap">
+    <h1>AI &amp; LLMs</h1>
+    <p>What a model learns, what fits in its context, and what your machine needs to run it. From a first local request to an answer grounded in the right evidence.</p>
+  </div></section>
+  <section class="ai-catalog wrap" id="modules" aria-labelledby="curriculum-heading">
+    <div class="curriculum-intro">
+      <div><p class="section-label">AI REFERENCE</p><h2 id="curriculum-heading">Models, context, evidence.</h2></div>
+      <p id="curriculum-summary" class="curriculum-summary">5 topics across 3 modules, from model foundations to grounded answers.</p>
+    </div>
+    <nav class="module-jump" id="module-jump" aria-label="Jump to a curriculum module"><a href="#module-ai-foundations" style="--module-color: var(--ai-fund);"><span class="module-jump-number">01</span><span>AI Foundations</span></a>
+<a href="#module-ai-local" style="--module-color: var(--ai-local);"><span class="module-jump-number">02</span><span>Local Inference</span></a>
+<a href="#module-ai-retrieval" style="--module-color: var(--ai-rag);"><span class="module-jump-number">03</span><span>Retrieval &amp; Grounding</span></a></nav>
+    <div class="catalog-tools" id="catalog-tools" hidden><label for="topic-level">Level</label><select id="topic-level" aria-controls="module-list"><option value="">All levels</option><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option></select></div>
+    <p class="search-results" id="search-results" role="status" aria-live="polite" aria-atomic="true">5 topics across 3 modules.</p>
+    <div id="module-list">
+<section class="module" id="module-ai-foundations" data-module-id="ai-foundations" style="--module-color: var(--ai-fund);" aria-labelledby="module-ai-foundations-heading">
+<div class="module-head"><p class="module-label">MODULE 01</p><h2 id="module-ai-foundations-heading">AI Foundations</h2><p>Separate the model from the application, then make its input and output checkable.</p><span class="module-count">2 topics</span></div>
+<ul class="topic-list"><li><a class="topic-row" href="topics/ai-llm-foundations.html" data-topic="ai &amp; llm foundations generative ai machine learning transformer hallucination checkpoint" data-search="ai &amp; llm foundations generative ai machine learning transformer hallucination checkpoint distinguish ai, ml, training, inference, model weights, runtimes, and chat applications. 01 llm ai foundations" data-level="beginner"><span class="topic-order">01</span><span class="topic-info"><span class="t-title">AI &amp; LLM Foundations</span><span class="topic-summary">Distinguish AI, ML, training, inference, model weights, runtimes, and chat applications.</span><span class="topic-level">Beginner</span></span><span class="topic-tail" aria-hidden="true">&#8594;</span></a></li>
+<li><a class="topic-row" href="topics/tokens-context-prompting.html" data-topic="tokens, context &amp; prompting tokenizer bpe context window temperature few-shot prompt injection structured output" data-search="tokens, context &amp; prompting tokenizer bpe context window temperature few-shot prompt injection structured output budget context, separate instructions from evidence, and evaluate prompts against an answer key. 01 llm ai foundations" data-level="beginner"><span class="topic-order">02</span><span class="topic-info"><span class="t-title">Tokens, Context &amp; Prompting</span><span class="topic-summary">Budget context, separate instructions from evidence, and evaluate prompts against an answer key.</span><span class="topic-level">Beginner</span></span><span class="topic-tail" aria-hidden="true">&#8594;</span></a></li></ul>
+</section>
+<section class="module" id="module-ai-local" data-module-id="ai-local" style="--module-color: var(--ai-local);" aria-labelledby="module-ai-local-heading">
+<div class="module-head"><p class="module-label">MODULE 02</p><h2 id="module-ai-local-heading">Local Inference</h2><p>Plan memory honestly, run one local request, and identify what each check proves.</p><span class="module-count">2 topics</span></div>
+<ul class="topic-list"><li><a class="topic-row" href="topics/local-ai-hardware.html" data-topic="local ai hardware ram vram unified memory gpu cpu gguf gqa quantization kv cache prefill decode" data-search="local ai hardware ram vram unified memory gpu cpu gguf gqa quantization kv cache prefill decode estimate weight and kv-cache memory, understand quantization, and separate fitting from speed. 02 local local inference" data-level="beginner"><span class="topic-order">01</span><span class="topic-info"><span class="t-title">Local AI Hardware</span><span class="topic-summary">Estimate weight and KV-cache memory, understand quantization, and separate fitting from speed.</span><span class="topic-level">Beginner</span></span><span class="topic-tail" aria-hidden="true">&#8594;</span></a></li>
+<li><a class="topic-row" href="topics/run-first-local-model.html" data-topic="run your first local model ollama windows powershell qwen qwen2.5 11434 local llm" data-search="run your first local model ollama windows powershell qwen qwen2.5 11434 local llm use ollama and powershell on windows with a small model, explicit limits, and loopback-only access. 02 local local inference" data-level="beginner"><span class="topic-order">02</span><span class="topic-info"><span class="t-title">Run Your First Local Model</span><span class="topic-summary">Use Ollama and PowerShell on Windows with a small model, explicit limits, and loopback-only access.</span><span class="topic-level">Beginner</span></span><span class="topic-tail" aria-hidden="true">&#8594;</span></a></li></ul>
+</section>
+<section class="module" id="module-ai-retrieval" data-module-id="ai-retrieval" style="--module-color: var(--ai-rag);" aria-labelledby="module-ai-retrieval-heading">
+<div class="module-head"><p class="module-label">MODULE 03</p><h2 id="module-ai-retrieval-heading">Retrieval &amp; Grounding</h2><p>Select relevant, authorized evidence and check that the answer follows from it.</p><span class="module-count">1 topic</span></div>
+<ul class="topic-list"><li><a class="topic-row" href="topics/rag-explained.html" data-topic="rag explained retrieval augmented generation embeddings vector search bm25 hybrid search chunking reranking fine-tuning" data-search="rag explained retrieval augmented generation embeddings vector search bm25 hybrid search chunking reranking fine-tuning follow ingestion, embeddings, retrieval, reranking, citations, and evaluation through a worked example. 03 rag retrieval &amp; grounding" data-level="intermediate"><span class="topic-order">01</span><span class="topic-info"><span class="t-title">RAG Explained</span><span class="topic-summary">Follow ingestion, embeddings, retrieval, reranking, citations, and evaluation through a worked example.</span><span class="topic-level">Intermediate</span></span><span class="topic-tail" aria-hidden="true">&#8594;</span></a></li></ul>
+</section>
+</div>
+    <p class="no-results" id="no-results" hidden>No matching topics.</p>
+  </section>
+</main>
+<footer class="site-footer"><div class="wrap"><span>netskillup</span><span>Understand the mechanism. Check the evidence.</span></div></footer>
+<script src="../js/main.js"></script>
+</body>
+</html>

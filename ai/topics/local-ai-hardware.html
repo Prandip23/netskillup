@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Local AI Hardware: RAM, VRAM &amp; Quantization &middot; netskillup</title>
+<meta name="description" content="Plan local inference with worked weight and KV-cache estimates, distinguish RAM from VRAM and unified memory, and measure latency without inventing hardware minimums.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/style.css"><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!-- site:metadata:start -->
+<link rel="canonical" href="https://netskillup.com/ai/topics/local-ai-hardware.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="netskillup">
+<meta property="og:title" content="Local AI Hardware: RAM, VRAM &amp; Quantization · netskillup">
+<meta property="og:description" content="Plan local inference with worked weight and KV-cache estimates, distinguish RAM from VRAM and unified memory, and measure latency without inventing hardware minimums.">
+<meta property="og:url" content="https://netskillup.com/ai/topics/local-ai-hardware.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Local AI Hardware: RAM, VRAM &amp; Quantization · netskillup">
+<meta name="twitter:description" content="Plan local inference with worked weight and KV-cache estimates, distinguish RAM from VRAM and unified memory, and measure latency without inventing hardware minimums.">
+<!-- site:metadata:end -->
+</head>
+<body>
+<header class="site-header"><div class="wrap"><a href="../../index.html" class="site-mark"><span class="dot" aria-hidden="true"></span>netskillup</a>
+    <form class="search-box" id="reference-search" role="search" action="../index.html" method="get"><input type="search" name="q" placeholder="Search topics" aria-label="Search AI &amp; LLMs topics"><button class="search-submit" type="submit" aria-label="Search" title="Search">&#8594;</button></form>
+<nav class="track-nav" aria-label="Reference tracks"><a href="../../index.html">Networking</a><a href="../index.html" aria-current="true">AI &amp; LLMs</a></nav></div></header>
+<div class="topic-header" style="--module-color: var(--ai-local);"><div class="wrap">
+  <a class="breadcrumb" href="../index.html#module-ai-local">&#8592; Module 02 &middot; Local Inference</a>
+  <h1>Local AI Hardware</h1>
+  <p class="topic-dek">A model file fitting on disk is only the first check. Weights, working memory, context, and the rest of your computer all need room.</p>
+</div></div>
+<article class="topic-body wrap">
+  <p class="topic-answer"><strong>Short answer:</strong> plan for model weights, the context's KV cache, runtime working buffers, and memory used by the OS and other applications. RAM, dedicated GPU VRAM, and unified memory are not interchangeable numbers. Quantization reduces weight storage, often with a quality tradeoff, but doesn't remove context costs or guarantee a particular speed.</p>
+  <p class="topic-prerequisites">Read <a href="ai-llm-foundations.html">model and runtime foundations</a> and <a href="tokens-context-prompting.html">context budgeting</a>. These estimates concern inference, not training.</p>
+  <h2 id="a-machining-workshop">A machining workshop</h2>
+  <p>A workshop keeps reusable tooling in cabinets, brings it to a workbench, and may move a job onto a powered machine's bed. The cabinets are disk storage, the general bench is system RAM, and the machine bed is dedicated VRAM. The learned weights are the tooling needed for the job. A large cabinet doesn't create more working space on the machine.</p>
+  <p>The current job also needs fixtures and room for work in progress. That's the KV cache and runtime buffers. Running four jobs at once requires more space even when they share the same tooling. On a unified-memory machine, CPU and GPU share a physical pool, more like two operators using the same bench. They don't each get the full advertised capacity independently.</p>
+  <h2 id="which-memory">Which memory does what?</h2>
+  <table class="compare-table">
+    <thead><tr><th>Resource</th><th>Role in inference</th><th>What to check</th></tr></thead>
+    <tbody>
+      <tr><td>SSD / disk</td><td>Stores model files and runtime packages; affects loading and download capacity</td><td>Free space for the exact artifacts, temporary downloads, and updates. Disk capacity is not inference memory.</td></tr>
+      <tr><td>System RAM</td><td>CPU-side weights, cache, staging, and application memory</td><td>Available memory under your normal workload, not just installed capacity</td></tr>
+      <tr><td>Dedicated VRAM</td><td>GPU-resident weights and computation buffers</td><td>Available VRAM after the display and other GPU processes; use the vendor's tooling</td></tr>
+      <tr><td>Unified / shared memory</td><td>A physical memory pool accessible to CPU and GPU, subject to platform limits</td><td>OS reservation and GPU allocation limits. Windows "shared GPU memory" isn't extra dedicated VRAM.</td></tr>
+    </tbody>
+  </table>
+  <p>On Windows, Task Manager's Performance view separates Memory and GPU memory. On an NVIDIA system, <code>nvidia-smi</code> can report device memory and driver information. In Ollama, <code>ollama ps</code> shows loaded models and CPU/GPU placement. A displayed <code>100% GPU</code> describes placement, not 100% GPU utilization.</p>
+  <h2 id="weight-estimate">First estimate: the weights</h2>
+  <p>For a simplified dense model, raw weight bytes = parameter count &times; bits per parameter &divide; 8. Here is an <strong>illustrative 8-billion-parameter model</strong>, assuming every parameter uses the listed width:</p>
+  <table class="compare-table" id="weight-budget">
+    <thead><tr><th>Parameters</th><th>Bits per weight</th><th>Raw bytes</th><th>Decimal GB</th><th>GiB, rounded</th></tr></thead>
+    <tbody>
+      <tr><td>8000000000</td><td>16</td><td>16000000000</td><td>16</td><td>14.90</td></tr>
+      <tr><td>8000000000</td><td>8</td><td>8000000000</td><td>8</td><td>7.45</td></tr>
+      <tr><td>8000000000</td><td>4</td><td>4000000000</td><td>4</td><td>3.73</td></tr>
+    </tbody>
+  </table>
+  <p>One GB is 1,000,000,000 bytes; one GiB is 1,073,741,824 bytes. These are arithmetic estimates, <strong>not model download sizes or complete memory requirements</strong>. Quantization schemes store scales and other metadata, may keep selected tensors at higher precision, and can require extra runtime buffers. A <code>Q4_K_M</code> artifact isn't exactly four bits for every parameter.</p>
+  <p>Quantization replaces higher-precision values with a smaller representation and associated scaling. It is like bringing a more compact set of tooling, with some precision sacrificed. It can preserve useful quality for many tasks, but aggressive quantization can damage results. A smaller artifact is not necessarily faster on a backend without efficient support for that format.</p>
+  <p><code>GGUF</code> is a model-file format used by llama.cpp-compatible runtimes, not a quantization level. <code>FP16</code> and <code>BF16</code> are different 16-bit floating-point formats. Model architecture, file format, numerical format, and inference backend must all be compatible. A mixture-of-experts model may activate only some parameters per token but still need storage for its other experts; don't size it from the active count alone.</p>
+  <h2 id="kv-cache-estimate">Second estimate: context memory</h2>
+  <p>For a conventional full-attention transformer with equally sized key and value heads, an approximate KV-cache size is: 2 &times; layers &times; tokens &times; KV heads &times; head dimension &times; bytes per element &times; concurrent sequences. The factor 2 accounts for keys and values.</p>
+  <pre tabindex="0" role="region" aria-label="Synthetic KV cache calculation"><code>Illustrative architecture, one sequence:
+32 layers, 8 KV heads, head dimension 128
+4,096 cached tokens, 2 bytes per cache element
+
+2 x 32 x 4096 x 8 x 128 x 2 = 536,870,912 bytes
+536,870,912 / 1,073,741,824 = 0.5 GiB
+
+At 8,192 tokens: 1 GiB
+Four such 8,192-token sequences: 4 GiB</code></pre>
+  <p>These are hypothetical architecture values, not the specification of every 8B model. Grouped-query attention (<code>GQA</code>) can use fewer KV heads than query heads. Sliding-window attention, cache quantization, allocation strategy, and other architectures change the calculation. Weight quantization and cache quantization are separate settings.</p>
+  <figure class="diagram-block">
+    <svg viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Inference memory includes model weights, KV cache, runtime buffers, and operating system and application headroom. Context length and concurrency increase cache requirements; weights alone are not the total.">
+      <g font-family="sans-serif" font-size="14" text-anchor="middle">
+        <text x="340" y="28" fill="#eef2ef">BUDGET EACH MEMORY POOL, NOT JUST THE MODEL FILE</text>
+        <g fill="none" stroke-width="2"><rect x="25" y="60" width="300" height="65" rx="3" stroke="#a8d477"/><rect x="355" y="60" width="300" height="65" rx="3" stroke="#7bc7d6"/><rect x="25" y="155" width="300" height="65" rx="3" stroke="#f2a93b"/><rect x="355" y="155" width="300" height="65" rx="3" stroke="#f1789c"/></g>
+        <g fill="#eef2ef"><text x="175" y="86">Model weights</text><text x="505" y="86">KV cache</text><text x="175" y="181">Runtime buffers</text><text x="505" y="181">OS + application headroom</text></g>
+        <g fill="#b1bdba" font-size="12"><text x="175" y="108">Parameters + quantization metadata</text><text x="505" y="108">Context + concurrent sequences</text><text x="175" y="203">Backend + workload dependent</text><text x="505" y="203">Leave room for normal work</text></g>
+        <text x="340" y="247" fill="#b1bdba">Conceptual components, not a measured allocation or scale drawing</text>
+      </g>
+    </svg>
+    <figcaption>The workshop needs tooling, job fixtures, operating space, and space for everyone else. Some runtimes reserve cache capacity up front; others grow it as needed.</figcaption>
+  </figure>
+  <h2 id="fit-is-not-speed">Fitting is not the same as being fast</h2>
+  <p><strong>Prefill</strong> processes the input prompt; <strong>decode</strong> generates subsequent tokens. Loading a cold model adds another delay. A long prompt can make time to first token poor even if subsequent generation is fast. A single interactive decode stream often depends heavily on memory bandwidth, while batching and prefill change the balance of compute and memory work.</p>
+  <p>A CPU can run supported models without a dedicated GPU, but latency depends on model size, memory bandwidth, thread configuration, and instructions supported by the CPU. A compatible GPU can accelerate inference. Check the runtime's current support matrix for the exact GPU, operating system, and driver; a product label like "AI PC" or an NPU TOPS number doesn't establish support.</p>
+  <p>Some runtimes split work between CPU and GPU when the whole model doesn't fit in VRAM. The workshop can use both benches, but moving work and waiting for the slower station has a cost. Adding 8 GiB of VRAM to 16 GiB of RAM doesn't create a single 24 GiB pool with uniform speed. Two discrete GPUs aren't automatically one larger GPU either.</p>
+  <h2 id="choose-and-measure">Choose conservatively, then measure</h2>
+  <ol>
+    <li><strong>Choose a task and model:</strong> use an instruction-tuned text model for basic chat. Check its license and exact artifact, not just the family name.</li>
+    <li><strong>Estimate memory:</strong> use weight size as a starting point, add context/cache and runtime overhead, and leave headroom. Start with one request and a short context.</li>
+    <li><strong>Verify placement:</strong> inspect runtime logs and <code>ollama ps</code> while loaded. Check actual available RAM/VRAM under the intended workload.</li>
+    <li><strong>Measure separately:</strong> record cold-load latency, warm-request latency, output rate, and peak memory. Keep input/output lengths and concurrency comparable.</li>
+    <li><strong>Check quality:</strong> run the same answer-key cases after changing quantization or model size. Faster wrong answers are still wrong.</li>
+  </ol>
+  <p>Ollama reports generation duration in nanoseconds. For a synthetic result of 120 output tokens in 6,000,000,000 ns, the decode rate is <code>120 / (6000000000 / 1000000000) = 20 tokens/s</code>. That excludes loading and prompt processing, so it isn't the end-to-end request rate or time to first token. Record the runtime version, model ID, context, settings, hardware, and competing workload before comparing measurements.</p>
+  <h2 id="memory-troubleshooting">When the job doesn't fit</h2>
+  <table class="compare-table">
+    <thead><tr><th>Symptom</th><th>Useful check</th><th>Small next step</th></tr></thead>
+    <tbody>
+      <tr><td>Out-of-memory during load</td><td>Exact artifact, free RAM/VRAM, other loaded models</td><td>Use a smaller supported model or quantization; close only workloads you own</td></tr>
+      <tr><td>Short prompt works, long prompt fails</td><td>Context allocation, cache growth, concurrency</td><td>Reduce the input/context or simultaneous requests before changing drivers</td></tr>
+      <tr><td>Very slow output with high disk activity</td><td>Memory pressure and paging</td><td>Reduce memory demand. A larger page file isn't equivalent to enough working RAM.</td></tr>
+      <tr><td>Unexpected CPU execution</td><td>GPU compatibility, driver/backend logs, available VRAM</td><td>Correct a supported configuration; don't disable security controls or install arbitrary driver scripts</td></tr>
+    </tbody>
+  </table>
+  <div class="callout"><span class="callout-label">BUY FOR A MEASURED WORKLOAD</span><p>Test a representative model, context length, and task before buying hardware. There is no universal RAM minimum that guarantees useful speed or answer quality across local AI workloads.</p></div>
+  <h2 id="related-topics">Continue reading</h2>
+  <p>Next: <a href="run-first-local-model.html">Run Your First Local Model</a>. Revisit <a href="tokens-context-prompting.html">context budgeting</a> before increasing limits; <a href="rag-explained.html">retrieval</a> can reduce irrelevant input without making memory costs disappear.</p>
+  <h2 id="sources">Primary sources</h2>
+  <ul><li><a href="https://huggingface.co/docs/transformers/kv_cache">Transformers: cache strategies and memory tradeoffs</a></li><li><a href="https://github.com/ggml-org/llama.cpp">llama.cpp: supported formats, quantization, and backends</a></li><li><a href="https://docs.ollama.com/gpu">Ollama: hardware support</a></li><li><a href="https://docs.ollama.com/context-length">Ollama: context allocation</a></li><li><a href="https://docs.ollama.com/api/generate">Ollama: timing and token-count fields</a></li></ul>
+</article>
+<nav class="topic-nav wrap" aria-label="Adjacent topics">
+<a href="tokens-context-prompting.html"><span class="nav-label">&#8592; PREVIOUS</span>Tokens, Context &amp; Prompting</a>
+<a href="run-first-local-model.html"><span class="nav-label">NEXT &#8594;</span>Run Your First Local Model</a>
+</nav>
+<footer class="site-footer"><div class="wrap"><span>netskillup</span><span>Understand the mechanism. Check the evidence.</span></div></footer>
+<script src="../../js/topic-page.js?v=2"></script>
+</body>
+</html>
