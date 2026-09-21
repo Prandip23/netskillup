@@ -85,9 +85,10 @@ test("reference browser workflows", async (suite) => {
     });
 
     await suite.test("complete catalog and section links work without JavaScript", async () => {
-      const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+      const context = await browser.newContext({ javaScriptEnabled: false, reducedMotion: "reduce", viewport: { width: 390, height: 844 } });
       const page = await context.newPage();
       await page.goto(base);
+      await page.evaluate(() => document.fonts.ready);
       assert.equal(await page.locator(".topic-row:visible").count(), topicCount);
       assert.equal(await page.locator("#module-jump a").count(), 9);
       assert.equal(await page.locator("#search-form").isVisible(), false);
@@ -96,6 +97,7 @@ test("reference browser workflows", async (suite) => {
       assert.equal(await page.locator(".topic-nav a").count(), 2);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
       await page.getByRole("navigation", { name: "Reference tracks" }).getByRole("link", { name: "AI & LLMs" }).click();
+      await page.evaluate(() => document.fonts.ready);
       assert.equal(await page.locator(".topic-row:visible").count(), 5);
       assert.equal(await page.locator("#module-jump a").count(), 3);
       await page.locator('.topic-row').first().click();
